@@ -1,68 +1,9 @@
 import React from "react";
 import Sidebar from "../components/sidebar/Sidebar";
+import TopBar from "../components/topbar/TopBar";
+import Stats from "../components/stats/Stats";
 import { Card, CardContent, Avatar, IconButton } from "@mui/material";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import MenuIcon from "@mui/icons-material/Menu";
-import PeopleIcon from "@mui/icons-material/People";
-import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
-import HomeWorkIcon from "@mui/icons-material/HomeWork";
-import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import WarningIcon from "@mui/icons-material/Warning";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import RemoveIcon from "@mui/icons-material/Remove";
 import { PieChart, Pie, Cell } from "recharts";
-
-const stats = [
-  {
-    title: "Total Students",
-    value: 68,
-    icon: <PeopleIcon fontSize="small" />,
-    bg: "bg-purple-100",
-    color: "text-purple-600",
-    sub: "4 this month",
-    subIcon: <ArrowUpwardIcon className="text-green-500 text-xs" />,
-    subColor: "text-green-500",
-  },
-  {
-    title: "Total Rooms",
-    value: 24,
-    icon: <MeetingRoomIcon fontSize="small" />,
-    bg: "bg-blue-100",
-    color: "text-blue-600",
-    sub: "No change",
-    subIcon: <RemoveIcon className="text-gray-400 text-xs" />,
-    subColor: "text-gray-400",
-  },
-  {
-    title: "Occupied Rooms",
-    value: 18,
-    icon: <HomeWorkIcon fontSize="small" />,
-    bg: "bg-green-100",
-    color: "text-green-600",
-    sub: "75% Occupied",
-    subIcon: <ArrowUpwardIcon className="text-green-500 text-xs" />,
-    subColor: "text-green-500",
-  },
-  {
-    title: "Monthly Income",
-    value: "₹2,45,800",
-    icon: <AccountBalanceWalletIcon fontSize="small" />,
-    bg: "bg-yellow-100",
-    color: "text-yellow-600",
-    sub: "12% this month",
-    subIcon: <ArrowUpwardIcon className="text-green-500 text-xs" />,
-    subColor: "text-green-500",
-  },
-  {
-    title: "Pending Payments",
-    value: 27,
-    icon: <WarningIcon fontSize="small" />,
-    bg: "bg-red-100",
-    color: "text-red-600",
-    sub: "₹64,500",
-    subColor: "text-red-500",
-  },
-];
 
 const pieData = [
   { name: "Paid", value: 41 },
@@ -107,62 +48,8 @@ export default function Dashboard() {
       <Sidebar />
       {/* Main */}
       <div className="flex-1 p-6">
-        {/* Topbar */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-3">
-            <IconButton size="small">
-              <MenuIcon />
-            </IconButton>
-            <div>
-              <h2 className="text-lg font-semibold">Dashboard</h2>
-              <p className="text-gray-500 text-xs">
-                Welcome back, Amit Sharma 👋
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="bg-white px-3 py-1 rounded-md shadow text-xs">
-              01 Apr 2024 - 30 Apr 2024
-            </div>
-            <IconButton size="small">
-              <NotificationsIcon />
-            </IconButton>
-            <div className="flex items-center gap-2">
-              <Avatar
-                src="https://i.pravatar.cc/40"
-                sx={{ width: 32, height: 32 }}
-              />
-              <div>
-                <p className="text-xs font-semibold">Amit Sharma</p>
-                <p className="text-[10px] text-gray-500">Owner</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-5 gap-4 mb-6">
-          {stats.map((s, i) => (
-            <Card key={i} className="rounded-xl shadow-sm">
-              <CardContent>
-                <div className="flex items-center gap-3">
-                  <div className={`${s.bg} p-2 rounded-md ${s.color}`}>
-                    {s.icon}
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-xs">{s.title}</p>
-                    <h3 className="text-base font-bold">{s.value}</h3>
-                    <div className="flex items-center gap-1 text-[10px]">
-                      {s.subIcon}
-                      <span className={s.subColor}>{s.sub}</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <TopBar />
+        <Stats />
 
         {/* Tables */}
         <div className="grid grid-cols-2 gap-6 mb-6">
