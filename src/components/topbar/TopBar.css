@@ -1,0 +1,33 @@
+.topbar{
+    @apply flex justify-between items-center mb-6;
+}
+
+.menu-icon{
+    @apply flex items-center gap-3;
+}
+
+.dashboard-heading{
+    @apply text-lg font-semibold;
+}
+
+.name-text{
+    @apply text-gray-500 text-xs;
+}
+
+.date{
+    @apply bg-white px-3 py-1 rounded-md shadow text-xs;
+}
+
+.date-bar{
+    @apply flex items-center gap-4;
+}
+
+.owner-name{
+    @apply text-xs font-semibold;
+}
+
+.user{
+    @apply text-[10px] text-gray-500;
+}
+
+

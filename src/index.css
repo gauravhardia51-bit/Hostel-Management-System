@@ -1,0 +1,59 @@
+/* index.css */
+
+/* Tailwind layers */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== Base Styles ===== */
+@layer base {
+  body {
+    @apply bg-gray-100 text-gray-800 font-sans;
+  }
+
+  h1 {
+    @apply text-2xl font-semibold;
+  }
+
+  h2 {
+    @apply text-xl font-semibold;
+  }
+
+  h3 {
+    @apply text-lg font-medium;
+  }
+}
+
+/* ===== Reusable Components ===== */
+@layer components {
+  .card {
+    @apply bg-white rounded-2xl shadow-sm p-5;
+  }
+
+  .sidebar-item {
+    @apply flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer text-gray-300 hover:bg-indigo-500 hover:text-white transition;
+  }
+
+  .sidebar-item-active {
+    @apply bg-indigo-600 text-white;
+  }
+
+  .table-row {
+    @apply flex justify-between items-center py-2 border-b text-sm;
+  }
+
+  .status-paid {
+    @apply text-green-600 font-medium;
+  }
+
+  .status-pending {
+    @apply text-red-500 font-medium;
+  }
+}
+
+/* ===== Utilities (optional custom) ===== */
+@layer utilities {
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
+}

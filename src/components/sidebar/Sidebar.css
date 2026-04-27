@@ -1,0 +1,32 @@
+.sidebar {
+  @apply w-64 bg-gradient-to-b from-[#1e293b] to-[#4f46e5] text-white p-5 flex flex-col justify-between;
+}
+
+.h1{
+    @apply text-xl font-bold mb-6;
+}
+
+.hostel-info{
+    @apply bg-[#312e81] p-3 rounded-lg mb-6;
+}
+
+.hostel-name{
+    @apply text-sm;
+}
+
+.hostel-status{
+    @apply text-green-400 text-xs;
+}
+
+.sidebar-list{
+    @apply space-y-3 text-sm
+}
+
+.active {
+    @apply block p-2 rounded bg-white text-black;
+  }
+
+
+.logout{
+    @apply flex items-center gap-2 text-red-400 text-sm
+}
