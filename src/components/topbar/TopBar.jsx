@@ -1,5 +1,6 @@
 import "./TopBar.css";
 import { Link } from "react-router-dom";
+import NotificationDrawer from "../notifications/NotificationDrawer";
 
 // Material UI imports
 import IconButton from "@mui/material/IconButton";
@@ -24,9 +25,7 @@ export default function TopBar() {
 
       <div className="date-bar">
         <div className="date">01 Apr 2024 - 30 Apr 2024</div>
-        <IconButton size="small">
-          <NotificationsIcon />
-        </IconButton>
+        <NotificationDrawer />
         <div className="flex items-center gap-2">
           <Avatar
             src="https://i.pravatar.cc/40"

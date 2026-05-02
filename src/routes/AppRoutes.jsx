@@ -6,6 +6,7 @@ import Room from "../pages/rooms/Rooms";
 import Payment from "../pages/payments/Payments";
 import Complaints from "../pages/complaints/Complaints";
 import Reminders from "../pages/reminders/Reminders";
+import NotificationDrawer from "../components/notifications/NotificationDrawer";
 
 export default function AppRoutes() {
   return (
@@ -17,6 +18,7 @@ export default function AppRoutes() {
         <Route path="payments" element={<Payment />} />
         <Route path="complaints" element={<Complaints />} />
         <Route path="reminders" element={<Reminders />} />
+        <Route path="notificationdrawer" element={<NotificationDrawer />} />
       </Route>
     </Routes>
   );
