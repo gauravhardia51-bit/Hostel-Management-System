@@ -13,9 +13,9 @@ import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
 import Sidebar from "../../components/sidebar/Sidebar";
 import TopBar from "../../components/topbar/TopBar";
+import api from "../../api/Api.jsx";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
 
 export default function Students() {
   const [loading, setLoading] = useState(false);
@@ -25,31 +25,37 @@ export default function Students() {
   const [totalElements, setTotalElements] = useState(0);
   const [search, setSearch] = useState("");
 
-  const fetchStudents = () => {
-    setLoading(true);
+  const fetchStudents = async () => {
+    try {
+      setLoading(true);
 
-    axios
-      .get("http://localhost:9001/rentrova/api/student/all", {
+      const res = await api.get("/student/all", {
         params: {
           pageNo: page,
           pageSize: 8,
           studentName: search,
           phone: search,
         },
-      })
-      .then((res) => {
-        const data = res.data;
+      });
 
-        setStudents(data.payLoad || []);
-        setTotalPages(data.totalPage || 0);
-        setTotalElements(data.totalRow || 0);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      const data = res.data;
+
+      setStudents(data.payLoad || []);
+      setTotalPages(data.totalPage || 0);
+      setTotalElements(data.totalRow || 0);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    fetchStudents();
+    const delay = setTimeout(() => {
+      fetchStudents();
+    }, 500);
+
+    return () => clearTimeout(delay);
   }, [page, search]);
 
   const getStatusStyle = (status) => {
