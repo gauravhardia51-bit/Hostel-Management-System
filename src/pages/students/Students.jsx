@@ -33,15 +33,15 @@ export default function Students() {
         params: {
           pageNo: page,
           pageSize: 8,
-          studentName: search,
-          phone: search,
+          //studentName: search,
+          //phone: search,
         },
       });
 
       const data = res.data;
-
-      setStudents(data.payLoad || []);
-      setTotalPages(data.totalPage || 0);
+      // console.log("Fetched students:", data);
+      setStudents(data.payload || []);
+      setTotalPages(data.totalPages || 0);
       setTotalElements(data.totalRow || 0);
     } catch (err) {
       console.error(err);
