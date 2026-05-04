@@ -15,6 +15,7 @@ const hostelStats = [
     title: "Total Students",
     value: 68,
     icon: <PeopleIcon fontSize="small" />,
+
     bg: "bg-purple-100",
     color: "text-purple-600",
     sub: "4 this month",

@@ -30,4 +30,14 @@
     @apply text-[10px] text-gray-500;
 }
 
+.h2{
+   @apply text-lg font-semibold;
+}
 
+.para{
+    @apply text-gray-500 text-xs;
+}
+
+.user-data{
+    @apply flex items-center gap-2;
+}

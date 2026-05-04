@@ -18,15 +18,15 @@ export default function TopBar() {
           <MenuIcon />
         </IconButton>
         <div>
-          <h2 className="text-lg font-semibold">Dashboard</h2>
-          <p className="text-gray-500 text-xs">Welcome back, Amit Sharma 👋</p>
+          <h2 className="h2">Dashboard</h2>
+          <p className="para">Welcome back, Amit Sharma 👋</p>
         </div>
       </div>
 
       <div className="date-bar">
         <div className="date">01 Apr 2024 - 30 Apr 2024</div>
         <NotificationDrawer />
-        <div className="flex items-center gap-2">
+        <div className="user-data">
           <Avatar
             src="https://i.pravatar.cc/40"
             sx={{ width: 32, height: 32 }}
