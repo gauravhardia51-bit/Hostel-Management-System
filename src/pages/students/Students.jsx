@@ -40,9 +40,9 @@ export default function Students() {
 
       const data = res.data;
       // console.log("Fetched students:", data);
-      setStudents(data.payload || []);
+      setStudents(data.payLoad || []);
       setTotalPages(data.totalPages || 0);
-      setTotalElements(data.totalRow || 0);
+      setTotalElements(data.totalElements || 0);
     } catch (err) {
       console.error(err);
     } finally {
@@ -58,13 +58,13 @@ export default function Students() {
     return () => clearTimeout(delay);
   }, [page, search]);
 
-  const getStatusStyle = (status) => {
-    return status === "ACTIVE"
-      ? "bg-green-100 text-green-600"
-      : "bg-red-100 text-red-500";
-  };
-
   const renderRows = () => {
+    console.log(
+      "Rendering rows with loading:",
+      loading,
+      "and students:",
+      students,
+    ); // Debug log
     if (loading) {
       return (
         <tr>
@@ -106,6 +106,12 @@ export default function Students() {
     ));
   };
 
+  const getStatusStyle = (status) => {
+    return status === "ACTIVE"
+      ? "bg-green-100 text-green-600"
+      : "bg-red-100 text-red-500";
+  };
+
   return (
     <div>
       {/* Header */}
@@ -132,11 +138,6 @@ export default function Students() {
       <div className="search-bar">
         <div className="search">
           <SearchIcon className="search-icon" />
-          {/* <input
-            type="text"
-            placeholder="Search student by name or phone..."
-            className="search-field"
-          /> */}
           <input
             type="text"
             placeholder="Search student by name or phone..."

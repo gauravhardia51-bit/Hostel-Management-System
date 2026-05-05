@@ -22,9 +22,8 @@ export default function Rooms() {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  console.log("Rooms component rendered with rooms:", rooms); // Debug log
+
   const renderRows = () => {
-    console.log("Rendering rows with loading:", loading, "and rooms:", rooms); // Debug log
     if (loading) {
       return (
         <tr>
@@ -44,11 +43,11 @@ export default function Rooms() {
         </tr>
       );
     }
-    console.log("Rendering rooms:", rooms); // Debug log
+
     // ✅ IMPORTANT: return map
     return rooms.map((room, index) => {
       const status = getStatus(room);
-      console.log(`Room ${room.roomNo} status: ${status}`); // Debug log
+
       return (
         <tr key={room.id} className="border-b hover:bg-gray-50">
           <td className="py-3">{page * 6 + index + 1}</td>
@@ -103,8 +102,8 @@ export default function Rooms() {
       });
 
       const data = res.data;
-      console.log("Fetched rooms:", data);
-      setRooms(data.payload || []);
+
+      setRooms(data.payLoad || []);
       setTotalPages(data.totalPages || 0);
       setTotalElements(data.totalElements || 0);
     } catch (err) {
