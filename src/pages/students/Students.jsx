@@ -14,7 +14,9 @@ import SearchIcon from "@mui/icons-material/Search";
 import Sidebar from "../../components/sidebar/Sidebar";
 import TopBar from "../../components/topbar/TopBar";
 import api from "../../api/Api.jsx";
-
+import { Link } from "react-router-dom";
+import { ROUTES } from "../../routes/RoutesConstant.js";
+import AddStudentDrawer from "../../feature/AddStudentDrawer.jsx";
 import { useEffect, useState } from "react";
 
 export default function Students() {
@@ -112,6 +114,12 @@ export default function Students() {
       : "bg-red-100 text-red-500";
   };
 
+  const [open, setOpen] = useState(false);
+
+  const handleSave = (data) => {
+    console.log("Saved:", data);
+  };
+
   return (
     <div>
       {/* Header */}
@@ -124,14 +132,17 @@ export default function Students() {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          sx={{
-            backgroundColor: "#4f46e5",
-            textTransform: "none",
-            borderRadius: "8px",
-          }}
+          onClick={() => setOpen(true)}
         >
           Add Student
         </Button>
+
+        <AddStudentDrawer
+          open={open}
+          onClose={() => setOpen(false)}
+          onSave={handleSave}
+          rooms={[]}
+        />
       </div>
 
       {/* Search */}

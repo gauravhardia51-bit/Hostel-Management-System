@@ -11,6 +11,7 @@ import Settings from "../pages/settings/Settings";
 import Reports from "../pages/reports/reports";
 import ProtectedRoute from "./ProtectedRoutes";
 import Login from "../pages/auth/Login";
+import { ROUTES } from "./RoutesConstant";
 
 export default function AppRoutes() {
   return (

@@ -6,6 +6,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import { useEffect, useState } from "react";
 import api from "../../api/Api.jsx";
+import AddRoomDrawer from "../../feature/AddRoomDrawer.jsx";
 
 // const rooms = [
 //   { id: 1, roomNo: "101", capacity: 3, occupied: 3 },
@@ -113,6 +114,12 @@ export default function Rooms() {
     }
   };
 
+  const [open, setOpen] = useState(false);
+
+  const handleSave = (data) => {
+    console.log("Saved:", data);
+  };
+
   useEffect(() => {
     const delay = setTimeout(() => {
       fetchRooms();
@@ -138,9 +145,16 @@ export default function Rooms() {
             textTransform: "none",
             borderRadius: "8px",
           }}
+          onClick={() => setOpen(true)}
         >
           Add Room
         </Button>
+        <AddRoomDrawer
+          open={open}
+          onClose={() => setOpen(false)}
+          onSave={handleSave}
+          rooms={[]}
+        />
       </div>
 
       {/* Table Card */}
