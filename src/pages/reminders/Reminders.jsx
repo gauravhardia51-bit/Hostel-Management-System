@@ -3,6 +3,8 @@ import { Card, CardContent, Button, MenuItem, Select } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
+import SendReminderDrawer from "../../feature/SendReminderDrawer";
+import { useState } from "react";
 
 const reminders = [
   {
@@ -54,6 +56,12 @@ export default function Reminders() {
     return "bg-red-100 text-red-500";
   };
 
+  const [open, setOpen] = useState(false);
+
+  const handleSave = (data) => {
+    console.log("Saved:", data);
+  };
+
   return (
     <div>
       {/* Header */}
@@ -71,9 +79,17 @@ export default function Reminders() {
             textTransform: "none",
             borderRadius: "8px",
           }}
+          onClick={() => setOpen(true)}
         >
           Send Reminder
         </Button>
+
+        <SendReminderDrawer
+          open={open}
+          onClose={() => setOpen(false)}
+          onSave={handleSave}
+          students={[]}
+        />
       </div>
 
       {/* Filters */}

@@ -11,6 +11,8 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import SearchIcon from "@mui/icons-material/Search";
+import AddPaymentDrawer from "../../feature/AddPaymentDrawer";
+import { useState } from "react";
 
 const payments = [
   {
@@ -70,6 +72,12 @@ export default function Payments() {
       : "bg-red-100 text-red-500";
   };
 
+  const [open, setOpen] = useState(false);
+
+  const handleSave = (data) => {
+    console.log("Saved:", data);
+  };
+
   return (
     <div>
       {/* Header */}
@@ -87,9 +95,17 @@ export default function Payments() {
             textTransform: "none",
             borderRadius: "8px",
           }}
+          onClick={() => setOpen(true)}
         >
           Add Payment
         </Button>
+
+        <AddPaymentDrawer
+          open={open}
+          onClose={() => setOpen(false)}
+          onSave={handleSave}
+          rooms={[]}
+        />
       </div>
 
       {/* Filters */}

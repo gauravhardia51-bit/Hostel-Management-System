@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
 import "./sidebar.css";
 import { Link } from "react-router-dom";
+import { ROUTES } from "../../routes/RoutesConstant";
 
 const active = ({ isActive }) =>
   isActive ? "active" : "block p-2 rounded text-white";
@@ -11,7 +12,9 @@ export default function Sidebar() {
     <>
       <div className="sidebar">
         <div>
-          <h1 className="h1">Rentrova</h1>
+          <Link to={ROUTES.HOME} className="no-underline">
+            <h1 className="h1">Rentrova</h1>
+          </Link>
 
           <div className="hostel-info">
             <p className="hostel-name">Galaxy Boys Hostel</p>

@@ -8,6 +8,9 @@ export const ROUTES = {
   // Dashboard
   DASHBOARD: "/dashboard",
 
+  //Rentrova Logo
+  HOME: "/",
+
   // Students
   STUDENTS: "/students",
   ADD_STUDENT: "/students/add",
