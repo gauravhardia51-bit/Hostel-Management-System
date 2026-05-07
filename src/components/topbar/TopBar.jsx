@@ -1,6 +1,6 @@
 import "./TopBar.css";
 import { Link } from "react-router-dom";
-import NotificationDrawer from "../notifications/NotificationDrawer";
+import NotificationDrawer from "../notifications/NotificationDrawers";
 
 // Material UI imports
 import IconButton from "@mui/material/IconButton";

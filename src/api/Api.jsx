@@ -4,6 +4,7 @@ const api = axios.create({
   baseURL: "http://localhost:9001/rentrova/api",
 });
 
+// ✅ Attach token
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 
@@ -13,5 +14,17 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
+
+// ✅ Handle expired token
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    }
+    return Promise.reject(err);
+  },
+);
 
 export default api;
