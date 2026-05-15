@@ -24,6 +24,7 @@ export default function AddStudent({
   const [form, setForm] = useState({
     name: "",
     phone: "",
+    email: "",
     roomId: "",
     joinDate: "",
   });
@@ -35,6 +36,7 @@ export default function AddStudent({
         id: editData.id || "",
         name: editData.name || "",
         phone: editData.phone || "",
+        email:editData.email ||"",
         roomId: editData.roomId || "",
         joinDate: editData.joinDate || "",
       });
@@ -43,6 +45,7 @@ export default function AddStudent({
         id: "",
         name: "",
         phone: "",
+        email: "",
         roomId: "",
         joinDate: "",
       });
@@ -60,6 +63,7 @@ export default function AddStudent({
     const payload = {
       name: form.name,
       phone: form.phone,
+      email: form.email,
       roomId: Number(form.roomId),
       joinDate: convertToTimestamp(form.joinDate),
     };
@@ -108,6 +112,15 @@ export default function AddStudent({
             label="Phone"
             name="phone"
             value={form.phone}
+            onChange={handleChange}
+            disabled={isView}
+          />
+
+          <TextField
+            fullWidth
+            label="Email"
+            name="email"
+            value={form.email}
             onChange={handleChange}
             disabled={isView}
           />

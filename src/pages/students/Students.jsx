@@ -34,6 +34,7 @@ export default function Students() {
   const [open, setOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [mode, setMode] = useState("add"); // add | edit | view
+  const [hostelId, setHostelId] = useState("");
 
   const fetchStudents = async () => {
     try {
@@ -42,7 +43,8 @@ export default function Students() {
       const res = await api.get("/student/all", {
         params: {
           pageNo: page,
-          pageSize: 8,
+          pageSize: 10,
+          hostelId:localStorage.getItem("hostelId"),
           search: search,
           //phone: search,
         },

@@ -59,7 +59,11 @@ export default function Login() {
           password: form.password,
         },
       );
-
+     const res = await api.get("/hostel/all", {
+        params: {
+          email:form.userCode
+        },
+      });
       // ===== JWT TOKEN =====
       const token = response.data.payLoad.accessToken;
       //   console.log(response.data);
@@ -68,8 +72,8 @@ export default function Login() {
       localStorage.setItem("token", token);
 
       // ===== SAVE HOSTEL =====
-      localStorage.setItem("hostelId", form.hostelId);
-
+      const hostels = response.data.payLoad
+      localStorage.setItem("hostels",JSON.stringify(hostels));
       // ===== SAVE USER =====
       localStorage.setItem("user", JSON.stringify(response.data.payLoad.user));
 
