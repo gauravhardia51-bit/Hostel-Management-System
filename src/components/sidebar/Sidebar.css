@@ -1,5 +1,7 @@
 .sidebar {
-  @apply w-64 bg-gradient-to-b from-[#1e293b] to-[#4f46e5] text-white p-5 flex flex-col justify-between;
+  @apply bg-gradient-to-b from-[#1e293b] to-[#4f46e5]
+  text-white p-4 flex flex-col justify-between
+  transition-all duration-300;
 }
 
 .h1{

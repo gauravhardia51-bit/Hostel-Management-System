@@ -10,13 +10,19 @@ import Avatar from "@mui/material/Avatar";
 import MenuIcon from "@mui/icons-material/Menu";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 
-export default function TopBar() {
+export default function TopBar({
+  collapsed,
+  setCollapsed,
+}) {
   return (
     <div className="topbar">
       <div className="menu-icon">
-        <IconButton size="small">
-          <MenuIcon />
-        </IconButton>
+       <IconButton
+  size="small"
+  onClick={() => setCollapsed(!collapsed)}
+>
+  <MenuIcon />
+</IconButton>
         <div>
           <h2 className="h2">Dashboard</h2>
           <p className="para">Welcome back, Amit Sharma 👋</p>
