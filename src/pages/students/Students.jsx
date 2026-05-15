@@ -1,4 +1,5 @@
 import React from "react";
+import "./Students.css";
 import {
   Card,
   CardContent,
@@ -21,6 +22,7 @@ import { useEffect, useState } from "react";
 import AddStudentDrawer from "../../feature/students/AddStudentDrawer.jsx";
 import { formatDate } from "../../utils/formatDate.js";
 import Pagination from "../../components/common/Pagination.jsx";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 export default function Students() {
   const [loading, setLoading] = useState(false);
@@ -29,7 +31,6 @@ export default function Students() {
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [search, setSearch] = useState("");
-
   const [open, setOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [mode, setMode] = useState("add"); // add | edit | view
@@ -42,7 +43,7 @@ export default function Students() {
         params: {
           pageNo: page,
           pageSize: 8,
-          //studentName: search,
+          search: search,
           //phone: search,
         },
       });
@@ -56,6 +57,24 @@ export default function Students() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    const confirm = window.confirm("Are you sure you want to delete?");
+
+    if (!confirm) return;
+
+    try {
+      await api.delete("/student/delete", {
+        params: { id },
+      });
+
+      toast.success("Deleted successfully ✅");
+      fetchStudents(); // refresh
+    } catch (err) {
+      console.error(err);
+      toast.error("Delete failed ❌");
     }
   };
 
@@ -111,22 +130,15 @@ export default function Students() {
             size="small"
             onClick={() => {
               setSelectedStudent(s);
-              setMode("view");
-              setOpen(true);
-            }}
-          >
-            <VisibilityIcon fontSize="small" />
-          </IconButton>
-
-          <IconButton
-            size="small"
-            onClick={() => {
-              setSelectedStudent(s);
               setMode("edit");
               setOpen(true);
             }}
           >
             <EditIcon fontSize="small" />
+          </IconButton>
+
+          <IconButton size="small" onClick={() => handleDelete(s.id)}>
+            <DeleteIcon fontSize="small" />
           </IconButton>
         </td>
       </tr>

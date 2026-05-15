@@ -57,11 +57,18 @@ export default function AddStudent({
   };
 
   const handleSubmit = () => {
-    onSave({
-      ...form,
+    const payload = {
+      name: form.name,
+      phone: form.phone,
       roomId: Number(form.roomId),
       joinDate: convertToTimestamp(form.joinDate),
-    });
+    };
+
+    if (mode === "edit") {
+      payload.id = form.id;
+    }
+
+    onSave(payload);
     onClose();
   };
 
