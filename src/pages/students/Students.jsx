@@ -149,7 +149,7 @@ export default function Students() {
         console.log("Token:", localStorage.getItem("token"));
         debugger;
 
-        await api.put(`/student/${selectedStudent.id}`, formData);
+        await api.put(`/student/update`, formData);
         debugger;
         toast.success("Student updated successfully ✅");
         debugger;
