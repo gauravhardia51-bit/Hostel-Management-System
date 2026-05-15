@@ -48,10 +48,10 @@ export default function Students() {
       });
 
       const data = res.data;
-      // console.log("Fetched students:", data);
+      console.log("Fetched students:", data);
       setStudents(data.payLoad || []);
       setTotalPages(data.totalPage || 0);
-      setTotalElements(data.totalElements || 0);
+      setTotalElements(data.totalRow || 0);
     } catch (err) {
       console.error(err);
     } finally {
@@ -245,8 +245,11 @@ export default function Students() {
             <Pagination
               page={page}
               totalPages={totalPages}
+              totalElements={totalElements}
+              pageSize={10}
               onPageChange={setPage}
               maxVisible={5}
+              label="students"
             />
           </div>
         </CardContent>

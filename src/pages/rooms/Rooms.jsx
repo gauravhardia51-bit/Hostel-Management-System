@@ -98,7 +98,7 @@ export default function Rooms() {
 
       setRooms(data.payLoad || []);
       setTotalPages(data.totalPage || 0);
-      setTotalElements(data.totalElements || 0);
+      setTotalElements(data.totalRow || 0);
     } catch (err) {
       console.error(err);
     } finally {
@@ -168,20 +168,15 @@ export default function Rooms() {
           </table>
 
           {/* Footer */}
-          <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
-            <span>
-              Showing {page * 6 + 1} to{" "}
-              {Math.min((page + 1) * 6, totalElements)} of {totalElements} rooms
-            </span>
-
-            {/* Pagination */}
-            <Pagination
-              page={page}
-              totalPages={totalPages}
-              onPageChange={setPage}
-              maxVisible={5}
-            />
-          </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            totalElements={totalElements}
+            pageSize={10}
+            onPageChange={setPage}
+            maxVisible={5}
+            label="rooms"
+          />
         </CardContent>
       </Card>
     </div>

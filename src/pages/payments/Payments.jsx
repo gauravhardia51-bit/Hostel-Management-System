@@ -180,22 +180,15 @@ export default function Payments() {
           </table>
 
           {/* Footer */}
-          <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
-            <span>Showing 1 to 6 of 27 payments</span>
-
-            {/* Pagination */}
-            <div className="flex items-center gap-1">
-              <button className="px-2 py-1 border rounded">&lt;</button>
-              <button className="px-3 py-1 bg-indigo-600 text-white rounded">
-                1
-              </button>
-              <button className="px-3 py-1 border rounded">2</button>
-              <button className="px-3 py-1 border rounded">3</button>
-              <button className="px-3 py-1 border rounded">4</button>
-              <button className="px-3 py-1 border rounded">5</button>
-              <button className="px-2 py-1 border rounded">&gt;</button>
-            </div>
-          </div>
+          {/* <Pagination
+            page={page}
+            totalPages={totalPages}
+            totalElements={totalElements}
+            pageSize={10}
+            onPageChange={setPage}
+            maxVisible={5}
+            label="payments"
+          /> */}
         </CardContent>
       </Card>
     </div>

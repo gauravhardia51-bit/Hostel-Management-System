@@ -8,57 +8,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
 import Pagination from "../../components/common/Pagination.jsx";
 
-// const complaints = [
-//   {
-//     id: 1,
-//     ticket: "#CMP1009",
-//     student: "Rohit Sharma",
-//     issue: "Water Problem",
-//     status: "OPEN",
-//     date: "28 Apr 2024",
-//   },
-//   {
-//     id: 2,
-//     ticket: "#CMP1008",
-//     student: "Aman Verma",
-//     issue: "WiFi Issue",
-//     status: "IN_PROGRESS",
-//     date: "27 Apr 2024",
-//   },
-//   {
-//     id: 3,
-//     ticket: "#CMP1007",
-//     student: "Vikas Singh",
-//     issue: "Electricity Problem",
-//     status: "OPEN",
-//     date: "27 Apr 2024",
-//   },
-//   {
-//     id: 4,
-//     ticket: "#CMP1006",
-//     student: "Rahul Kumar",
-//     issue: "Room Cleaning",
-//     status: "CLOSED",
-//     date: "26 Apr 2024",
-//   },
-//   {
-//     id: 5,
-//     ticket: "#CMP1005",
-//     student: "Deepak Yadav",
-//     issue: "Washroom Issue",
-//     status: "OPEN",
-//     date: "25 Apr 2024",
-//   },
-//   {
-//     id: 6,
-//     ticket: "#CMP1004",
-//     student: "Rajesh Kumar",
-//     issue: "Fan Not Working",
-//     status: "IN_PROGRESS",
-//     date: "25 Apr 2024",
-//   },
-// ];
-
 export default function Complaints() {
   const [loading, setLoading] = useState(false);
   const [complaints, setComplaints] = useState([]);
