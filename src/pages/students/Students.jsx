@@ -141,26 +141,15 @@ export default function Students() {
   //const [open, setOpen] = useState(false);
 
   const handleSave = async (formData) => {
-    console.log("144 Saving student with data:", formData, "Mode:", mode);
-    console.log("144 student id:", selectedStudent.id);
-    debugger;
     try {
       if (mode === "edit") {
-        console.log("Token:", localStorage.getItem("token"));
-        debugger;
-
         await api.put(`/student/update`, formData);
-        debugger;
         toast.success("Student updated successfully ✅");
-        debugger;
       } else {
-        await api.post("/student", formData);
-
+        console.log("Adding student with data:", formData);
+        await api.post("/student/add", formData);
         toast.success("Student added successfully ✅");
       }
-
-      console.log("Student saved successfully, refreshing list...");
-
       fetchStudents(); // refresh table
       setOpen(false);
       setSelectedStudent(null);

@@ -29,10 +29,10 @@ export default function AddStudent({
   });
 
   useEffect(() => {
-    console.log("32= "+editData)
+    console.log("32= " + editData);
     if (editData) {
       setForm({
-        id:editData.id ||"",
+        id: editData.id || "",
         name: editData.name || "",
         phone: editData.phone || "",
         roomId: editData.roomId || "",
@@ -40,7 +40,7 @@ export default function AddStudent({
       });
     } else {
       setForm({
-        id:"",
+        id: "",
         name: "",
         phone: "",
         roomId: "",

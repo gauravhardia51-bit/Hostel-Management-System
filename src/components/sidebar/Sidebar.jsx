@@ -1,7 +1,6 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, Link, useNavigate } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
 import "./sidebar.css";
-import { Link } from "react-router-dom";
 import { ROUTES } from "../../routes/RoutesConstant";
 import HostelSwitcher from "./HostelSwitcher";
 
@@ -9,6 +8,19 @@ const active = ({ isActive }) =>
   isActive ? "active" : "block p-2 rounded text-white";
 
 export default function Sidebar({ collapsed }) {
+  const navigate = useNavigate();
+
+  // ✅ Logout handler (production-ready)
+  const handleLogout = () => {
+    // remove auth data
+    localStorage.removeItem("token");
+
+    // optional: clear other stored data
+    // localStorage.clear();
+
+    // redirect safely
+    navigate("/login", { replace: true });
+  };
   return (
     <>
       <div className={`sidebar ${collapsed ? "w-20" : "w-64"}`}>
@@ -75,7 +87,7 @@ export default function Sidebar({ collapsed }) {
           </ul>
         </div>
 
-        <button className="logout">
+        <button className="logout" onClick={handleLogout}>
           <LogoutIcon fontSize="small" />
           {!collapsed && "Logout"}
         </button>
