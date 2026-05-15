@@ -7,6 +7,7 @@ import {
   TextField,
 } from "@mui/material";
 
+import { toast } from "react-toastify";
 import AddIcon from "@mui/icons-material/Add";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
@@ -16,8 +17,9 @@ import TopBar from "../../components/topbar/TopBar";
 import api from "../../api/Api.jsx";
 import { Link } from "react-router-dom";
 import { ROUTES } from "../../routes/RoutesConstant.js";
-import AddStudentDrawer from "../../feature/AddStudentDrawer.jsx";
 import { useEffect, useState } from "react";
+import AddStudentDrawer from "../../feature/students/AddStudentDrawer.jsx";
+import { formatDate } from "../../utils/formatDate.js";
 
 export default function Students() {
   const [loading, setLoading] = useState(false);
@@ -26,6 +28,10 @@ export default function Students() {
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [search, setSearch] = useState("");
+
+  const [open, setOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [mode, setMode] = useState("add"); // add | edit | view
 
   const fetchStudents = async () => {
     try {
@@ -43,7 +49,7 @@ export default function Students() {
       const data = res.data;
       // console.log("Fetched students:", data);
       setStudents(data.payLoad || []);
-      setTotalPages(data.totalPages || 0);
+      setTotalPages(data.totalPage || 0);
       setTotalElements(data.totalElements || 0);
     } catch (err) {
       console.error(err);
@@ -61,12 +67,6 @@ export default function Students() {
   }, [page, search]);
 
   const renderRows = () => {
-    console.log(
-      "Rendering rows with loading:",
-      loading,
-      "and students:",
-      students,
-    ); // Debug log
     if (loading) {
       return (
         <tr>
@@ -93,7 +93,8 @@ export default function Students() {
         <td>{s.name}</td>
         <td>{s.phone}</td>
         <td>{s.roomNumber}</td>
-        <td>{new Date(s.joinDate).toLocaleDateString()}</td>
+
+        <td>{formatDate(s.joinDate)}</td>
 
         <td>
           <span
@@ -103,6 +104,29 @@ export default function Students() {
           >
             {s.status || "N/A"}
           </span>
+        </td>
+        <td className="text-center space-x-1">
+          <IconButton
+            size="small"
+            onClick={() => {
+              setSelectedStudent(s);
+              setMode("view");
+              setOpen(true);
+            }}
+          >
+            <VisibilityIcon fontSize="small" />
+          </IconButton>
+
+          <IconButton
+            size="small"
+            onClick={() => {
+              setSelectedStudent(s);
+              setMode("edit");
+              setOpen(true);
+            }}
+          >
+            <EditIcon fontSize="small" />
+          </IconButton>
         </td>
       </tr>
     ));
@@ -114,11 +138,44 @@ export default function Students() {
       : "bg-red-100 text-red-500";
   };
 
-  const [open, setOpen] = useState(false);
+  //const [open, setOpen] = useState(false);
 
-  const handleSave = (data) => {
-    console.log("Saved:", data);
+  const handleSave = async (formData) => {
+    console.log("144 Saving student with data:", formData, "Mode:", mode);
+    console.log("144 student id:", selectedStudent.id);
+    debugger;
+    try {
+      if (mode === "edit") {
+        console.log("Token:", localStorage.getItem("token"));
+        debugger;
+
+        await api.put(`/student/${selectedStudent.id}`, formData);
+        debugger;
+        toast.success("Student updated successfully ✅");
+        debugger;
+      } else {
+        await api.post("/student", formData);
+
+        toast.success("Student added successfully ✅");
+      }
+
+      console.log("Student saved successfully, refreshing list...");
+
+      fetchStudents(); // refresh table
+      setOpen(false);
+      setSelectedStudent(null);
+    } catch (err) {
+      console.error("FULL ERROR:", err.response);
+      toast.error("Something went wrong ❌");
+    }
   };
+
+  const [rooms] = useState(
+    Array.from({ length: 30 }, (_, i) => ({
+      id: i + 1,
+      roomNumber: `R${i + 1}`,
+    })),
+  );
 
   return (
     <div>
@@ -132,16 +189,22 @@ export default function Students() {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setSelectedStudent(null);
+            setMode("add");
+            setOpen(true);
+          }}
         >
           Add Student
         </Button>
-
         <AddStudentDrawer
+          key={selectedStudent?.id || mode}
           open={open}
           onClose={() => setOpen(false)}
           onSave={handleSave}
-          rooms={[]}
+          rooms={rooms}
+          editData={selectedStudent}
+          mode={mode}
         />
       </div>
 
@@ -209,7 +272,6 @@ export default function Students() {
                   {i + 1}
                 </button>
               ))}
-
               <button
                 disabled={page === totalPages - 1}
                 onClick={() => setPage((p) => p + 1)}

@@ -11,7 +11,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import SearchIcon from "@mui/icons-material/Search";
-import AddPaymentDrawer from "../../feature/AddPaymentDrawer";
+import AddPaymentDrawer from "../../feature/payments/AddPaymentDrawer.jsx";
 import { useState } from "react";
 
 const payments = [

@@ -20,9 +20,13 @@ api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
+      console.error("Unauthorized:", err.response);
+
+      // // optional: check message before logout
+      // localStorage.removeItem("token");
+      // window.location.href = "/login";
     }
+
     return Promise.reject(err);
   },
 );

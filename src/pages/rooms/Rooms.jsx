@@ -6,7 +6,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import { useEffect, useState } from "react";
 import api from "../../api/Api.jsx";
-import AddRoomDrawer from "../../feature/AddRoomDrawer.jsx";
+import AddRoomDrawer from "../../feature/rooms/AddRoomDrawer.jsx";
 
 // const rooms = [
 //   { id: 1, roomNo: "101", capacity: 3, occupied: 3 },
@@ -105,7 +105,7 @@ export default function Rooms() {
       const data = res.data;
 
       setRooms(data.payLoad || []);
-      setTotalPages(data.totalPages || 0);
+      setTotalPages(data.totalPage || 0);
       setTotalElements(data.totalElements || 0);
     } catch (err) {
       console.error(err);

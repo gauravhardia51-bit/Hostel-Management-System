@@ -28,6 +28,18 @@ export const ROUTES = {
   // Notifications
   NOTIFICATIONS: "/notifications",
 
+  // Reminders
+  REMINDERS: "/reminders",
+
+  // Complaints
+  COMPLAINTS: "/complaints",
+
+  // Reports
+  REPORTS: "/reports",
+
+  // Settings
+  SETTINGS: "/settings",
+
   // Fallback
   NOT_FOUND: "*",
 };

@@ -3,7 +3,7 @@ import { Card, CardContent, Button, MenuItem, Select } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
-import SendReminderDrawer from "../../feature/SendReminderDrawer";
+import SendReminderDrawer from "../../feature/reminders/SendReminderDrawer";
 import { useState } from "react";
 
 const reminders = [
