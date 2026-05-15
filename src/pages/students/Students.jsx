@@ -20,6 +20,7 @@ import { ROUTES } from "../../routes/RoutesConstant.js";
 import { useEffect, useState } from "react";
 import AddStudentDrawer from "../../feature/students/AddStudentDrawer.jsx";
 import { formatDate } from "../../utils/formatDate.js";
+import Pagination from "../../components/common/Pagination.jsx";
 
 export default function Students() {
   const [loading, setLoading] = useState(false);
@@ -241,34 +242,12 @@ export default function Students() {
             </span>
 
             {/* Pagination */}
-            <div className="flex items-center gap-1">
-              <button
-                disabled={page === 0}
-                onClick={() => setPage((p) => p - 1)}
-                className="px-2 py-1 border rounded"
-              >
-                &lt;
-              </button>
-
-              {[...Array(totalPages)].map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPage(i)}
-                  className={`px-3 py-1 rounded ${
-                    i === page ? "bg-indigo-600 text-white" : "border"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-              <button
-                disabled={page === totalPages - 1}
-                onClick={() => setPage((p) => p + 1)}
-                className="px-2 py-1 border rounded"
-              >
-                &gt;
-              </button>
-            </div>
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+              maxVisible={5}
+            />
           </div>
         </CardContent>
       </Card>

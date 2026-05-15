@@ -7,15 +7,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { useEffect, useState } from "react";
 import api from "../../api/Api.jsx";
 import AddRoomDrawer from "../../feature/rooms/AddRoomDrawer.jsx";
-
-// const rooms = [
-//   { id: 1, roomNo: "101", capacity: 3, occupied: 3 },
-//   { id: 2, roomNo: "102", capacity: 3, occupied: 2 },
-//   { id: 3, roomNo: "103", capacity: 3, occupied: 3 },
-//   { id: 4, roomNo: "201", capacity: 2, occupied: 2 },
-//   { id: 5, roomNo: "202", capacity: 2, occupied: 1 },
-//   { id: 6, roomNo: "203", capacity: 2, occupied: 0 },
-// ];
+import Pagination from "../../components/common/Pagination.jsx";
 
 export default function Rooms() {
   const [loading, setLoading] = useState(false);
@@ -183,35 +175,12 @@ export default function Rooms() {
             </span>
 
             {/* Pagination */}
-            <div className="flex items-center gap-1">
-              <button
-                disabled={page === 0}
-                onClick={() => setPage((p) => p - 1)}
-                className="px-2 py-1 border rounded"
-              >
-                &lt;
-              </button>
-
-              {[...Array(totalPages)].map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPage(i)}
-                  className={`px-3 py-1 rounded ${
-                    i === page ? "bg-indigo-600 text-white" : "border"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-
-              <button
-                disabled={page === totalPages - 1}
-                onClick={() => setPage((p) => p + 1)}
-                className="px-2 py-1 border rounded"
-              >
-                &gt;
-              </button>
-            </div>
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+              maxVisible={5}
+            />
           </div>
         </CardContent>
       </Card>
