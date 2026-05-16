@@ -19,6 +19,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import ApartmentIcon from "@mui/icons-material/Apartment";
 import api from "../../api/Api";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -59,9 +60,9 @@ export default function Login() {
           password: form.password,
         },
       );
-     const res = await api.get("/hostel/all", {
+      const res = await api.get("/hostel/all", {
         params: {
-          email:form.userCode
+          email: form.userCode,
         },
       });
       // ===== JWT TOKEN =====
@@ -70,12 +71,20 @@ export default function Login() {
       //   console.log(localStorage.getItem("token"));
       // ===== SAVE TOKEN =====
       localStorage.setItem("token", token);
+      const decoded = jwtDecode(token);
 
       // ===== SAVE HOSTEL =====
-      const hostels = response.data.payLoad
-      localStorage.setItem("hostels",JSON.stringify(hostels));
+      const hostels = response.data.payLoad;
+      localStorage.setItem("hostels", JSON.stringify(hostels));
       // ===== SAVE USER =====
-      localStorage.setItem("user", JSON.stringify(response.data.payLoad.user));
+
+      const userRes = await api.get("/users/id", {
+        params: {
+          id: decoded.userId,
+        },
+      });
+
+      localStorage.setItem("user", JSON.stringify(userRes.data.payLoad));
 
       // redirect
       navigate("/");
