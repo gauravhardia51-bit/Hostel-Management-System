@@ -14,3 +14,25 @@ export const logout = () => {
 export const isLoggedIn = () => {
   return !!localStorage.getItem("token");
 };
+
+export const getAuthData = () => {
+  try {
+    const hostelId = localStorage.getItem("hostelId");
+
+    const hostelsRaw = localStorage.getItem("hostels");
+
+    const hostels = hostelsRaw ? JSON.parse(hostelsRaw) : [];
+
+    return {
+      hostelId,
+      hostels,
+    };
+  } catch (err) {
+    console.error("Auth parse error:", err);
+
+    return {
+      hostelId: null,
+      hostels: [],
+    };
+  }
+};

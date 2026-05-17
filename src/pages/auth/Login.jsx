@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -34,10 +34,12 @@ export default function Login() {
   });
 
   // demo hostel list
-  const hostels = [
-    { id: 1, name: "Galaxy Boys Hostel" },
-    { id: 2, name: "Sunrise Hostel" },
-  ];
+  // const hostels = [
+  //   { id: 1, name: "Galaxy Boys Hostel" },
+  //   { id: 2, name: "Sunrise Hostel" },
+  // ];
+
+  const [hostels, setHostels] = useState([]);
 
   // handle input
   const handleChange = (e) => {
@@ -47,41 +49,61 @@ export default function Login() {
     });
   };
 
+  const fetchHostels = async () => {
+    if (!form.userCode) return;
+
+    try {
+      const res = await api.get("/hostel/all", {
+        params: { email: form.userCode },
+      });
+
+      const data = res.data.payLoad || [];
+
+      setHostels(data); //update dropdown list
+
+      //AUTO-SELECT if one hostel
+      if (data.length === 1) {
+        setForm((prev) => ({
+          ...prev,
+          hostelId: data[0].id,
+        }));
+      }
+
+      console.log("Fetched hostels:", data);
+    } catch (err) {
+      console.error(err);
+      setHostels([]);
+    }
+  };
+
   // login api
   const handleLogin = async () => {
     try {
       setLoading(true);
 
-      const response = await api.post(
-        "http://localhost:9001/rentrova/api/auth/login",
-        {
-          userCode: form.userCode,
-          password: form.password,
-        },
-      );
-     const res = await api.get("/hostel/all", {
-        params: {
-          email:form.userCode
-        },
+      const response = await api.post("/auth/login", {
+        userCode: form.userCode,
+        password: form.password,
+        hostelId: form.hostelId, // ✅ IMPORTANT
       });
-      // ===== JWT TOKEN =====
-      const token = response.data.payLoad.accessToken;
-      //   console.log(response.data);
-      //   console.log(localStorage.getItem("token"));
-      // ===== SAVE TOKEN =====
-      localStorage.setItem("token", token);
 
-      // ===== SAVE HOSTEL =====
-      const hostels = response.data.payLoad
-      localStorage.setItem("hostels",JSON.stringify(hostels));
-      // ===== SAVE USER =====
-      localStorage.setItem("user", JSON.stringify(response.data.payLoad.user));
+      const data = response.data.payLoad;
 
-      // redirect
+      // ✅ Save token
+      localStorage.setItem("token", data.accessToken);
+
+      // ✅ Save user
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      // ✅ Save selected hostel
+      localStorage.setItem("hostelId", form.hostelId);
+
+      // ✅ Save all hostels (for global use)
+      localStorage.setItem("hostels", JSON.stringify(hostels));
+
       navigate("/");
     } catch (error) {
       console.log(error);
-
       alert(error?.response?.data?.message || "Login Failed");
     } finally {
       setLoading(false);
@@ -122,6 +144,7 @@ export default function Login() {
               name="userCode"
               value={form.userCode}
               onChange={handleChange}
+              onBlur={fetchHostels} //API hits only when user leaves field
               size="small"
               slotProps={{
                 input: {
@@ -176,7 +199,7 @@ export default function Login() {
 
               {hostels.map((hostel) => (
                 <MenuItem key={hostel.id} value={hostel.id}>
-                  {hostel.name}
+                  {hostel.id} - {hostel.hostelName}
                 </MenuItem>
               ))}
             </Select>
