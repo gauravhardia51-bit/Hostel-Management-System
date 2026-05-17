@@ -15,17 +15,24 @@ export const isLoggedIn = () => {
   return !!localStorage.getItem("token");
 };
 
-export const getAuthData = () => {
+export const getHostelsData = () => {
   try {
-    const hostelId = localStorage.getItem("hostelId");
-
+    // ✅ Get raw values
+    const hostelIdRaw = localStorage.getItem("hostelId");
     const hostelsRaw = localStorage.getItem("hostels");
 
+    // ✅ Parse safely
+    const hostelId = hostelIdRaw ? Number(hostelIdRaw) : null;
+
     const hostels = hostelsRaw ? JSON.parse(hostelsRaw) : [];
+
+    // ✅ Get selected hostel object
+    const selectedHostel = hostels.find((h) => h.id === hostelId);
 
     return {
       hostelId,
       hostels,
+      selectedHostel, // 🔥 IMPORTANT (use in sidebar, header etc.)
     };
   } catch (err) {
     console.error("Auth parse error:", err);
@@ -33,6 +40,7 @@ export const getAuthData = () => {
     return {
       hostelId: null,
       hostels: [],
+      selectedHostel: null,
     };
   }
 };

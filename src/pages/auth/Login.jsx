@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -34,14 +34,6 @@ export default function Login() {
     hostelId: "",
   });
 
-  // demo hostel list
-  // const hostels = [
-  //   { id: 1, name: "Galaxy Boys Hostel" },
-  //   { id: 2, name: "Sunrise Hostel" },
-  // ];
-
-  const [hostels, setHostels] = useState([]);
-
   // handle input
   const handleChange = (e) => {
     setForm({
@@ -50,34 +42,6 @@ export default function Login() {
     });
   };
 
-  const fetchHostels = async () => {
-    if (!form.userCode) return;
-
-    try {
-      const res = await api.get("/hostel/all", {
-        params: { email: form.userCode },
-      });
-
-      const data = res.data.payLoad || [];
-
-      setHostels(data); //update dropdown list
-
-      //AUTO-SELECT if one hostel
-      if (data.length === 1) {
-        setForm((prev) => ({
-          ...prev,
-          hostelId: data[0].id,
-        }));
-      }
-
-      console.log("Fetched hostels:", data);
-    } catch (err) {
-      console.error(err);
-      setHostels([]);
-    }
-  };
-
-  // login api
   const handleLogin = async () => {
     try {
       setLoading(true);
@@ -89,21 +53,24 @@ export default function Login() {
           password: form.password,
         },
       );
-      const res = await api.get("/hostel/all", {
-        params: {
-          email: form.userCode,
-        },
-      });
+
       // ===== JWT TOKEN =====
       const token = response.data.payLoad.accessToken;
       //   console.log(response.data);
       //   console.log(localStorage.getItem("token"));
       // ===== SAVE TOKEN =====
       localStorage.setItem("token", token);
+      const decoded = jwtDecode(token);
 
-      // ===== SAVE HOSTEL =====
-      const hostels = response.data.payLoad;
-      localStorage.setItem("hostels", JSON.stringify(hostels));
+      const hostelRes = await api.get("/hostel/all", {
+        params: {
+          userId: decoded.userId,
+        },
+      });
+
+      // // ===== SAVE HOSTEL =====
+      // const hostels = response.data.payLoad;
+      // localStorage.setItem("hostels", JSON.stringify(hostels));
       // ===== SAVE USER =====
 
       const userRes = await api.get("/users/id", {
@@ -113,6 +80,7 @@ export default function Login() {
       });
 
       localStorage.setItem("user", JSON.stringify(userRes.data.payLoad));
+      localStorage.setItem("hostels", JSON.stringify(hostelRes.data.payLoad));
 
       navigate("/");
     } catch (error) {
@@ -157,7 +125,6 @@ export default function Login() {
               name="userCode"
               value={form.userCode}
               onChange={handleChange}
-              onBlur={fetchHostels} //API hits only when user leaves field
               size="small"
               slotProps={{
                 input: {
@@ -199,7 +166,7 @@ export default function Login() {
           />
 
           {/* Hostel Select */}
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <Select
               fullWidth
               displayEmpty
@@ -216,7 +183,7 @@ export default function Login() {
                 </MenuItem>
               ))}
             </Select>
-          </div>
+          </div> */}
 
           {/* Remember */}
           <div className="flex justify-between items-center mb-5">

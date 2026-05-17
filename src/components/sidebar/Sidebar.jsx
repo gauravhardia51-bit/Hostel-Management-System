@@ -4,7 +4,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import "./sidebar.css";
 import { ROUTES } from "../../routes/RoutesConstant";
 import HostelSwitcher from "./HostelSwitcher";
-import { getAuthData } from "../../utils/auth";
+import { getHostelsData } from "../../utils/auth";
 import { FormControl, Select, MenuItem } from "@mui/material";
 
 const active = ({ isActive }) =>
@@ -25,9 +25,10 @@ export default function Sidebar({ collapsed }) {
     navigate("/login", { replace: true });
   };
 
-  const { hostelId, hostels } = getAuthData();
+  const { hostelId, hostels } = getHostelsData();
   const [selectedHostel, setSelectedHostel] = useState("");
-
+  console.log("30 hostel= " + hostels);
+  console.log("hostelId= " + hostelId);
   useEffect(() => {
     if (hostelId) {
       setSelectedHostel(Number(hostelId));

@@ -46,16 +46,6 @@
 
 
 
-/* remove MUI weird styles */
-.MuiInputBase-root {
-  background: transparent !important;
-  color: white !important;
-}
-
-.MuiSelect-select {
-  background: transparent !important;
-}
-
 /* keep your existing design */
 .hostel-info {
   @apply bg-[#312e81] p-3 rounded-lg mb-6;
