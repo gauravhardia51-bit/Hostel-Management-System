@@ -34,12 +34,6 @@ export default function Login() {
     hostelId: "",
   });
 
-  // demo hostel list
-  const hostels = [
-    { id: 1, name: "Galaxy Boys Hostel" },
-    { id: 2, name: "Sunrise Hostel" },
-  ];
-
   // handle input
   const handleChange = (e) => {
     setForm({
@@ -48,7 +42,6 @@ export default function Login() {
     });
   };
 
-  // login api
   const handleLogin = async () => {
     try {
       setLoading(true);
@@ -60,11 +53,7 @@ export default function Login() {
           password: form.password,
         },
       );
-      const res = await api.get("/hostel/all", {
-        params: {
-          email: form.userCode,
-        },
-      });
+
       // ===== JWT TOKEN =====
       const token = response.data.payLoad.accessToken;
       //   console.log(response.data);
@@ -73,9 +62,15 @@ export default function Login() {
       localStorage.setItem("token", token);
       const decoded = jwtDecode(token);
 
-      // ===== SAVE HOSTEL =====
-      const hostels = response.data.payLoad;
-      localStorage.setItem("hostels", JSON.stringify(hostels));
+      const hostelRes = await api.get("/hostel/all", {
+        params: {
+          userId: decoded.userId,
+        },
+      });
+
+      // // ===== SAVE HOSTEL =====
+      // const hostels = response.data.payLoad;
+      // localStorage.setItem("hostels", JSON.stringify(hostels));
       // ===== SAVE USER =====
 
       const userRes = await api.get("/users/id", {
@@ -85,12 +80,11 @@ export default function Login() {
       });
 
       localStorage.setItem("user", JSON.stringify(userRes.data.payLoad));
+      localStorage.setItem("hostels", JSON.stringify(hostelRes.data.payLoad));
 
-      // redirect
       navigate("/");
     } catch (error) {
       console.log(error);
-
       alert(error?.response?.data?.message || "Login Failed");
     } finally {
       setLoading(false);
@@ -172,7 +166,7 @@ export default function Login() {
           />
 
           {/* Hostel Select */}
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <Select
               fullWidth
               displayEmpty
@@ -185,11 +179,11 @@ export default function Login() {
 
               {hostels.map((hostel) => (
                 <MenuItem key={hostel.id} value={hostel.id}>
-                  {hostel.name}
+                  {hostel.id} - {hostel.hostelName}
                 </MenuItem>
               ))}
             </Select>
-          </div>
+          </div> */}
 
           {/* Remember */}
           <div className="flex justify-between items-center mb-5">

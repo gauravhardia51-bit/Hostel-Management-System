@@ -1,8 +1,11 @@
 import { NavLink, Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import LogoutIcon from "@mui/icons-material/Logout";
 import "./sidebar.css";
 import { ROUTES } from "../../routes/RoutesConstant";
 import HostelSwitcher from "./HostelSwitcher";
+import { getHostelsData } from "../../utils/auth";
+import { FormControl, Select, MenuItem } from "@mui/material";
 
 const active = ({ isActive }) =>
   isActive ? "active" : "block p-2 rounded text-white";
@@ -10,7 +13,7 @@ const active = ({ isActive }) =>
 export default function Sidebar({ collapsed }) {
   const navigate = useNavigate();
 
-  // ✅ Logout handler (production-ready)
+  // Logout handler (production-ready)
   const handleLogout = () => {
     // remove auth data
     localStorage.removeItem("token");
@@ -21,6 +24,29 @@ export default function Sidebar({ collapsed }) {
     // redirect safely
     navigate("/login", { replace: true });
   };
+
+  const { hostelId, hostels } = getHostelsData();
+  const [selectedHostel, setSelectedHostel] = useState("");
+  console.log("30 hostel= " + hostels);
+  console.log("hostelId= " + hostelId);
+  useEffect(() => {
+    if (hostelId) {
+      setSelectedHostel(Number(hostelId));
+    }
+  }, [hostelId]);
+
+  const handleChange = (event) => {
+    const value = event.target.value;
+
+    setSelectedHostel(value);
+
+    // ✅ persist
+    localStorage.setItem("hostelId", value);
+
+    // reload or later replace with Zustand
+    window.location.reload();
+  };
+
   return (
     <>
       <div className={`sidebar ${collapsed ? "w-20" : "w-64"}`}>
@@ -37,9 +63,57 @@ export default function Sidebar({ collapsed }) {
 
           {!collapsed && (
             <div className="hostel-info">
-              <p className="hostel-name">Galaxy Boys Hostel</p>
+              <FormControl fullWidth size="small">
+                <Select
+                  value={selectedHostel || ""}
+                  onChange={handleChange}
+                  displayEmpty
+                  variant="standard"
+                  disableUnderline
+                  renderValue={(selected) => {
+                    const hostel = hostels.find((h) => h.id === selected);
 
-              <p className="hostel-status">● Active</p>
+                    return (
+                      <div className="flex flex-col">
+                        <span className="hostel-name">
+                          {hostel?.hostelName || "Select Hostel"}
+                        </span>
+                        <span className="hostel-status">● Active</span>
+                      </div>
+                    );
+                  }}
+                  sx={{
+                    width: "100%",
+                    color: "white",
+
+                    // remove default padding & background
+                    "& .MuiSelect-select": {
+                      padding: "0px !important",
+                      background: "transparent !important",
+                      display: "flex",
+                      alignItems: "center",
+                    },
+
+                    "& .MuiSelect-icon": {
+                      color: "white",
+                    },
+
+                    "& fieldset": {
+                      border: "none",
+                    },
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Select Hostel</em>
+                  </MenuItem>
+
+                  {hostels.map((h) => (
+                    <MenuItem key={h.id} value={h.id}>
+                      {h.hostelName}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </div>
           )}
 

@@ -40,6 +40,22 @@
   cursor: pointer;
 }
 
-.hostel-info:hover {
-  background: rgba(255, 255, 255, 0.1);
+
+
+
+
+
+
+/* keep your existing design */
+.hostel-info {
+  @apply bg-[#312e81] p-3 rounded-lg mb-6;
 }
+
+.hostel-name {
+  @apply text-sm text-white;
+}
+
+.hostel-status {
+  @apply text-green-400 text-xs;
+}
+
