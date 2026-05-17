@@ -19,6 +19,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import ApartmentIcon from "@mui/icons-material/Apartment";
 import api from "../../api/Api";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -81,25 +82,37 @@ export default function Login() {
     try {
       setLoading(true);
 
-      const response = await api.post("/auth/login", {
-        userCode: form.userCode,
-        password: form.password,
-        hostelId: form.hostelId, // ✅ IMPORTANT
+      const response = await api.post(
+        "http://localhost:9001/rentrova/api/auth/login",
+        {
+          userCode: form.userCode,
+          password: form.password,
+        },
+      );
+      const res = await api.get("/hostel/all", {
+        params: {
+          email: form.userCode,
+        },
+      });
+      // ===== JWT TOKEN =====
+      const token = response.data.payLoad.accessToken;
+      //   console.log(response.data);
+      //   console.log(localStorage.getItem("token"));
+      // ===== SAVE TOKEN =====
+      localStorage.setItem("token", token);
+
+      // ===== SAVE HOSTEL =====
+      const hostels = response.data.payLoad;
+      localStorage.setItem("hostels", JSON.stringify(hostels));
+      // ===== SAVE USER =====
+
+      const userRes = await api.get("/users/id", {
+        params: {
+          id: decoded.userId,
+        },
       });
 
-      const data = response.data.payLoad;
-
-      // ✅ Save token
-      localStorage.setItem("token", data.accessToken);
-
-      // ✅ Save user
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      // ✅ Save selected hostel
-      localStorage.setItem("hostelId", form.hostelId);
-
-      // ✅ Save all hostels (for global use)
-      localStorage.setItem("hostels", JSON.stringify(hostels));
+      localStorage.setItem("user", JSON.stringify(userRes.data.payLoad));
 
       navigate("/");
     } catch (error) {
