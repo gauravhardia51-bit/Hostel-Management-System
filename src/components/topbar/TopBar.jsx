@@ -1,5 +1,4 @@
 import "./TopBar.css";
-import { useState } from "react";
 import NotificationDrawer from "../notifications/NotificationDrawers";
 
 // MUI
@@ -9,37 +8,27 @@ import Avatar from "@mui/material/Avatar";
 // Icons
 import MenuIcon from "@mui/icons-material/Menu";
 
-// Date Picker
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-
 export default function TopBar({
   collapsed,
   setCollapsed,
 }) {
 
   // ===== USER =====
-const storedUser = localStorage.getItem("user");
+  const storedUser =
+    localStorage.getItem("user");
 
-let user = null;
+  let user = null;
 
-try {
-  user = storedUser
-    ? JSON.parse(storedUser)
-    : null;
-} catch (error) {
-  console.log("Invalid user data");
-}
-console.log(user);
-  // ===== DATE =====
-  const [fromDate, setFromDate] = useState(
-    new Date()
-  );
+  try {
 
-  const [toDate, setToDate] = useState(
-    new Date()
-  );
+    user = storedUser
+      ? JSON.parse(storedUser)
+      : null;
+
+  } catch (error) {
+
+    console.log("Invalid user data");
+  }
 
   return (
     <div className="topbar">
@@ -57,6 +46,7 @@ console.log(user);
         </IconButton>
 
         <div>
+
           <h2 className="h2">
             Dashboard
           </h2>
@@ -65,54 +55,12 @@ console.log(user);
             Welcome back,
             {user?.name || "User"} 👋
           </p>
+
         </div>
       </div>
 
       {/* RIGHT */}
       <div className="date-bar">
-
-        {/* DATE PICKERS */}
-        <div className="date-picker">
-
-          <LocalizationProvider
-            dateAdapter={AdapterDateFns}
-          >
-
-            <div className="flex items-center gap-2">
-
-              <DatePicker
-                label="From"
-                value={fromDate}
-                format="dd/MM/yyyy"
-                onChange={(newValue) =>
-                  setFromDate(newValue)
-                }
-                slotProps={{
-                  textField: {
-                    size: "small",
-                  },
-                }}
-              />
-
-              <DatePicker
-                label="To"
-                value={toDate}
-                format="dd/MM/yyyy"
-                onChange={(newValue) =>
-                  setToDate(newValue)
-                }
-                slotProps={{
-                  textField: {
-                    size: "small",
-                  },
-                }}
-              />
-
-            </div>
-
-          </LocalizationProvider>
-
-        </div>
 
         {/* NOTIFICATION */}
         <NotificationDrawer />
@@ -132,6 +80,7 @@ console.log(user);
 
           {!collapsed && (
             <div>
+
               <p className="owner-name">
                 {user?.name || "User"}
               </p>
@@ -139,6 +88,7 @@ console.log(user);
               <p className="user">
                 Owner
               </p>
+
             </div>
           )}
 

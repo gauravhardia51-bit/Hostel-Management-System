@@ -62,11 +62,32 @@ export default function Login() {
       localStorage.setItem("token", token);
       const decoded = jwtDecode(token);
 
-      const hostelRes = await api.get("/hostel/all", {
-        params: {
-          userId: decoded.userId,
-        },
-      });
+      const hostelRes = await api.get(
+  "/hostel/all",
+  {
+    params: {
+      userId: decoded.userId,
+    },
+  }
+);
+
+const hostels =
+  hostelRes.data.payLoad || [];
+
+// save hostels
+localStorage.setItem(
+  "hostels",
+  JSON.stringify(hostels)
+);
+
+// save first hostel id automatically
+if (hostels.length > 0) {
+
+  localStorage.setItem(
+    "hostelId",
+    hostels[0].id
+  );
+}
 
       // // ===== SAVE HOSTEL =====
       // const hostels = response.data.payLoad;
@@ -80,7 +101,6 @@ export default function Login() {
       });
 
       localStorage.setItem("user", JSON.stringify(userRes.data.payLoad));
-      localStorage.setItem("hostels", JSON.stringify(hostelRes.data.payLoad));
 
       navigate("/");
     } catch (error) {
