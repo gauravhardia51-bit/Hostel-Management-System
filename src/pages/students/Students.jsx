@@ -46,7 +46,7 @@ export default function Students() {
           pageSize: 10,
           hostelId:localStorage.getItem("hostelId"),
           search: search,
-          //phone: search,
+          //phone: search,  
         },
       });
 
