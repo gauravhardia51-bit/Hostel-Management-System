@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { formatDateForInput, convertToTimestamp } from "../../utils/formatDate";
+import { getHostelsData } from "../../utils/auth";
 
 export default function AddStudent({
   open,
@@ -20,25 +21,28 @@ export default function AddStudent({
   mode = "add",
 }) {
   const isView = mode === "view";
-
+  const { hostelId } = getHostelsData();
+  //console.log("Hostel ID in AddStudentDrawer: ", hostelId);
   const [form, setForm] = useState({
     name: "",
     phone: "",
     email: "",
     roomId: "",
     joinDate: "",
+    status: "ACTIVE", // ✅ default
   });
 
   useEffect(() => {
-    console.log("32= " + editData);
+    //console.log("32= " + editData);
     if (editData) {
       setForm({
         id: editData.id || "",
         name: editData.name || "",
         phone: editData.phone || "",
-        email:editData.email ||"",
+        email: editData.email || "",
         roomId: editData.roomId || "",
         joinDate: editData.joinDate || "",
+        status: editData.status || "ACTIVE",
       });
     } else {
       setForm({
@@ -48,6 +52,7 @@ export default function AddStudent({
         email: "",
         roomId: "",
         joinDate: "",
+        status: "ACTIVE",
       });
     }
   }, [editData, open]);
@@ -60,17 +65,25 @@ export default function AddStudent({
   };
 
   const handleSubmit = () => {
-    const payload = {
+    let payload = {
       name: form.name,
       phone: form.phone,
       email: form.email,
       roomId: Number(form.roomId),
       joinDate: convertToTimestamp(form.joinDate),
+      status: form.status,
+      hostelId: Number(hostelId), // ✅ ADD THIS
     };
 
-    if (mode === "edit") {
+    // ✅ Only add id in edit mode
+    if (mode === "edit" && form.id) {
       payload.id = form.id;
     }
+
+    // ✅ Remove empty fields
+    Object.keys(payload).forEach(
+      (key) => payload[key] === "" && delete payload[key],
+    );
 
     onSave(payload);
     onClose();
@@ -116,14 +129,16 @@ export default function AddStudent({
             disabled={isView}
           />
 
-          <TextField
-            fullWidth
-            label="Email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            disabled={isView}
-          />
+          {mode === "add" && (
+            <TextField
+              fullWidth
+              label="Email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              disabled={isView}
+            />
+          )}
 
           <TextField
             select
@@ -150,6 +165,29 @@ export default function AddStudent({
             disabled={isView}
             InputLabelProps={{ shrink: true }}
           />
+
+          {mode === "edit" && (
+            <TextField
+              select
+              fullWidth
+              label="Status"
+              name="status"
+              value={form.status}
+              onChange={handleChange}
+            >
+              <MenuItem value="ACTIVE">
+                <span className="px-2 py-1 text-xs rounded-md font-semibold bg-green-100 text-green-600">
+                  ● ACTIVE
+                </span>
+              </MenuItem>
+
+              <MenuItem value="INACTIVE">
+                <span className="px-2 py-1 text-xs rounded-md font-semibold bg-red-100 text-red-500">
+                  ● INACTIVE
+                </span>
+              </MenuItem>
+            </TextField>
+          )}
         </div>
 
         {/* Footer */}
