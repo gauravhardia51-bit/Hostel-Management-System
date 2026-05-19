@@ -44,14 +44,14 @@ export default function Students() {
         params: {
           pageNo: page,
           pageSize: 10,
-          hostelId:localStorage.getItem("hostelId"),
+          hostelId: localStorage.getItem("hostelId"),
           search: search,
-          //phone: search,  
+          //phone: search,
         },
       });
 
       const data = res.data;
-      console.log("Fetched students:", data);
+      //console.log("Fetched students:", data);
       setStudents(data.payLoad || []);
       setTotalPages(data.totalPage || 0);
       setTotalElements(data.totalRow || 0);
@@ -61,6 +61,21 @@ export default function Students() {
       setLoading(false);
     }
   };
+
+  const [rooms] = useState(
+    Array.from({ length: 30 }, (_, i) => ({
+      id: i + 1,
+      roomNumber: `R${i + 1}`,
+    })),
+  );
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      fetchStudents();
+    }, 500);
+
+    return () => clearTimeout(delay);
+  }, [page, search]);
 
   const handleDelete = async (id) => {
     const confirm = window.confirm("Are you sure you want to delete?");
@@ -79,14 +94,6 @@ export default function Students() {
       toast.error("Delete failed ❌");
     }
   };
-
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      fetchStudents();
-    }, 500);
-
-    return () => clearTimeout(delay);
-  }, [page, search]);
 
   const renderRows = () => {
     if (loading) {
@@ -153,15 +160,12 @@ export default function Students() {
       : "bg-red-100 text-red-500";
   };
 
-  //const [open, setOpen] = useState(false);
-
   const handleSave = async (formData) => {
     try {
       if (mode === "edit") {
         await api.put(`/student/update`, formData);
         toast.success("Student updated successfully ✅");
       } else {
-        console.log("Adding student with data:", formData);
         await api.post("/student/add", formData);
         toast.success("Student added successfully ✅");
       }
@@ -173,13 +177,6 @@ export default function Students() {
       toast.error("Something went wrong ❌");
     }
   };
-
-  const [rooms] = useState(
-    Array.from({ length: 30 }, (_, i) => ({
-      id: i + 1,
-      roomNumber: `R${i + 1}`,
-    })),
-  );
 
   return (
     <div>
