@@ -68,7 +68,6 @@ export default function Reminders() {
       <div className="flex justify-between items-center mb-4">
         <div>
           <h2 className="text-lg font-semibold">Reminders</h2>
-          <p className="text-xs text-gray-500">Dashboard / Reminders</p>
         </div>
 
         <Button

@@ -1,4 +1,5 @@
 import "./TopBar.css";
+import { useState } from "react";
 import NotificationDrawer from "../notifications/NotificationDrawers";
 
 // MUI
@@ -7,6 +8,11 @@ import Avatar from "@mui/material/Avatar";
 
 // Icons
 import MenuIcon from "@mui/icons-material/Menu";
+
+// Date Picker
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 export default function TopBar({
   collapsed,
@@ -20,15 +26,28 @@ export default function TopBar({
   let user = null;
 
   try {
-
     user = storedUser
       ? JSON.parse(storedUser)
       : null;
-
-  } catch (error) {
-
+  } catch {
     console.log("Invalid user data");
   }
+
+  // ===== DEFAULT DATES =====
+
+  const today = new Date();
+
+  const firstDayOfMonth = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    1
+  );
+
+  const [fromDate, setFromDate] =
+    useState(firstDayOfMonth);
+
+  const [toDate, setToDate] =
+    useState(today);
 
   return (
     <div className="topbar">
@@ -47,25 +66,61 @@ export default function TopBar({
 
         <div>
 
-          <h2 className="h2">
-            Dashboard
-          </h2>
-
           <p className="para">
             Welcome back,
             {user?.name || "User"} 👋
           </p>
 
         </div>
+
       </div>
+
+      {/* CENTER DATE */}
+      <LocalizationProvider
+        dateAdapter={AdapterDateFns}
+      >
+
+        <div className="flex items-center gap-3">
+
+          <DatePicker
+            label="From Date"
+            value={fromDate}
+            format="dd/MM/yyyy"
+            onChange={(value) =>
+              setFromDate(value)
+            }
+            slotProps={{
+              textField: {
+                size: "small"
+              }
+            }}
+          />
+
+          <span>→</span>
+
+          <DatePicker
+            label="To Date"
+            value={toDate}
+            format="dd/MM/yyyy"
+            onChange={(value) =>
+              setToDate(value)
+            }
+            slotProps={{
+              textField: {
+                size: "small"
+              }
+            }}
+          />
+
+        </div>
+
+      </LocalizationProvider>
 
       {/* RIGHT */}
       <div className="date-bar">
 
-        {/* NOTIFICATION */}
         <NotificationDrawer />
 
-        {/* USER */}
         <div className="user-data">
 
           <Avatar
@@ -95,6 +150,7 @@ export default function TopBar({
         </div>
 
       </div>
+
     </div>
   );
 }

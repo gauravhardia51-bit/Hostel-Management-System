@@ -84,7 +84,6 @@ export default function Payments() {
       <div className="flex justify-between items-center mb-4">
         <div>
           <h2 className="text-lg font-semibold">Payments</h2>
-          <p className="text-xs text-gray-500">Dashboard / Payments</p>
         </div>
 
         <Button

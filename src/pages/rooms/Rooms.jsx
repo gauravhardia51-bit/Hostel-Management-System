@@ -126,7 +126,6 @@ export default function Rooms() {
       <div className="flex justify-between items-center mb-4">
         <div>
           <h2 className="text-lg font-semibold">Rooms</h2>
-          <p className="text-xs text-gray-500">Dashboard / Rooms</p>
         </div>
 
         <Button
