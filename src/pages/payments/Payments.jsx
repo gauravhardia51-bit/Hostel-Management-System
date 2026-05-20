@@ -93,12 +93,12 @@ export default function Payments() {
     try {
       setLoading(true);
 
-      const res = await api.get("/payments/all", {
+      const res = await api.get("/payment/all", {
         params: {
           pageNo: page,
           pageSize: 10,
           hostelId: localStorage.getItem("hostelId"),
-          search: search,
+          search: search || undefined,
           status: status !== "ALL" ? status : undefined,
           fromDate: fromDate || undefined,
           toDate: toDate || undefined,
