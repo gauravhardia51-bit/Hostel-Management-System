@@ -12,7 +12,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { formatDateForInput, convertToTimestamp } from "../../utils/formatDate";
 import { getHostelsData } from "../../utils/auth";
 
-export default function AddStudent({
+export default function AddStudentDrawer({
   open,
   onClose,
   onSave,
@@ -22,7 +22,7 @@ export default function AddStudent({
 }) {
   const isView = mode === "view";
   const { hostelId } = getHostelsData();
-  //console.log("Hostel ID in AddStudentDrawer: ", hostelId);
+
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -92,7 +92,7 @@ export default function AddStudent({
   const titles = {
     add: "Add Student",
     edit: "Edit Student Details",
-    view: "View Student Details",
+    // view: "View Student Details",
   };
 
   return (

@@ -34,7 +34,12 @@ export default function Students() {
   const [open, setOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [mode, setMode] = useState("add"); // add | edit | view
-  const [hostelId, setHostelId] = useState("");
+  //const [hostelId, setHostelId] = useState("");
+  const getStatusStyle = (status) => {
+    return status === "ACTIVE"
+      ? "bg-green-100 text-green-600"
+      : "bg-red-100 text-red-500";
+  };
 
   const fetchStudents = async () => {
     try {
@@ -154,12 +159,6 @@ export default function Students() {
     ));
   };
 
-  const getStatusStyle = (status) => {
-    return status === "ACTIVE"
-      ? "bg-green-100 text-green-600"
-      : "bg-red-100 text-red-500";
-  };
-
   const handleSave = async (formData) => {
     try {
       if (mode === "edit") {
@@ -189,6 +188,11 @@ export default function Students() {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
+          sx={{
+            backgroundColor: "#4f46e5",
+            textTransform: "none",
+            borderRadius: "8px",
+          }}
           onClick={() => {
             setSelectedStudent(null);
             setMode("add");

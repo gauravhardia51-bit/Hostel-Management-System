@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Drawer,
   Box,
@@ -8,16 +8,44 @@ import {
   MenuItem,
   IconButton,
 } from "@mui/material";
-
 import CloseIcon from "@mui/icons-material/Close";
+import { getHostelsData } from "../../utils/auth";
 
-export default function AddRoomDrawer({ open, onClose, onSave, editData }) {
+export default function AddRoomDrawer({
+  open,
+  onClose,
+  onSave,
+  editData,
+  mode = "add",
+}) {
+  //const isView = mode === "view";
+  const { hostelId } = getHostelsData();
+
   const [form, setForm] = useState({
-    roomNumber: editData?.roomNumber || "",
-    capacity: editData?.capacity || "",
-    occupied: editData?.occupied || 0,
-    status: editData?.status || "AVAILABLE",
+    roomNumber: "",
+    capacity: "",
+    occupied: 0,
+    status: "AVAILABLE",
   });
+
+  useEffect(() => {
+    //console.log("32= " + editData);
+    if (editData) {
+      setForm({
+        roomNumber: editData?.roomNumber || "",
+        capacity: editData?.capacity || "",
+        occupied: editData?.occupied || 0,
+        status: editData?.status || "AVAILABLE",
+      });
+    } else {
+      setForm({
+        roomNumber: "",
+        capacity: "",
+        occupied: 0,
+        status: "AVAILABLE",
+      });
+    }
+  }, [editData, open]);
 
   const handleChange = (e) => {
     setForm({
@@ -27,16 +55,32 @@ export default function AddRoomDrawer({ open, onClose, onSave, editData }) {
   };
 
   const handleSubmit = () => {
-    onSave(form);
+    let payload = {
+      roomNumber: form.roomNumber,
+      capacity: form.capacity,
+      occupied: form.occupied,
+      status: form.status,
+      hostelId: Number(hostelId), // ✅ ADD THIS
+    };
 
-    setForm({
-      roomNumber: "",
-      capacity: "",
-      occupied: 0,
-      status: "AVAILABLE",
-    });
+    // ✅ Only add id in edit mode
+    if (mode === "edit" && form.id) {
+      payload.id = form.id;
+    }
 
+    // ✅ Remove empty fields
+    Object.keys(payload).forEach(
+      (key) => payload[key] === "" && delete payload[key],
+    );
+
+    onSave(payload);
     onClose();
+  };
+
+  const titles = {
+    add: "Add Room",
+    edit: "Edit Room Details",
+    view: "View Room Details",
   };
 
   return (
@@ -57,7 +101,7 @@ export default function AddRoomDrawer({ open, onClose, onSave, editData }) {
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b">
           <Typography variant="h6" fontWeight={700}>
-            Add Room
+            {titles[mode]}
           </Typography>
 
           <IconButton onClick={onClose}>
@@ -91,6 +135,7 @@ export default function AddRoomDrawer({ open, onClose, onSave, editData }) {
             name="occupied"
             value={form.occupied}
             onChange={handleChange}
+            disabled={mode === "edit"}
           />
 
           <TextField
@@ -100,6 +145,7 @@ export default function AddRoomDrawer({ open, onClose, onSave, editData }) {
             name="status"
             value={form.status}
             onChange={handleChange}
+            disabled={mode === "edit"}
           >
             <MenuItem value="AVAILABLE">AVAILABLE</MenuItem>
             <MenuItem value="FULL">FULL</MenuItem>

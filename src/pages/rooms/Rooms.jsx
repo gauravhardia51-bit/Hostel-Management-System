@@ -8,13 +8,50 @@ import { useEffect, useState } from "react";
 import api from "../../api/Api.jsx";
 import AddRoomDrawer from "../../feature/rooms/AddRoomDrawer.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
+import { toast } from "react-toastify";
 
 export default function Rooms() {
   const [loading, setLoading] = useState(false);
   const [rooms, setRooms] = useState([]);
   const [page, setPage] = useState(0);
+  const [open, setOpen] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [mode, setMode] = useState("add"); // add | edit | view
+
+  const fetchRooms = async () => {
+    try {
+      setLoading(true);
+
+      const res = await api.get("/room/all", {
+        params: {
+          pageNo: page,
+          pageSize: 10,
+          hostelId: localStorage.getItem("hostelId"),
+          //search: search,
+        },
+      });
+
+      const data = res.data;
+
+      setRooms(data.payLoad || []);
+      setTotalPages(data.totalPage || 0);
+      setTotalElements(data.totalRow || 0);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      fetchRooms();
+    }, 300); // rooms usually don’t need long debounce
+
+    return () => clearTimeout(delay);
+  }, [page]);
 
   const renderRows = () => {
     if (loading) {
@@ -62,7 +99,14 @@ export default function Rooms() {
             <IconButton size="small">
               <VisibilityIcon fontSize="small" />
             </IconButton>
-            <IconButton size="small">
+            <IconButton
+              size="small"
+              onClick={() => {
+                setSelectedRoom(room);
+                setMode("edit");
+                setOpen(true);
+              }}
+            >
               <EditIcon fontSize="small" />
             </IconButton>
           </td>
@@ -81,44 +125,23 @@ export default function Rooms() {
       : "bg-green-100 text-green-600";
   };
 
-  localStorage.getItem("token");
-
-  const fetchRooms = async () => {
+  const handleSave = async (formData) => {
     try {
-      setLoading(true);
-
-      const res = await api.get("/room/all", {
-        params: {
-          pageNo: page,
-          pageSize: 6,
-        },
-      });
-
-      const data = res.data;
-
-      setRooms(data.payLoad || []);
-      setTotalPages(data.totalPage || 0);
-      setTotalElements(data.totalRow || 0);
+      if (mode === "edit") {
+        await api.put(`/room/update`, formData);
+        toast.success("Room updated successfully ✅");
+      } else {
+        await api.post("/room/add", formData);
+        toast.success("Room added successfully ✅");
+      }
+      fetchRooms(); // refresh table
+      setOpen(false);
+      setSelectedRoom(null);
     } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+      console.error("FULL ERROR:", err.response);
+      toast.error("Something went wrong ❌");
     }
   };
-
-  const [open, setOpen] = useState(false);
-
-  const handleSave = (data) => {
-    console.log("Saved:", data);
-  };
-
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      fetchRooms();
-    }, 300); // rooms usually don’t need long debounce
-
-    return () => clearTimeout(delay);
-  }, [page]);
 
   return (
     <div className="bg-[#f5f7fb]">
@@ -136,15 +159,22 @@ export default function Rooms() {
             textTransform: "none",
             borderRadius: "8px",
           }}
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setSelectedRoom(null);
+            setMode("add");
+            setOpen(true);
+          }}
         >
           Add Room
         </Button>
         <AddRoomDrawer
+          key={selectedRoom?.id || mode}
           open={open}
           onClose={() => setOpen(false)}
           onSave={handleSave}
-          rooms={[]}
+          rooms={rooms}
+          editData={selectedRoom}
+          mode={mode}
         />
       </div>
 
@@ -167,15 +197,23 @@ export default function Rooms() {
           </table>
 
           {/* Footer */}
-          <Pagination
-            page={page}
-            totalPages={totalPages}
-            totalElements={totalElements}
-            pageSize={10}
-            onPageChange={setPage}
-            maxVisible={5}
-            label="rooms"
-          />
+          <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
+            <span>
+              Showing {rooms.length === 0 ? 0 : page * 8 + 1} to{" "}
+              {page * 8 + rooms.length} of {totalElements} rooms
+            </span>
+
+            {/* Pagination */}
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              totalElements={totalElements}
+              pageSize={10}
+              onPageChange={setPage}
+              maxVisible={5}
+              label="students"
+            />
+          </div>
         </CardContent>
       </Card>
     </div>
