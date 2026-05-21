@@ -20,13 +20,14 @@ import { Link } from "react-router-dom";
 import { ROUTES } from "../../routes/RoutesConstant.js";
 import { useEffect, useState } from "react";
 import AddStudentDrawer from "../../feature/students/AddStudentDrawer.jsx";
-import { formatDate } from "../../utils/formatDate.js";
+import { formatDateForDisplay } from "../../utils/formatDate.js";
 import Pagination from "../../components/common/Pagination.jsx";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 export default function Students() {
   const [loading, setLoading] = useState(false);
   const [students, setStudents] = useState([]);
+  const [rooms, setRooms] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
@@ -55,24 +56,29 @@ export default function Students() {
         },
       });
 
+      const response = await api.get("/room/all", {
+        params: {
+          //pageNo: page,
+          //pageSize: 10,
+          hostelId: localStorage.getItem("hostelId"),
+          //search: search,
+        },
+      });
+
       const data = res.data;
-      //console.log("Fetched students:", data);
+      const roomData = response.data;
+
+      setRooms(roomData.payLoad || []);
       setStudents(data.payLoad || []);
       setTotalPages(data.totalPage || 0);
       setTotalElements(data.totalRow || 0);
+      console.log("Rooms= ", roomData.payLoad);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
-
-  const [rooms] = useState(
-    Array.from({ length: 30 }, (_, i) => ({
-      id: i + 1,
-      roomNumber: `R${i + 1}`,
-    })),
-  );
 
   useEffect(() => {
     const delay = setTimeout(() => {
@@ -128,7 +134,7 @@ export default function Students() {
         <td>{s.phone}</td>
         <td>{s.roomNumber}</td>
 
-        <td>{formatDate(s.joinDate)}</td>
+        <td>{formatDateForDisplay(s.joinDate)}</td>
 
         <td>
           <span

@@ -9,7 +9,10 @@ import {
   MenuItem,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { formatDateForInput, convertToTimestamp } from "../../utils/formatDate";
+import {
+  convertToTimestamp,
+  formatDateForBackend,
+} from "../../utils/formatDate";
 import { getHostelsData } from "../../utils/auth";
 
 export default function AddStudentDrawer({
@@ -22,7 +25,6 @@ export default function AddStudentDrawer({
 }) {
   const isView = mode === "view";
   const { hostelId } = getHostelsData();
-
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -33,7 +35,6 @@ export default function AddStudentDrawer({
   });
 
   useEffect(() => {
-    //console.log("32= " + editData);
     if (editData) {
       setForm({
         id: editData.id || "",
@@ -41,7 +42,7 @@ export default function AddStudentDrawer({
         phone: editData.phone || "",
         email: editData.email || "",
         roomId: editData.roomId || "",
-        joinDate: editData.joinDate || "",
+        joinDate: formatDateForBackend(editData.joinDate) || "",
         status: editData.status || "ACTIVE",
       });
     } else {
@@ -160,7 +161,7 @@ export default function AddStudentDrawer({
             fullWidth
             type="date"
             name="joinDate"
-            value={formatDateForInput(form.joinDate)}
+            value={form.joinDate}
             onChange={handleChange}
             disabled={isView}
             InputLabelProps={{ shrink: true }}

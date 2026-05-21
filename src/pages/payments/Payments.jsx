@@ -16,57 +16,7 @@ import { useState, useEffect } from "react";
 import api from "../../api/Api.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
 import { toast } from "react-toastify";
-
-// const payments = [
-//   {
-//     id: 1,
-//     name: "Rahul Kumar",
-//     amount: "₹5,000",
-//     dueDate: "05 Apr 2024",
-//     paidDate: "05 Apr 2024",
-//     status: "PAID",
-//   },
-//   {
-//     id: 2,
-//     name: "Aman Verma",
-//     amount: "₹4,500",
-//     dueDate: "05 Apr 2024",
-//     paidDate: "-",
-//     status: "PENDING",
-//   },
-//   {
-//     id: 3,
-//     name: "Vikas Singh",
-//     amount: "₹5,000",
-//     dueDate: "05 Apr 2024",
-//     paidDate: "05 Apr 2024",
-//     status: "PAID",
-//   },
-//   {
-//     id: 4,
-//     name: "Rohit Sharma",
-//     amount: "₹5,000",
-//     dueDate: "05 Apr 2024",
-//     paidDate: "-",
-//     status: "PENDING",
-//   },
-//   {
-//     id: 5,
-//     name: "Deepak Yadav",
-//     amount: "₹4,500",
-//     dueDate: "05 Apr 2024",
-//     paidDate: "-",
-//     status: "PENDING",
-//   },
-//   {
-//     id: 6,
-//     name: "Rajesh Kumar",
-//     amount: "₹5,000",
-//     dueDate: "05 Apr 2024",
-//     paidDate: "05 Apr 2024",
-//     status: "PAID",
-//   },
-// ];
+import { formatDateForDisplay } from "../../utils/formatDate.js";
 
 export default function Payments() {
   const [loading, setLoading] = useState(false);
@@ -106,7 +56,7 @@ export default function Payments() {
       });
 
       const data = res.data;
-
+      console.log("Payment Response", data);
       setPayments(data.payLoad || []);
       setTotalPages(data.totalPage || 0);
       setTotalElements(data.totalRow || 0);
@@ -116,13 +66,6 @@ export default function Payments() {
       setLoading(false);
     }
   };
-
-  // const [rooms] = useState(
-  //   Array.from({ length: 30 }, (_, i) => ({
-  //     id: i + 1,
-  //     roomNumber: `R${i + 1}`,
-  //   })),
-  // );
 
   useEffect(() => {
     const delay = setTimeout(() => {
@@ -161,9 +104,9 @@ export default function Payments() {
 
         <td>₹{p.amount}</td>
 
-        <td>{p.dueDate}</td>
+        <td>{formatDateForDisplay(p.dueDate)}</td>
 
-        <td>{p.paidDate || "-"}</td>
+        <td>{formatDateForDisplay(p.paidDate) || "-"}</td>
 
         <td>
           <span
@@ -173,12 +116,6 @@ export default function Payments() {
           >
             {p.status}
           </span>
-        </td>
-
-        <td className="text-center">
-          <IconButton size="small">
-            <VisibilityIcon fontSize="small" />
-          </IconButton>
         </td>
       </tr>
     ));
@@ -210,7 +147,7 @@ export default function Payments() {
           <h2 className="text-lg font-semibold">Payments</h2>
         </div>
 
-        <Button
+        {/* <Button
           variant="contained"
           startIcon={<AddIcon />}
           sx={{
@@ -219,13 +156,13 @@ export default function Payments() {
             borderRadius: "8px",
           }}
           onClick={() => {
-            setSelectedPayment(null);
+            setSelectedPayment(payments);
             setMode("add");
             setOpen(true);
           }}
         >
           Add Payment
-        </Button>
+        </Button> */}
 
         <AddPaymentDrawer
           key={selectedPayment?.id || mode}
@@ -234,7 +171,6 @@ export default function Payments() {
           onSave={handleSave}
           rooms={[]}
           editData={selectedPayment}
-          mode={mode}
         />
       </div>
 
@@ -305,7 +241,6 @@ export default function Payments() {
                 <th>Due Date</th>
                 <th>Paid Date</th>
                 <th>Status</th>
-                <th className="text-center">Actions</th>
               </tr>
             </thead>
 

@@ -7,6 +7,8 @@ import AddIcon from "@mui/icons-material/Add";
 import { useEffect, useState } from "react";
 import api from "../../api/Api.jsx";
 import AddRoomDrawer from "../../feature/rooms/AddRoomDrawer.jsx";
+import SearchIcon from "@mui/icons-material/Search";
+import "./Rooms.css";
 import Pagination from "../../components/common/Pagination.jsx";
 import { toast } from "react-toastify";
 
@@ -19,6 +21,7 @@ export default function Rooms() {
   const [totalElements, setTotalElements] = useState(0);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [mode, setMode] = useState("add"); // add | edit | view
+  const [search, setSearch] = useState("");
 
   const fetchRooms = async () => {
     try {
@@ -29,7 +32,7 @@ export default function Rooms() {
           pageNo: page,
           pageSize: 10,
           hostelId: localStorage.getItem("hostelId"),
-          //search: search,
+          search: search,
         },
       });
 
@@ -38,6 +41,7 @@ export default function Rooms() {
       setRooms(data.payLoad || []);
       setTotalPages(data.totalPage || 0);
       setTotalElements(data.totalRow || 0);
+      console.log("41 Fetched rooms:", data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -51,7 +55,7 @@ export default function Rooms() {
     }, 300); // rooms usually don’t need long debounce
 
     return () => clearTimeout(delay);
-  }, [page]);
+  }, [page, search]);
 
   const renderRows = () => {
     if (loading) {
@@ -176,6 +180,23 @@ export default function Rooms() {
           editData={selectedRoom}
           mode={mode}
         />
+      </div>
+
+      {/* Search */}
+      <div className="search-bar">
+        <div className="search">
+          <SearchIcon className="search-icon" />
+          <input
+            type="text"
+            placeholder="Search room by number..."
+            className="w-full px-2 py-2 outline-none text-sm"
+            value={search}
+            onChange={(e) => {
+              setPage(0); // reset page
+              setSearch(e.target.value);
+            }}
+          />
+        </div>
       </div>
 
       {/* Table Card */}
