@@ -5,9 +5,12 @@ import NotificationDrawer from "../notifications/NotificationDrawers";
 // MUI
 import IconButton from "@mui/material/IconButton";
 import Avatar from "@mui/material/Avatar";
+import Popover from "@mui/material/Popover";
+import Button from "@mui/material/Button";
 
 // Icons
 import MenuIcon from "@mui/icons-material/Menu";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 
 // Date Picker
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -34,7 +37,6 @@ export default function TopBar({
   }
 
   // ===== DEFAULT DATES =====
-
   const today = new Date();
 
   const firstDayOfMonth = new Date(
@@ -48,6 +50,20 @@ export default function TopBar({
 
   const [toDate, setToDate] =
     useState(today);
+
+  // ===== POPOVER =====
+  const [anchorEl, setAnchorEl] =
+    useState(null);
+
+  const openDatePopup = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeDatePopup = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
 
   return (
     <div className="topbar">
@@ -64,61 +80,83 @@ export default function TopBar({
           <MenuIcon />
         </IconButton>
 
-        <div>
-
-          <p className="para">
-            Welcome back,
-            {user?.name || "User"} 👋
-          </p>
-
-        </div>
-
       </div>
 
-      {/* CENTER DATE */}
-      <LocalizationProvider
-        dateAdapter={AdapterDateFns}
-      >
-
-        <div className="flex items-center gap-3">
-
-          <DatePicker
-            label="From Date"
-            value={fromDate}
-            format="dd/MM/yyyy"
-            onChange={(value) =>
-              setFromDate(value)
-            }
-            slotProps={{
-              textField: {
-                size: "small"
-              }
-            }}
-          />
-
-          <span>→</span>
-
-          <DatePicker
-            label="To Date"
-            value={toDate}
-            format="dd/MM/yyyy"
-            onChange={(value) =>
-              setToDate(value)
-            }
-            slotProps={{
-              textField: {
-                size: "small"
-              }
-            }}
-          />
-
-        </div>
-
-      </LocalizationProvider>
+      {/* CENTER DATE ICON */}
+     
 
       {/* RIGHT */}
       <div className="date-bar">
+{/* CENTER DATE */}
+<LocalizationProvider
+  dateAdapter={AdapterDateFns}
+>
 
+  <div className="date-filter">
+
+    <IconButton
+      onClick={openDatePopup}
+      className="calendar-btn"
+    >
+      <CalendarMonthIcon />
+    </IconButton>
+
+    <Popover
+      open={open}
+      anchorEl={anchorEl}
+      onClose={closeDatePopup}
+      anchorOrigin={{
+        vertical: "bottom",
+        horizontal: "center",
+      }}
+    >
+
+      <div className="date-popup">
+
+        <DatePicker
+          label="From Date"
+          value={fromDate}
+          format="dd/MM/yyyy"
+          onChange={(value) =>
+            setFromDate(value)
+          }
+          slotProps={{
+            textField: {
+              size: "small",
+              fullWidth: true
+            }
+          }}
+        />
+
+        <DatePicker
+          label="To Date"
+          value={toDate}
+          format="dd/MM/yyyy"
+          onChange={(value) =>
+            setToDate(value)
+          }
+          slotProps={{
+            textField: {
+              size: "small",
+              fullWidth: true
+            }
+          }}
+        />
+
+        <Button
+          variant="contained"
+          onClick={closeDatePopup}
+        >
+          Apply
+        </Button>
+
+      </div>
+
+    </Popover>
+
+  </div>
+
+</LocalizationProvider>
         <NotificationDrawer />
 
         <div className="user-data">

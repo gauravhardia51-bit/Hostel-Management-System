@@ -246,7 +246,7 @@ export default function Payments() {
 
             <tbody>{renderRows()}</tbody>
           </table>
-
+<div className="flex justify-end items-center mt-4 text-xs text-gray-500">
           {/* Footer */}
           <Pagination
             page={page}
@@ -257,6 +257,7 @@ export default function Payments() {
             maxVisible={5}
             label="payments"
           />
+          </div>
         </CardContent>
       </Card>
     </div>
