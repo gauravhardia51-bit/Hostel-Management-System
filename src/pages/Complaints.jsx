@@ -502,11 +502,11 @@ export default function Complaints() {
           </table>
 
           {/* Footer */}
-          <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
-            <span>
+          <div className="flex justify-end items-center mt-4 text-xs text-gray-500">
+            {/* <span>
               Showing {complaints.length === 0 ? 0 : page * 10 + 1} to{" "}
               {page * 10 + complaints.length} of {totalElements} complaints
-            </span>
+            </span> */}
 
             <Pagination
               page={page}

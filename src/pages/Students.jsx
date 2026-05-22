@@ -128,7 +128,7 @@ export default function Students() {
 
     return students.map((s, index) => (
       <tr key={s.id} className="border-b hover:bg-gray-50">
-        <td className="py-3">{page * 8 + index + 1}</td>
+        <td className="py-3">{page * 10 + index + 1}</td>
         <td>{s.name}</td>
         <td>{s.phone}</td>
         <td>{s.roomNumber}</td>
@@ -255,11 +255,11 @@ export default function Students() {
           </table>
 
           {/* Footer */}
-          <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
-            <span>
-              Showing {students.length === 0 ? 0 : page * 8 + 1} to{" "}
-              {page * 8 + students.length} of {totalElements} students
-            </span>
+          <div className="flex justify-end items-center mt-4 text-xs text-gray-500">
+            {/* <span>
+              Showing {students.length === 0 ? 0 : page * 10 + 1} to{" "}
+              {page * 10 + students.length} of {totalElements} students
+            </span> */}
 
             {/* Pagination */}
             <Pagination

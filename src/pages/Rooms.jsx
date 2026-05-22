@@ -84,12 +84,8 @@ export default function Rooms() {
 
       return (
         <tr key={room.id} className="border-b hover:bg-gray-50">
-          <td className="py-3">{page * 6 + index + 1}</td>
-          <td>
-            {room.roomNumber?.startsWith("R-")
-              ? room.roomNumber
-              : `R-${room.roomNo || room.roomNumber}`}
-          </td>
+          <td className="py-3">{page * 10 + index + 1}</td>
+          <td>{room.roomNo || room.roomNumber}</td>
           <td>{room.capacity}</td>
           <td>{room.occupied}</td>
 
@@ -220,11 +216,11 @@ export default function Rooms() {
           </table>
 
           {/* Footer */}
-          <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
-            <span>
-              Showing {rooms.length === 0 ? 0 : page * 8 + 1} to{" "}
-              {page * 8 + rooms.length} of {totalElements} rooms
-            </span>
+          <div className="flex justify-end items-center mt-4 text-xs text-gray-500">
+            {/* <span>
+              Showing {rooms.length === 0 ? 0 : page * 10 + 1} to{" "}
+              {page * 10 + rooms.length} of {totalElements} rooms
+            </span> */}
 
             {/* Pagination */}
             <Pagination
