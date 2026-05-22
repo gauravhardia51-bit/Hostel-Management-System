@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   Drawer,
   Box,
@@ -9,6 +9,9 @@ import {
   IconButton,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+
+import useFormValidation from "../../hooks/FormValidation";
+import { validateRoom } from "../../validations/ValidateRoom";
 import { getHostelsData } from "../../utils/auth";
 
 export default function AddRoomDrawer({
@@ -18,60 +21,53 @@ export default function AddRoomDrawer({
   editData,
   mode = "add",
 }) {
-  //const isView = mode === "view";
   const { hostelId } = getHostelsData();
 
-  const [form, setForm] = useState({
-    roomNumber: "",
-    capacity: "",
-    occupied: 0,
-    status: "AVAILABLE",
-  });
+  const {
+    values: form,
+    errors,
+    handleChange,
+    validateAll,
+    resetForm,
+    setValues,
+  } = useFormValidation(
+    {
+      roomNumber: "",
+      capacity: "",
+      occupied: 0,
+      status: "AVAILABLE",
+    },
+    validateRoom,
+  );
 
+  // ✅ Prefill edit
   useEffect(() => {
-    //console.log("32= " + editData);
     if (editData) {
-      setForm({
-        roomNumber: editData?.roomNumber || "",
+      setValues({
+        roomNumber: editData?.roomNumber?.replace("R-", "") || "",
         capacity: editData?.capacity || "",
         occupied: editData?.occupied || 0,
         status: editData?.status || "AVAILABLE",
       });
     } else {
-      setForm({
-        roomNumber: "",
-        capacity: "",
-        occupied: 0,
-        status: "AVAILABLE",
-      });
+      resetForm();
     }
   }, [editData, open]);
 
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
-
   const handleSubmit = () => {
+    if (!validateAll()) return; // ❌ stop if invalid
+
     let payload = {
       roomNumber: form.roomNumber,
-      capacity: form.capacity,
-      occupied: form.occupied,
+      capacity: Number(form.capacity),
+      occupied: Number(form.occupied),
       status: form.status,
-      hostelId: Number(hostelId), // ✅ ADD THIS
+      hostelId: Number(hostelId),
     };
 
-    // ✅ Only add id in edit mode
-    if (mode === "edit" && form.id) {
-      payload.id = form.id;
+    if (mode === "edit" && editData?.id) {
+      payload.id = editData.id;
     }
-
-    // ✅ Remove empty fields
-    Object.keys(payload).forEach(
-      (key) => payload[key] === "" && delete payload[key],
-    );
 
     onSave(payload);
     onClose();
@@ -80,24 +76,11 @@ export default function AddRoomDrawer({
   const titles = {
     add: "Add Room",
     edit: "Edit Room Details",
-    view: "View Room Details",
   };
 
   return (
-    <Drawer
-      anchor="right"
-      open={open}
-      onClose={onClose}
-      PaperProps={{
-        sx: {
-          width: {
-            xs: "100%",
-            sm: 420,
-          },
-        },
-      }}
-    >
-      <Box className="h-full flex flex-col">
+    <Drawer anchor="right" open={open} onClose={onClose}>
+      <Box sx={{ width: 420 }} className="h-full flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b">
           <Typography variant="h6" fontWeight={700}>
@@ -116,7 +99,17 @@ export default function AddRoomDrawer({
             label="Room Number"
             name="roomNumber"
             value={form.roomNumber}
-            onChange={handleChange}
+            onChange={(e) => {
+              const value = e.target.value;
+
+              // ✅ allow only numbers AND max 3 digits
+              if (/^[0-9]*$/.test(value) && value.length <= 3) {
+                handleChange(e);
+              }
+            }}
+            error={!!errors.roomNumber}
+            helperText={errors.roomNumber}
+            inputProps={{ maxLength: 3 }} // extra safety
           />
 
           <TextField
@@ -126,6 +119,8 @@ export default function AddRoomDrawer({
             name="capacity"
             value={form.capacity}
             onChange={handleChange}
+            error={!!errors.capacity}
+            helperText={errors.capacity}
           />
 
           <TextField
@@ -136,6 +131,8 @@ export default function AddRoomDrawer({
             value={form.occupied}
             onChange={handleChange}
             disabled={mode === "edit"}
+            error={!!errors.occupied}
+            helperText={errors.occupied}
           />
 
           <TextField
@@ -146,6 +143,8 @@ export default function AddRoomDrawer({
             value={form.status}
             onChange={handleChange}
             disabled={mode === "edit"}
+            error={!!errors.status}
+            helperText={errors.status}
           >
             <MenuItem value="AVAILABLE">AVAILABLE</MenuItem>
             <MenuItem value="FULL">FULL</MenuItem>
@@ -166,7 +165,7 @@ export default function AddRoomDrawer({
               background: "linear-gradient(to right, #4f46e5, #7c3aed)",
             }}
           >
-            Save Room
+            {mode === "edit" ? "Update Room" : "Save Room"}
           </Button>
         </div>
       </Box>

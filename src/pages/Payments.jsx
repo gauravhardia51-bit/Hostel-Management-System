@@ -11,12 +11,12 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import SearchIcon from "@mui/icons-material/Search";
-import AddPaymentDrawer from "../../feature/payments/AddPaymentDrawer.jsx";
+import AddPaymentDrawer from "../feature/payments/AddPaymentDrawer.jsx";
 import { useState, useEffect } from "react";
-import api from "../../api/Api.jsx";
-import Pagination from "../../components/common/Pagination.jsx";
+import api from "../api/Api.jsx";
+import Pagination from "../components/common/Pagination.jsx";
 import { toast } from "react-toastify";
-import { formatDateForDisplay } from "../../utils/formatDate.js";
+import { formatDateForDisplay } from "../utils/formatDate.js";
 
 export default function Payments() {
   const [loading, setLoading] = useState(false);

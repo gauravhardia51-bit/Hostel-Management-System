@@ -5,11 +5,11 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import { useEffect, useState } from "react";
-import api from "../../api/Api.jsx";
-import AddRoomDrawer from "../../feature/rooms/AddRoomDrawer.jsx";
+import api from "../api/Api.jsx";
+import AddRoomDrawer from "../feature/rooms/AddRoomDrawer.jsx";
 import SearchIcon from "@mui/icons-material/Search";
 import "./Rooms.css";
-import Pagination from "../../components/common/Pagination.jsx";
+import Pagination from "../components/common/Pagination.jsx";
 import { toast } from "react-toastify";
 
 export default function Rooms() {
@@ -85,7 +85,11 @@ export default function Rooms() {
       return (
         <tr key={room.id} className="border-b hover:bg-gray-50">
           <td className="py-3">{page * 6 + index + 1}</td>
-          <td>{room.roomNo || room.roomNumber}</td>
+          <td>
+            {room.roomNumber?.startsWith("R-")
+              ? room.roomNumber
+              : `R-${room.roomNo || room.roomNumber}`}
+          </td>
           <td>{room.capacity}</td>
           <td>{room.occupied}</td>
 
@@ -100,9 +104,6 @@ export default function Rooms() {
           </td>
 
           <td className="text-center space-x-1">
-            <IconButton size="small">
-              <VisibilityIcon fontSize="small" />
-            </IconButton>
             <IconButton
               size="small"
               onClick={() => {
@@ -130,6 +131,7 @@ export default function Rooms() {
   };
 
   const handleSave = async (formData) => {
+    console.log("Saving room with data:", formData.roomNumber);
     try {
       if (mode === "edit") {
         await api.put(`/room/update`, formData);

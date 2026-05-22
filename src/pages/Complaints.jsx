@@ -279,10 +279,10 @@ import { Card, CardContent, MenuItem, Select } from "@mui/material";
 
 import SearchIcon from "@mui/icons-material/Search";
 
-import api from "../../api/Api.jsx";
-import Pagination from "../../components/common/Pagination.jsx";
+import api from "../api/Api.jsx";
+import Pagination from "../components/common/Pagination.jsx";
 import { toast } from "react-toastify";
-import { formatDateForDisplay } from "../../utils/formatDate.js";
+import { formatDateForDisplay } from "../utils/formatDate.js";
 
 export default function Complaints() {
   const [loading, setLoading] = useState(false);

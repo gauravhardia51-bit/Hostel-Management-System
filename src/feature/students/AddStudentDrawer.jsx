@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   Drawer,
   Box,
@@ -9,6 +9,10 @@ import {
   MenuItem,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+
+import useFormValidation from "../../hooks/FormValidation";
+import { validateStudent } from "../../validations/ValidateStudent";
+
 import {
   convertToTimestamp,
   formatDateForBackend,
@@ -23,20 +27,32 @@ export default function AddStudentDrawer({
   editData,
   mode = "add",
 }) {
-  const isView = mode === "view";
   const { hostelId } = getHostelsData();
-  const [form, setForm] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    roomId: "",
-    joinDate: "",
-    status: "ACTIVE", // ✅ default
-  });
+  console.log("Rooms in AddStudentDrawer: ", rooms);
+  const {
+    values: form,
+    errors,
+    handleChange,
+    validateAll,
+    resetForm,
+    setValues,
+  } = useFormValidation(
+    {
+      name: "",
+      phone: "",
+      email: "",
+      roomId: "",
+      joinDate: "",
+      status: "ACTIVE",
+    },
+    validateStudent,
+  );
 
+  // ✅ Prefill edit
   useEffect(() => {
     if (editData) {
-      setForm({
+      console.log("Edit data in drawer: ", editData);
+      setValues({
         id: editData.id || "",
         name: editData.name || "",
         phone: editData.phone || "",
@@ -46,54 +62,29 @@ export default function AddStudentDrawer({
         status: editData.status || "ACTIVE",
       });
     } else {
-      setForm({
-        id: "",
-        name: "",
-        phone: "",
-        email: "",
-        roomId: "",
-        joinDate: "",
-        status: "ACTIVE",
-      });
+      resetForm();
     }
   }, [editData, open]);
 
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
-
   const handleSubmit = () => {
+    console.log("Form values on submit: ", form);
+    if (!validateAll()) return; // ❌ stop if error
     let payload = {
       name: form.name,
       phone: form.phone,
-      email: form.email,
       roomId: Number(form.roomId),
       joinDate: convertToTimestamp(form.joinDate),
       status: form.status,
-      hostelId: Number(hostelId), // ✅ ADD THIS
+      hostelId: Number(hostelId),
     };
-
-    // ✅ Only add id in edit mode
     if (mode === "edit" && form.id) {
       payload.id = form.id;
     }
-
-    // ✅ Remove empty fields
-    Object.keys(payload).forEach(
-      (key) => payload[key] === "" && delete payload[key],
-    );
-
+    if (mode === "add" && form.email) {
+      payload.email = form.email;
+    }
     onSave(payload);
     onClose();
-  };
-
-  const titles = {
-    add: "Add Student",
-    edit: "Edit Student Details",
-    // view: "View Student Details",
   };
 
   return (
@@ -102,9 +93,8 @@ export default function AddStudentDrawer({
         {/* Header */}
         <div className="flex justify-between items-center p-5 border-b">
           <Typography variant="h6" fontWeight={700}>
-            {titles[mode]}
+            {mode === "edit" ? "Edit Student" : "Add Student"}
           </Typography>
-
           <IconButton onClick={onClose}>
             <CloseIcon />
           </IconButton>
@@ -118,7 +108,8 @@ export default function AddStudentDrawer({
             name="name"
             value={form.name}
             onChange={handleChange}
-            disabled={isView}
+            error={!!errors.name}
+            helperText={errors.name}
           />
 
           <TextField
@@ -127,7 +118,8 @@ export default function AddStudentDrawer({
             name="phone"
             value={form.phone}
             onChange={handleChange}
-            disabled={isView}
+            error={!!errors.phone}
+            helperText={errors.phone}
           />
 
           {mode === "add" && (
@@ -137,7 +129,8 @@ export default function AddStudentDrawer({
               name="email"
               value={form.email}
               onChange={handleChange}
-              disabled={isView}
+              error={!!errors.email}
+              helperText={errors.email}
             />
           )}
 
@@ -148,7 +141,8 @@ export default function AddStudentDrawer({
             name="roomId"
             value={form.roomId}
             onChange={handleChange}
-            disabled={isView}
+            error={!!errors.roomId}
+            helperText={errors.roomId}
           >
             {rooms.map((r) => (
               <MenuItem key={r.id} value={r.id}>
@@ -163,32 +157,10 @@ export default function AddStudentDrawer({
             name="joinDate"
             value={form.joinDate}
             onChange={handleChange}
-            disabled={isView}
+            error={!!errors.joinDate}
+            helperText={errors.joinDate}
             InputLabelProps={{ shrink: true }}
           />
-
-          {mode === "edit" && (
-            <TextField
-              select
-              fullWidth
-              label="Status"
-              name="status"
-              value={form.status}
-              onChange={handleChange}
-            >
-              <MenuItem value="ACTIVE">
-                <span className="px-2 py-1 text-xs rounded-md font-semibold bg-green-100 text-green-600">
-                  ● ACTIVE
-                </span>
-              </MenuItem>
-
-              <MenuItem value="INACTIVE">
-                <span className="px-2 py-1 text-xs rounded-md font-semibold bg-red-100 text-red-500">
-                  ● INACTIVE
-                </span>
-              </MenuItem>
-            </TextField>
-          )}
         </div>
 
         {/* Footer */}
@@ -197,18 +169,16 @@ export default function AddStudentDrawer({
             Cancel
           </Button>
 
-          {mode !== "view" && (
-            <Button
-              fullWidth
-              variant="contained"
-              onClick={handleSubmit}
-              sx={{
-                background: "linear-gradient(to right, #4f46e5, #7c3aed)",
-              }}
-            >
-              {mode === "edit" ? "Update Student" : "Save Student"}
-            </Button>
-          )}
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={handleSubmit}
+            sx={{
+              background: "linear-gradient(to right, #4f46e5, #7c3aed)",
+            }}
+          >
+            {mode === "edit" ? "Update Student" : "Save Student"}
+          </Button>
         </div>
       </Box>
     </Drawer>

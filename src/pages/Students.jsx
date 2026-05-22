@@ -13,15 +13,15 @@ import AddIcon from "@mui/icons-material/Add";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
-import Sidebar from "../../components/sidebar/Sidebar";
-import TopBar from "../../components/topbar/TopBar";
-import api from "../../api/Api.jsx";
+import Sidebar from "../components/sidebar/Sidebar.jsx";
+import TopBar from "../components/topbar/TopBar.jsx";
+import api from "../api/Api.jsx";
 import { Link } from "react-router-dom";
-import { ROUTES } from "../../routes/RoutesConstant.js";
+import { ROUTES } from "../routes/RoutesConstant.js";
 import { useEffect, useState } from "react";
-import AddStudentDrawer from "../../feature/students/AddStudentDrawer.jsx";
-import { formatDateForDisplay } from "../../utils/formatDate.js";
-import Pagination from "../../components/common/Pagination.jsx";
+import AddStudentDrawer from "../feature/students/AddStudentDrawer.jsx";
+import { formatDateForDisplay } from "../utils/formatDate.js";
+import Pagination from "../components/common/Pagination.jsx";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 export default function Students() {
@@ -67,12 +67,11 @@ export default function Students() {
 
       const data = res.data;
       const roomData = response.data;
-
+      //console.log("Student Response: ", data);
       setRooms(roomData.payLoad || []);
       setStudents(data.payLoad || []);
       setTotalPages(data.totalPage || 0);
       setTotalElements(data.totalRow || 0);
-      console.log("Rooms= ", roomData.payLoad);
     } catch (err) {
       console.error(err);
     } finally {
@@ -166,6 +165,7 @@ export default function Students() {
   };
 
   const handleSave = async (formData) => {
+    console.log("Form Data in Students.jsx: ", formData);
     try {
       if (mode === "edit") {
         await api.put(`/student/update`, formData);
