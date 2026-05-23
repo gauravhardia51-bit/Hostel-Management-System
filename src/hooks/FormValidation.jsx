@@ -26,6 +26,7 @@ export default function useFormValidation(initialValues, validateFn) {
 
   // Validate all fields on submit
   const validateAll = () => {
+    console.log("Validating form with values: ", values);
     const validationErrors = validateFn(values);
 
     setErrors(validationErrors);

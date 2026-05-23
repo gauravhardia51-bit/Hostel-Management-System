@@ -80,8 +80,8 @@ export default function AddStudentDrawer({
     if (mode === "edit" && form.id) {
       payload.id = form.id;
     }
-    if (mode === "add" && form.email) {
-      payload.email = form.email;
+    if (mode === "add" && editData?.email) {
+      payload.email = editData.email;
     }
     onSave(payload);
     onClose();
