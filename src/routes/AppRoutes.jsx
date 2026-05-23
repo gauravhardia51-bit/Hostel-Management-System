@@ -11,12 +11,16 @@ import Settings from "../pages/Settings";
 import Reports from "../pages/reports";
 import ProtectedRoute from "./ProtectedRoutes";
 import Login from "../pages/auth/Login";
+import Register from "../pages/auth/Register";
 import { ROUTES } from "./RoutesConstant";
+import VerifyOtp from "../pages/auth/VerifyOtp";
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path={ROUTES.REGISTER} element={<Register />} />
+      <Route path={ROUTES.VerifyOtp} element={<VerifyOtp />} />
       <Route path="/" element={<MainLayout />}>
         <Route
           index

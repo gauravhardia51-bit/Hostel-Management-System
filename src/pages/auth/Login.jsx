@@ -62,32 +62,21 @@ export default function Login() {
       localStorage.setItem("token", token);
       const decoded = jwtDecode(token);
 
-      const hostelRes = await api.get(
-  "/hostel/all",
-  {
-    params: {
-      userId: decoded.userId,
-    },
-  }
-);
+      const hostelRes = await api.get("/hostel/all", {
+        params: {
+          userId: decoded.userId,
+        },
+      });
 
-const hostels =
-  hostelRes.data.payLoad || [];
+      const hostels = hostelRes.data.payLoad || [];
 
-// save hostels
-localStorage.setItem(
-  "hostels",
-  JSON.stringify(hostels)
-);
+      // save hostels
+      localStorage.setItem("hostels", JSON.stringify(hostels));
 
-// save first hostel id automatically
-if (hostels.length > 0) {
-
-  localStorage.setItem(
-    "hostelId",
-    hostels[0].id
-  );
-}
+      // save first hostel id automatically
+      if (hostels.length > 0) {
+        localStorage.setItem("hostelId", hostels[0].id);
+      }
 
       // // ===== SAVE HOSTEL =====
       // const hostels = response.data.payLoad;
@@ -233,7 +222,18 @@ if (hostels.length > 0) {
           >
             {loading ? "Please wait..." : "Login"}
           </Button>
-
+          {/* Signup Link */}
+          <div className="mt-5 text-center">
+            <p className="text-sm text-gray-500">
+              Don't have an account?{" "}
+              <span
+                className="text-indigo-600 font-medium cursor-pointer hover:underline"
+                onClick={() => navigate("/register")}
+              >
+                Sign Up
+              </span>
+            </p>
+          </div>
           {/* Footer */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">
