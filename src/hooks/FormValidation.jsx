@@ -4,7 +4,7 @@ export default function useFormValidation(initialValues, validateFn) {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
 
-  // ✅ Handle input change (live validation)
+  // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -15,19 +15,25 @@ export default function useFormValidation(initialValues, validateFn) {
 
     setValues(updatedValues);
 
-    // 🔥 validate on change
+    // validate only current field
     const validationErrors = validateFn(updatedValues);
-    setErrors(validationErrors);
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: validationErrors[name] || "",
+    }));
   };
 
-  // ✅ Validate all fields (on submit)
+  // Validate all fields on submit
   const validateAll = () => {
     const validationErrors = validateFn(values);
+
     setErrors(validationErrors);
+
     return Object.keys(validationErrors).length === 0;
   };
 
-  // ✅ Reset form
+  // Reset form
   const resetForm = (newValues = initialValues) => {
     setValues(newValues);
     setErrors({});

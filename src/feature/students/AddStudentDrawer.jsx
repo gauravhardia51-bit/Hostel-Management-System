@@ -37,16 +37,16 @@ export default function AddStudentDrawer({
     resetForm,
     setValues,
   } = useFormValidation(
-    {
-      name: "",
-      phone: "",
-      email: "",
-      roomId: "",
-      joinDate: "",
-      status: "ACTIVE",
-    },
-    validateStudent,
-  );
+  {
+    name: "",
+    phone: "",
+    email: "",
+    roomId: "",
+    joinDate: "",
+    status: "ACTIVE",
+  },
+  (values) => validateStudent(values, mode)
+);
 
   // ✅ Prefill edit
   useEffect(() => {
