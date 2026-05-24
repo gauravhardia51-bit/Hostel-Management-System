@@ -14,6 +14,8 @@ import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import { ROUTES } from "./RoutesConstant";
 import VerifyOtp from "../pages/auth/VerifyOtp";
+import ForgotPassword from "../pages/auth/ForgotPassword";
+import ResetPassword from "../pages/auth/ResetPassword";
 
 export default function AppRoutes() {
   return (
@@ -21,6 +23,9 @@ export default function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path={ROUTES.REGISTER} element={<Register />} />
       <Route path={ROUTES.VerifyOtp} element={<VerifyOtp />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/" element={<MainLayout />}>
         <Route
           index

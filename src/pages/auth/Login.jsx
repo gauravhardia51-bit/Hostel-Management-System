@@ -201,7 +201,10 @@ export default function Login() {
               label={<span className="text-sm">Remember me</span>}
             />
 
-            <button className="text-sm text-indigo-600 hover:underline">
+            <button
+              className="text-sm text-indigo-600 hover:underline"
+              onClick={() => navigate("/forgot-password")}
+            >
               Forgot Password?
             </button>
           </div>

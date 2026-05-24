@@ -7,7 +7,7 @@ export const ROUTES = {
   LOGIN: "/login",
   REGISTER: "/register",
   VerifyOtp: "/verify-otp",
-
+FORGOT_PASSWORD: "/forgot-password",
   // Dashboard
   DASHBOARD: "/dashboard",
 
