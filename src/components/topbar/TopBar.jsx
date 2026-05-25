@@ -1,5 +1,5 @@
 import "./TopBar.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import NotificationDrawer from "../notifications/NotificationDrawers";
 
 // MUI
@@ -7,7 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import Avatar from "@mui/material/Avatar";
 import Popover from "@mui/material/Popover";
 import Button from "@mui/material/Button";
-
+import { useNavigate } from "react-router-dom";
 // Icons
 import MenuIcon from "@mui/icons-material/Menu";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
@@ -17,43 +17,43 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
-export default function TopBar({
-  collapsed,
-  setCollapsed,
-}) {
-
+export default function TopBar({ collapsed, setCollapsed }) {
+  const navigate = useNavigate();
   // ===== USER =====
-  const storedUser =
-    localStorage.getItem("user");
+  const [user, setUser] = useState(null);
 
-  let user = null;
+  useEffect(() => {
+    const loadUser = () => {
+      try {
+        const storedUser = localStorage.getItem("user");
 
-  try {
-    user = storedUser
-      ? JSON.parse(storedUser)
-      : null;
-  } catch {
-    console.log("Invalid user data");
-  }
+        setUser(storedUser ? JSON.parse(storedUser) : null);
+      } catch {
+        console.log("Invalid user data");
+      }
+    };
+
+    loadUser();
+
+    // listen for updates
+    window.addEventListener("userUpdated", loadUser);
+
+    return () => {
+      window.removeEventListener("userUpdated", loadUser);
+    };
+  }, []);
 
   // ===== DEFAULT DATES =====
   const today = new Date();
 
-  const firstDayOfMonth = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    1
-  );
+  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-  const [fromDate, setFromDate] =
-    useState(firstDayOfMonth);
+  const [fromDate, setFromDate] = useState(firstDayOfMonth);
 
-  const [toDate, setToDate] =
-    useState(today);
+  const [toDate, setToDate] = useState(today);
 
   // ===== POPOVER =====
-  const [anchorEl, setAnchorEl] =
-    useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const openDatePopup = (event) => {
     setAnchorEl(event.currentTarget);
@@ -67,100 +67,73 @@ export default function TopBar({
 
   return (
     <div className="topbar">
-
       {/* LEFT */}
       <div className="menu-icon">
-
-        <IconButton
-          size="small"
-          onClick={() =>
-            setCollapsed(!collapsed)
-          }
-        >
+        <IconButton size="small" onClick={() => setCollapsed(!collapsed)}>
           <MenuIcon />
         </IconButton>
-
       </div>
 
       {/* CENTER DATE ICON */}
-     
 
       {/* RIGHT */}
       <div className="date-bar">
-{/* CENTER DATE */}
-<LocalizationProvider
-  dateAdapter={AdapterDateFns}
->
+        {/* CENTER DATE */}
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <div className="date-filter">
+            <IconButton onClick={openDatePopup} className="calendar-btn">
+              <CalendarMonthIcon />
+            </IconButton>
 
-  <div className="date-filter">
+            <Popover
+              open={open}
+              anchorEl={anchorEl}
+              onClose={closeDatePopup}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "center",
+              }}
+            >
+              <div className="date-popup">
+                <DatePicker
+                  label="From Date"
+                  value={fromDate}
+                  format="dd/MM/yyyy"
+                  onChange={(value) => setFromDate(value)}
+                  slotProps={{
+                    textField: {
+                      size: "small",
+                      fullWidth: true,
+                    },
+                  }}
+                />
 
-    <IconButton
-      onClick={openDatePopup}
-      className="calendar-btn"
-    >
-      <CalendarMonthIcon />
-    </IconButton>
+                <DatePicker
+                  label="To Date"
+                  value={toDate}
+                  format="dd/MM/yyyy"
+                  onChange={(value) => setToDate(value)}
+                  slotProps={{
+                    textField: {
+                      size: "small",
+                      fullWidth: true,
+                    },
+                  }}
+                />
 
-    <Popover
-      open={open}
-      anchorEl={anchorEl}
-      onClose={closeDatePopup}
-      anchorOrigin={{
-        vertical: "bottom",
-        horizontal: "center",
-      }}
-    >
-
-      <div className="date-popup">
-
-        <DatePicker
-          label="From Date"
-          value={fromDate}
-          format="dd/MM/yyyy"
-          onChange={(value) =>
-            setFromDate(value)
-          }
-          slotProps={{
-            textField: {
-              size: "small",
-              fullWidth: true
-            }
-          }}
-        />
-
-        <DatePicker
-          label="To Date"
-          value={toDate}
-          format="dd/MM/yyyy"
-          onChange={(value) =>
-            setToDate(value)
-          }
-          slotProps={{
-            textField: {
-              size: "small",
-              fullWidth: true
-            }
-          }}
-        />
-
-        <Button
-          variant="contained"
-          onClick={closeDatePopup}
-        >
-          Apply
-        </Button>
-
-      </div>
-
-    </Popover>
-
-  </div>
-
-</LocalizationProvider>
+                <Button variant="contained" onClick={closeDatePopup}>
+                  Apply
+                </Button>
+              </div>
+            </Popover>
+          </div>
+        </LocalizationProvider>
         <NotificationDrawer />
 
-        <div className="user-data">
-
+        <div
+          className="user-data cursor-pointer"
+          onClick={() => navigate("/settings")}
+        >
           <Avatar
             sx={{
               width: 36,
@@ -173,22 +146,13 @@ export default function TopBar({
 
           {!collapsed && (
             <div>
+              <p className="owner-name">{user?.name || "User"}</p>
 
-              <p className="owner-name">
-                {user?.name || "User"}
-              </p>
-
-              <p className="user">
-                Owner
-              </p>
-
+              <p className="user">Owner</p>
             </div>
           )}
-
         </div>
-
       </div>
-
     </div>
   );
 }

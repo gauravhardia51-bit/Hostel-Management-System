@@ -25,7 +25,21 @@ export default function Sidebar({ collapsed }) {
     navigate("/login", { replace: true });
   };
 
-  const { hostelId, hostels } = getHostelsData();
+  const [hostelData, setHostelData] = useState(getHostelsData());
+
+  useEffect(() => {
+    const loadHostels = () => {
+      setHostelData(getHostelsData());
+    };
+
+    window.addEventListener("hostelUpdated", loadHostels);
+
+    return () => {
+      window.removeEventListener("hostelUpdated", loadHostels);
+    };
+  }, []);
+
+  const { hostelId, hostels } = hostelData;
   const [selectedHostel, setSelectedHostel] = useState("");
   console.log("30 hostel= " + hostels);
   console.log("hostelId= " + hostelId);
@@ -51,29 +65,19 @@ export default function Sidebar({ collapsed }) {
     <>
       <div className={`sidebar ${collapsed ? "w-20" : "w-64"}`}>
         <div>
-<Link to={ROUTES.HOME} className="no-underline">
-
-  <div className="mb-6 flex justify-center items-center">
-
-    {collapsed ? (
-
-      <div className="bg-white text-indigo-600 font-bold w-10 h-10 rounded-xl flex items-center justify-center">
-        R
-      </div>
-
-    ) : (
-
-      <div className="w-full text-center">
-        <h1 className="text-2xl font-bold text-white">
-          RentRova
-        </h1>
-      </div>
-
-    )}
-
-  </div>
-
-</Link>
+          <Link to={ROUTES.HOME} className="no-underline">
+            <div className="mb-6 flex justify-center items-center">
+              {collapsed ? (
+                <div className="bg-white text-indigo-600 font-bold w-10 h-10 rounded-xl flex items-center justify-center">
+                  R
+                </div>
+              ) : (
+                <div className="w-full text-center">
+                  <h1 className="text-2xl font-bold text-white">RentRova</h1>
+                </div>
+              )}
+            </div>
+          </Link>
 
           {!collapsed && (
             <div className="hostel-info">
