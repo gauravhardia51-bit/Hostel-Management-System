@@ -44,7 +44,7 @@ export default function data() {
       {/* Tables */}
       <div className="grid grid-cols-2 gap-6 mb-6">
         {/* Payments */}
-        <Card className="p-4 rounded-xl">
+        {/* <Card className="p-4 rounded-xl">
           <div className="flex justify-between mb-3">
             <h3 className="text-sm font-semibold">Recent Payments</h3>
             <span className="text-blue-500 text-xs">View all</span>
@@ -75,10 +75,10 @@ export default function data() {
               ))}
             </tbody>
           </table>
-        </Card>
+        </Card> */}
 
         {/* Complaints */}
-        <Card className="p-4 rounded-xl">
+        {/* <Card className="p-4 rounded-xl">
           <div className="flex justify-between mb-3">
             <h3 className="text-sm font-semibold">Recent Complaints</h3>
             <span className="text-blue-500 text-xs">View all</span>
@@ -103,7 +103,7 @@ export default function data() {
               ))}
             </tbody>
           </table>
-        </Card>
+        </Card> */}
       </div>
       {/* Pie Chart Bottom */}
       <Card className="p-4 rounded-xl">
