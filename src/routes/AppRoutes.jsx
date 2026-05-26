@@ -10,12 +10,8 @@ import NotificationDrawer from "../components/notifications/NotificationDrawers"
 import Settings from "../pages/Settings";
 import Reports from "../pages/reports";
 import ProtectedRoute from "./ProtectedRoutes";
-<<<<<<< Updated upstream
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
-=======
-import Login from "../feature/auth/Login";
->>>>>>> Stashed changes
 import { ROUTES } from "./RoutesConstant";
 import VerifyOtp from "../pages/auth/VerifyOtp";
 import ForgotPassword from "../pages/auth/ForgotPassword";
