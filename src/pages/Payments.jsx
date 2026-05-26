@@ -106,7 +106,7 @@ export default function Payments() {
 
         <td>{formatDateForDisplay(p.dueDate)}</td>
 
-        <td>{formatDateForDisplay(p.paidDate) || "-"}</td>
+        <td>{formatDateForDisplay(p.paidAt) || "-"}</td>
 
         <td>
           <span
