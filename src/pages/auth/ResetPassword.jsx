@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import {
   Card,
@@ -18,7 +18,6 @@ import { toast } from "react-toastify";
 export default function ResetPassword() {
 
   const navigate = useNavigate();
-
   const location = useLocation();
 
   const email = location.state?.email;
@@ -30,48 +29,91 @@ export default function ResetPassword() {
   });
 
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const [seconds, setSeconds] = useState(120);
+
+  // redirect if page opened directly
+  useEffect(() => {
+    if (!email) {
+      navigate("/forgot-password");
+    }
+  }, []);
+
+  // countdown timer
+  useEffect(() => {
+
+    if (seconds <= 0) return;
+
+    const timer = setInterval(() => {
+
+      setSeconds(prev => prev - 1);
+
+    }, 1000);
+
+    return () => clearInterval(timer);
+
+  }, [seconds]);
+
+  // MM:SS
+  const formatTime = () => {
+
+    const mins = Math.floor(seconds / 60);
+
+    const secs = seconds % 60;
+
+    return `${mins}:${secs
+      .toString()
+      .padStart(2, "0")}`;
+  };
 
   const handleChange = (e) => {
 
-    setData({
-      ...data,
-      [e.target.name]: e.target.value
-    });
+    let { name, value } = e.target;
 
-    // remove error while typing
-    setErrors({
-      ...errors,
-      [e.target.name]: ""
-    });
+    // OTP only digits + max 6
+    if (name === "token") {
+      value = value
+        .replace(/\D/g, "")
+        .slice(0, 6);
+    }
+
+    setData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+
+    setErrors(prev => ({
+      ...prev,
+      [name]: ""
+    }));
   };
 
   const validate = () => {
 
     let tempErrors = {};
 
-    // OTP validation
     if (!data.token.trim()) {
 
       tempErrors.token =
         "OTP is required";
 
     }
-    else if (!/^\d{6}$/.test(data.token)) {
+    else if (
+      data.token.length !== 6
+    ) {
 
       tempErrors.token =
         "OTP must be 6 digits";
 
     }
 
-    // new password
     if (!data.newPass.trim()) {
 
       tempErrors.newPass =
         "New Password is required";
-
     }
 
-    // confirm password
     if (!data.confPass.trim()) {
 
       tempErrors.confPass =
@@ -85,7 +127,6 @@ export default function ResetPassword() {
 
       tempErrors.confPass =
         "Passwords do not match";
-
     }
 
     setErrors(tempErrors);
@@ -100,6 +141,8 @@ export default function ResetPassword() {
     if (!validate()) return;
 
     try {
+
+      setLoading(true);
 
       await api.post(
         "/reset/password",
@@ -119,38 +162,93 @@ export default function ResetPassword() {
       navigate("/login");
 
     }
-    catch(error){
+    catch (error) {
 
       toast.error(
         error?.response?.data?.message ||
         "Reset failed"
       );
 
-      // clear OTP if wrong
       setData(prev => ({
         ...prev,
         token: ""
       }));
+
+    }
+    finally {
+
+      setLoading(false);
+    }
+  };
+
+  // resend OTP
+  const handleResendOtp = async () => {
+
+    try {
+
+      await api.post(
+        `/send/otp?email=${email}&type=forgot`
+      );
+
+      toast.success(
+        "OTP resent successfully ✅"
+      );
+
+      setData(prev => ({
+        ...prev,
+        token: ""
+      }));
+
+      setErrors(prev => ({
+        ...prev,
+        token: ""
+      }));
+
+      // restart timer
+      setSeconds(120);
+
+    }
+    catch(error){
+
+      toast.error(
+        error?.response?.data?.message ||
+        "Unable to resend OTP"
+      );
     }
   };
 
   return (
 
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-indigo-200 flex justify-center items-center">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-indigo-200 flex justify-center items-center p-4">
 
       <Card className="w-full max-w-md rounded-3xl shadow-xl">
 
         <CardContent className="p-8">
 
-          <h2 className="text-2xl font-bold text-center mb-6">
+          <div className="text-center mb-6">
 
-            Reset Password
+            <h2 className="text-2xl font-bold text-indigo-600">
 
-          </h2>
+              Reset Password
+
+            </h2>
+
+            <p className="text-sm text-gray-500 mt-2">
+
+              OTP sent to
+              <br />
+
+              <span className="font-medium">
+                {email}
+              </span>
+
+            </p>
+
+          </div>
 
           <TextField
             fullWidth
-            label="OTP"
+            label="Enter OTP"
             name="token"
             value={data.token}
             onChange={handleChange}
@@ -197,11 +295,47 @@ export default function ResetPassword() {
               textTransform:"none"
             }}
             onClick={handleSubmit}
+            disabled={loading}
           >
 
-            Reset Password
+            {loading
+              ? "Resetting..."
+              : "Reset Password"}
 
           </Button>
+
+          <div className="text-center mt-4">
+
+            {seconds > 0 ? (
+
+              <p className="text-sm text-gray-500">
+
+                Resend OTP in{" "}
+
+                <span className="font-semibold text-indigo-600">
+
+                  {formatTime()}
+
+                </span>
+
+              </p>
+
+            ) : (
+
+              <Button
+                onClick={handleResendOtp}
+                sx={{
+                  textTransform:"none"
+                }}
+              >
+
+                Resend OTP
+
+              </Button>
+
+            )}
+
+          </div>
 
         </CardContent>
 
