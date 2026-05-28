@@ -313,8 +313,8 @@ export default function Complaints() {
       const data = res.data;
 
       setComplaints(data.payLoad || []);
-      setTotalPages(data.totalPages || 0);
-      setTotalElements(data.totalElements || 0);
+      setTotalPages(data.totalPage || 0);
+      setTotalElements(data.totalRow || 0);
     } catch (err) {
       console.error(err);
     } finally {
@@ -501,6 +501,7 @@ export default function Complaints() {
             <tbody>{renderRows()}</tbody>
           </table>
 
+          {/* Footer */}
           {/* Footer */}
           <div className="flex justify-end items-center mt-4 text-xs text-gray-500">
             {/* <span>
