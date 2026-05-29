@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import api from "../api/Api";
 
@@ -16,8 +15,27 @@ import {
 
 export default function Settings() {
   const [tab, setTab] = useState(0);
-  const [loading, setLoading] = useState(false);
+
   const [userLoading, setUserLoading] = useState(false);
+
+  const [hostelLoading, setHostelLoading] = useState(false);
+
+  const [hostelEditMode, setHostelEditMode] = useState(false);
+
+  const [editMode, setEditMode] = useState(false);
+
+  // ================= USER =================
+
+  const [userData, setUserData] = useState({
+    id: "",
+    name: "",
+    email: "",
+    password: "",
+    roleId: "",
+  });
+
+  // ================= HOSTEL =================
+
   const [hostelData, setHostelData] = useState({
     id: "",
     hostelName: "",
@@ -27,11 +45,24 @@ export default function Settings() {
     userId: "",
   });
 
-  const [hostelLoading, setHostelLoading] = useState(false);
+  // ================= LOAD USER =================
 
-  const [hostelEditMode, setHostelEditMode] = useState(false);
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
 
-  // Hostel load
+    if (user) {
+      setUserData({
+        id: user.id,
+        name: user.name || "",
+        email: user.email || "",
+        password: "",
+        roleId: user.roleName === "ROLE_ADMIN" ? 1 : 2,
+      });
+    }
+  }, []);
+
+  // ================= LOAD HOSTEL =================
+
   useEffect(() => {
     loadHostel();
   }, []);
@@ -56,6 +87,17 @@ export default function Settings() {
     }
   };
 
+  // ================= USER CHANGE =================
+
+  const handleChange = (e) => {
+    setUserData({
+      ...userData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // ================= HOSTEL CHANGE =================
+
   const handleHostelChange = (e) => {
     setHostelData({
       ...hostelData,
@@ -63,13 +105,91 @@ export default function Settings() {
     });
   };
 
+  // ================= USER UPDATE =================
+
+  const handleUpdate = async () => {
+    try {
+      setUserLoading(true);
+
+      const payload = Object.fromEntries(
+        Object.entries(userData).filter(
+          ([, value]) =>
+            value !== null &&
+            value !== undefined &&
+            value !== "",
+        ),
+      );
+
+      await api.put("/users/update", payload);
+
+      // ================= UPDATE USER LOCAL STORAGE =================
+
+      const existingUser = JSON.parse(localStorage.getItem("user"));
+
+      const updatedUser = {
+        ...existingUser,
+        ...payload,
+      };
+
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
+      window.dispatchEvent(new Event("userUpdated"));
+
+      // ================= UPDATE HOSTEL OWNER NAME =================
+
+      const updatedHostelData = {
+        ...hostelData,
+        ownerName: payload.name || hostelData.ownerName,
+      };
+
+      await api.put("/hostel/update", updatedHostelData);
+
+      setHostelData(updatedHostelData);
+
+      // update hostel localStorage list also
+      const hostels = JSON.parse(localStorage.getItem("hostels")) || [];
+
+      const updatedHostels = hostels.map((h) =>
+        h.id === updatedHostelData.id
+          ? {
+              ...h,
+              ownerName: updatedHostelData.ownerName,
+            }
+          : h,
+      );
+
+      localStorage.setItem("hostels", JSON.stringify(updatedHostels));
+
+      window.dispatchEvent(new Event("hostelUpdated"));
+
+      setUserData({
+        ...updatedUser,
+        password: "",
+      });
+
+      toast.success("Profile updated successfully ✅");
+
+      setEditMode(false);
+    } catch (error) {
+      console.log(error);
+
+      toast.error(
+        error?.response?.data?.message || "Update failed ❌",
+      );
+    } finally {
+      setUserLoading(false);
+    }
+  };
+
+  // ================= HOSTEL UPDATE =================
+
   const handleHostelUpdate = async () => {
     try {
       setHostelLoading(true);
 
       await api.put("/hostel/update", hostelData);
 
-      // update hostels array
+      // update localStorage
       const hostels = JSON.parse(localStorage.getItem("hostels")) || [];
 
       const updatedHostels = hostels.map((h) =>
@@ -82,96 +202,33 @@ export default function Settings() {
       );
 
       localStorage.setItem("hostels", JSON.stringify(updatedHostels));
+
       window.dispatchEvent(new Event("hostelUpdated"));
 
-      setHostelData(hostelData);
-
-      toast.success("Hostel updated successfully");
+      toast.success("Hostel updated successfully ✅");
 
       setHostelEditMode(false);
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Update failed");
+      console.log(error);
+
+      toast.error(
+        error?.response?.data?.message || "Update failed ❌",
+      );
     } finally {
       setHostelLoading(false);
-    }
-  };
-  const [userData, setUserData] = useState({
-    id: "",
-    name: "",
-    email: "",
-    password: "",
-    roleId: "",
-  });
-
-  const [editMode, setEditMode] = useState(false);
-
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-
-    if (user) {
-      setUserData({
-        id: user.id,
-        name: user.name || "",
-        email: user.email || "",
-        password: "",
-        roleId: user.roleName === "ROLE_ADMIN" ? 1 : 2,
-      });
-    }
-  }, []);
-
-  const handleChange = (e) => {
-    setUserData({
-      ...userData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleUpdate = async () => {
-    try {
-      setUserLoading(true);
-
-      // only non-empty fields send
-      const payload = Object.fromEntries(
-        Object.entries(userData).filter(
-          ([key, value]) =>
-            value !== null && value !== undefined && value !== "",
-        ),
-      );
-
-      await api.put("/users/update", payload);
-
-      // update localStorage immediately
-      const existingUser = JSON.parse(localStorage.getItem("user"));
-
-      const updatedUser = {
-        ...existingUser,
-        ...payload,
-      };
-
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      window.dispatchEvent(new Event("userUpdated"));
-
-      setUserData(updatedUser);
-
-      toast.success("Profile updated successfully");
-
-      setEditMode(false);
-    } catch (error) {
-      toast.error(error?.response?.data?.message || "Update failed");
-    } finally {
-      setUserLoading(false);
     }
   };
 
   return (
     <div>
-      {/* Header */}
+      {/* HEADER */}
       <div className="mb-4">
         <h2 className="text-lg font-semibold">Settings</h2>
       </div>
 
-      {/* Tabs */}
+      {/* MAIN CARD */}
       <Card className="rounded-xl shadow-sm">
+        {/* TABS */}
         <Tabs
           value={tab}
           onChange={(e, newValue) => setTab(newValue)}
@@ -181,18 +238,18 @@ export default function Settings() {
           <Tab label="Hostel" />
           <Tab label="Rent" />
           <Tab label="Notifications" />
-          <Tab label="Users" />
           <Tab label="Subscription" />
         </Tabs>
 
         <CardContent>
-          {/* PROFILE */}
-          {/* USERS */}
+          {/* ================= PROFILE ================= */}
           {tab === 0 && (
             <div className="max-w-3xl">
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h3 className="font-semibold text-lg">User Profile</h3>
+                  <h3 className="font-semibold text-lg">
+                    User Profile
+                  </h3>
 
                   <p className="text-sm text-gray-500">
                     Update your account details
@@ -200,7 +257,10 @@ export default function Settings() {
                 </div>
 
                 {!editMode && (
-                  <Button variant="contained" onClick={() => setEditMode(true)}>
+                  <Button
+                    variant="contained"
+                    onClick={() => setEditMode(true)}
+                  >
                     Edit
                   </Button>
                 )}
@@ -227,7 +287,11 @@ export default function Settings() {
 
                 <TextField
                   label="Role"
-                  value={userData.roleId === 1 ? "Owner" : "Student"}
+                  value={
+                    userData.roleId === 1
+                      ? "Owner"
+                      : "Student"
+                  }
                   disabled
                   fullWidth
                 />
@@ -249,12 +313,17 @@ export default function Settings() {
                   <Button
                     variant="contained"
                     onClick={handleUpdate}
-                    disabled={loading}
+                    disabled={userLoading}
                   >
-                    {loading ? "Saving..." : "Save Changes"}
+                    {userLoading
+                      ? "Saving..."
+                      : "Save Changes"}
                   </Button>
 
-                  <Button variant="outlined" onClick={() => setEditMode(false)}>
+                  <Button
+                    variant="outlined"
+                    onClick={() => setEditMode(false)}
+                  >
                     Cancel
                   </Button>
                 </div>
@@ -262,13 +331,14 @@ export default function Settings() {
             </div>
           )}
 
-          {/* HOSTEL */}
-          {/* HOSTEL */}
+          {/* ================= HOSTEL ================= */}
           {tab === 1 && (
             <div>
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h3 className="text-lg font-semibold">Hostel Information</h3>
+                  <h3 className="text-lg font-semibold">
+                    Hostel Information
+                  </h3>
 
                   <p className="text-sm text-gray-500">
                     Manage your hostel details
@@ -278,7 +348,9 @@ export default function Settings() {
                 {!hostelEditMode && (
                   <Button
                     variant="contained"
-                    onClick={() => setHostelEditMode(true)}
+                    onClick={() =>
+                      setHostelEditMode(true)
+                    }
                   >
                     Edit
                   </Button>
@@ -329,12 +401,16 @@ export default function Settings() {
                     onClick={handleHostelUpdate}
                     disabled={hostelLoading}
                   >
-                    {hostelLoading ? "Saving..." : "Save Changes"}
+                    {hostelLoading
+                      ? "Saving..."
+                      : "Save Changes"}
                   </Button>
 
                   <Button
                     variant="outlined"
-                    onClick={() => setHostelEditMode(false)}
+                    onClick={() =>
+                      setHostelEditMode(false)
+                    }
                   >
                     Cancel
                   </Button>
@@ -343,66 +419,79 @@ export default function Settings() {
             </div>
           )}
 
-          {/* RENT */}
+          {/* ================= RENT ================= */}
           {tab === 2 && (
             <div className="grid grid-cols-2 gap-4">
-              <TextField label="Default Rent (₹)" fullWidth />
-              <TextField label="Due Date (1-31)" fullWidth />
-              <TextField label="Late Fee (₹/day)" fullWidth />
-              <TextField label="Grace Period (days)" fullWidth />
+              <TextField
+                label="Default Rent (₹)"
+                fullWidth
+              />
+
+              <TextField
+                label="Due Date (1-31)"
+                fullWidth
+              />
+
+              <TextField
+                label="Late Fee (₹/day)"
+                fullWidth
+              />
+
+              <TextField
+                label="Grace Period (days)"
+                fullWidth
+              />
 
               <div className="col-span-2">
-                <Button variant="contained">Save Changes</Button>
+                <Button variant="contained">
+                  Save Changes
+                </Button>
               </div>
             </div>
           )}
 
-          {/* NOTIFICATIONS */}
+          {/* ================= NOTIFICATIONS ================= */}
           {tab === 3 && (
             <div className="space-y-3">
               <FormControlLabel
                 control={<Switch defaultChecked />}
                 label="Enable SMS Notifications"
               />
+
               <FormControlLabel
                 control={<Switch />}
                 label="Enable WhatsApp Notifications"
               />
+
               <FormControlLabel
                 control={<Switch defaultChecked />}
                 label="Send Payment Reminders"
               />
 
-              <Button variant="contained">Save Changes</Button>
+              <Button variant="contained">
+                Save Changes
+              </Button>
             </div>
           )}
 
-          {/* USERS */}
+
+          {/* ================= SUBSCRIPTION ================= */}
           {tab === 4 && (
-            <div className="grid grid-cols-2 gap-4">
-              <TextField label="Staff Name" fullWidth />
-              <TextField label="Role" fullWidth />
-              <TextField label="Phone" fullWidth />
-
-              <div className="col-span-2">
-                <Button variant="contained">Add User</Button>
-              </div>
-            </div>
-          )}
-
-          {/* SUBSCRIPTION */}
-          {tab === 5 && (
             <div className="space-y-4">
               <div className="bg-gray-100 p-4 rounded-lg">
                 <p>
                   <b>Current Plan:</b> Pro
                 </p>
+
                 <p>
                   <b>Expiry Date:</b> 30 May 2024
                 </p>
               </div>
 
-              <Button variant="contained" color="secondary">
+              <Button
+                variant="contained"
+                color="secondary"
+              >
                 Upgrade Plan
               </Button>
             </div>

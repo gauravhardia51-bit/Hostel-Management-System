@@ -64,6 +64,18 @@ export default function TopBar({ collapsed, setCollapsed }) {
   };
 
   const open = Boolean(anchorEl);
+  useEffect(() => {
+    const savedFromDate = localStorage.getItem("fromDate");
+    const savedToDate = localStorage.getItem("toDate");
+
+    if (savedFromDate) {
+      setFromDate(new Date(Number(savedFromDate)));
+    }
+
+    if (savedToDate) {
+      setToDate(new Date(Number(savedToDate)));
+    }
+  }, []);
 
   return (
     <div className="topbar">
@@ -121,7 +133,26 @@ export default function TopBar({ collapsed, setCollapsed }) {
                   }}
                 />
 
-                <Button variant="contained" onClick={closeDatePopup}>
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    if (fromDate) {
+                      localStorage.setItem("fromDate", fromDate.getTime());
+                    }
+
+                    if (toDate) {
+                      localStorage.setItem("toDate", toDate.getTime());
+                    }
+
+                    console.log("FROM:", localStorage.getItem("fromDate"));
+
+                    console.log("TO:", localStorage.getItem("toDate"));
+
+                    window.dispatchEvent(new Event("dateFilterUpdated"));
+
+                    closeDatePopup();
+                  }}
+                >
                   Apply
                 </Button>
               </div>
