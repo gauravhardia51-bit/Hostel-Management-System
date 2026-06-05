@@ -45,35 +45,41 @@ export default function Reports() {
 
   // ================= FETCH REPORT =================
   useEffect(() => {
-    const fetchReports = async () => {
-      const hostelId = localStorage.getItem("hostelId");
+    let isMounted = true;
 
-      const { start, end } = getMonthRange(month); // ✅ also fix this
-      console.log("Fetching reports for:", { month, start, end });
-      const res = await api.get("/reports", {
-        params: {
-          hostelId,
-          fromDate: start,
-          toDate: end,
-        },
-      });
+    const loadData = async () => {
+      try {
+        const hostelId = localStorage.getItem("hostelId");
+        const { start, end } = getMonthRange(month);
 
-      const data = res.data.payLoad;
-      console.log("Report data received:", data);
-      setRevenueData(data.revenueData);
-      setPieData(data.pieData);
-      setTopDefaulters(data.topDefaulters);
+        const res = await api.get("/reports", {
+          params: { hostelId, fromDate: start, toDate: end },
+        });
 
-      // ✅ ADD THIS HERE
-      setSummary({
-        total: data.totalRevenue,
-        collected: data.totalCollected,
-        pending: data.totalPending,
-      });
+        if (!isMounted) return;
+
+        const data = res.data.payLoad;
+
+        setRevenueData(data.revenueData);
+        setPieData(data.pieData);
+        setTopDefaulters(data.topDefaulters);
+
+        setSummary({
+          total: data.totalRevenue,
+          collected: data.totalCollected,
+          pending: data.totalPending,
+        });
+      } catch (err) {
+        console.error("Error fetching reports:", err);
+      }
     };
 
-    fetchReports();
-  }, []);
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [month]);
 
   // ================= EXPORT (OPTIONAL) =================
   const handleExport = () => {
