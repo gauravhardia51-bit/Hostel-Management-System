@@ -160,17 +160,17 @@ export default function NotificationDrawer() {
       await markAsRead(n.id);
     }
 
-    if (n.type === "PAYMENT") {
-      navigate("/payments");
-    }
+   if (n.type === "COMPLAINT") {
+  navigate(`/complaints?complaintId=${n.commonId}`);
+}
 
-    if (n.type === "COMPLAINT") {
-      navigate("/complaints");
-    }
+if (n.type === "PAYMENT") {
+  navigate(`/payments?paymentId=${n.commonId}`);
+}
 
-    if (n.type === "STUDENT") {
-      navigate("/students");
-    }
+if (n.type === "STUDENT") {
+  navigate(`/students?studentId=${n.commonId}`);
+}
 
     if (n.type === "SYSTEM") {
       navigate("/");
