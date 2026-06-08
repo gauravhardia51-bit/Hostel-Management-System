@@ -8,6 +8,7 @@ import Avatar from "@mui/material/Avatar";
 import Popover from "@mui/material/Popover";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
+
 // Icons
 import MenuIcon from "@mui/icons-material/Menu";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
@@ -19,6 +20,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 export default function TopBar({ collapsed, setCollapsed }) {
   const navigate = useNavigate();
+
   // ===== USER =====
   const [user, setUser] = useState(null);
 
@@ -26,7 +28,6 @@ export default function TopBar({ collapsed, setCollapsed }) {
     const loadUser = () => {
       try {
         const storedUser = localStorage.getItem("user");
-
         setUser(storedUser ? JSON.parse(storedUser) : null);
       } catch {
         console.log("Invalid user data");
@@ -35,7 +36,6 @@ export default function TopBar({ collapsed, setCollapsed }) {
 
     loadUser();
 
-    // listen for updates
     window.addEventListener("userUpdated", loadUser);
 
     return () => {
@@ -43,16 +43,76 @@ export default function TopBar({ collapsed, setCollapsed }) {
     };
   }, []);
 
-  // ===== DEFAULT DATES =====
+  // ===== DATE =====
+
   const today = new Date();
 
-  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-
-  const [fromDate, setFromDate] = useState(firstDayOfMonth);
-
+  const [fromDate, setFromDate] = useState(today);
   const [toDate, setToDate] = useState(today);
 
-  // ===== POPOVER =====
+  useEffect(() => {
+    const savedFromDate = localStorage.getItem("fromDate");
+    const savedToDate = localStorage.getItem("toDate");
+
+    const today = new Date();
+
+    const currentMonthStart = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      1
+    );
+
+    if (savedFromDate && savedToDate) {
+      const from = new Date(Number(savedFromDate));
+      const to = new Date(Number(savedToDate));
+
+      const sameMonth =
+        from.getMonth() === today.getMonth() &&
+        from.getFullYear() === today.getFullYear();
+
+      if (sameMonth) {
+        setFromDate(from);
+        setToDate(to);
+      } else {
+        setFromDate(currentMonthStart);
+        setToDate(today);
+
+        localStorage.setItem(
+          "fromDate",
+          currentMonthStart.getTime()
+        );
+
+        localStorage.setItem(
+          "toDate",
+          today.getTime()
+        );
+
+        window.dispatchEvent(
+          new Event("dateFilterUpdated")
+        );
+      }
+    } else {
+      setFromDate(currentMonthStart);
+      setToDate(today);
+
+      localStorage.setItem(
+        "fromDate",
+        currentMonthStart.getTime()
+      );
+
+      localStorage.setItem(
+        "toDate",
+        today.getTime()
+      );
+
+      window.dispatchEvent(
+        new Event("dateFilterUpdated")
+      );
+    }
+  }, []);
+
+  // ===== DATE POPOVER =====
+
   const [anchorEl, setAnchorEl] = useState(null);
 
   const openDatePopup = (event) => {
@@ -64,36 +124,27 @@ export default function TopBar({ collapsed, setCollapsed }) {
   };
 
   const open = Boolean(anchorEl);
-  useEffect(() => {
-    const savedFromDate = localStorage.getItem("fromDate");
-    const savedToDate = localStorage.getItem("toDate");
-
-    if (savedFromDate) {
-      setFromDate(new Date(Number(savedFromDate)));
-    }
-
-    if (savedToDate) {
-      setToDate(new Date(Number(savedToDate)));
-    }
-  }, []);
 
   return (
     <div className="topbar">
       {/* LEFT */}
       <div className="menu-icon">
-        <IconButton size="small" onClick={() => setCollapsed(!collapsed)}>
+        <IconButton
+          size="small"
+          onClick={() => setCollapsed(!collapsed)}
+        >
           <MenuIcon />
         </IconButton>
       </div>
 
-      {/* CENTER DATE ICON */}
-
       {/* RIGHT */}
       <div className="date-bar">
-        {/* CENTER DATE */}
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <div className="date-filter">
-            <IconButton onClick={openDatePopup} className="calendar-btn">
+            <IconButton
+              onClick={openDatePopup}
+              className="calendar-btn"
+            >
               <CalendarMonthIcon />
             </IconButton>
 
@@ -136,19 +187,21 @@ export default function TopBar({ collapsed, setCollapsed }) {
                 <Button
                   variant="contained"
                   onClick={() => {
-                    if (fromDate) {
-                      localStorage.setItem("fromDate", fromDate.getTime());
-                    }
+                    if (!fromDate || !toDate) return;
 
-                    if (toDate) {
-                      localStorage.setItem("toDate", toDate.getTime());
-                    }
+                    localStorage.setItem(
+                      "fromDate",
+                      fromDate.getTime()
+                    );
 
-                    console.log("FROM:", localStorage.getItem("fromDate"));
+                    localStorage.setItem(
+                      "toDate",
+                      toDate.getTime()
+                    );
 
-                    console.log("TO:", localStorage.getItem("toDate"));
-
-                    window.dispatchEvent(new Event("dateFilterUpdated"));
+                    window.dispatchEvent(
+                      new Event("dateFilterUpdated")
+                    );
 
                     closeDatePopup();
                   }}
@@ -159,8 +212,11 @@ export default function TopBar({ collapsed, setCollapsed }) {
             </Popover>
           </div>
         </LocalizationProvider>
+
+        {/* Notifications */}
         <NotificationDrawer />
 
+        {/* User */}
         <div
           className="user-data cursor-pointer"
           onClick={() => navigate("/settings")}
@@ -177,7 +233,9 @@ export default function TopBar({ collapsed, setCollapsed }) {
 
           {!collapsed && (
             <div>
-              <p className="owner-name">{user?.name || "User"}</p>
+              <p className="owner-name">
+                {user?.name || "User"}
+              </p>
 
               <p className="user">Owner</p>
             </div>
