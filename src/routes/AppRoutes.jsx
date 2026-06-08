@@ -1,36 +1,62 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "../layout/MainLayout";
-import Dashboard from "../pages/Dashboard";
-import Students from "../pages/Students";
-import Room from "../pages/Rooms";
-import Payment from "../pages/Payments";
-import Complaints from "../pages/Complaints";
-import Reminders from "../pages/Reminders";
+
+// OWNER PAGES
+import Dashboard from "../pages/owner/Dashboard";
+import Students from "../pages/owner/Students";
+import Room from "../pages/owner/Rooms";
+import Payment from "../pages/owner/Payments";
+import Complaints from "../pages/owner/Complaints";
+import Reminders from "../pages/owner/Reminders";
 import NotificationDrawer from "../components/notifications/NotificationDrawers";
-import Settings from "../pages/Settings";
-import Reports from "../pages/reports";
-import ProtectedRoute from "./ProtectedRoutes";
+import Settings from "../pages/owner/Settings";
+import Reports from "../pages/owner/reports";
+
+// STUDENT PAGES (CREATE THESE)
+import StudentDashboard from "../pages/student/StudentDashboard";
+import StudentPayments from "../pages/student/StudentPayments";
+import StudentComplaints from "../pages/student/StudentComplaints";
+import StudentRooms from "../pages/student/StudentRooms";
+import StudentNotifications from "../pages/student/StudentNotifications";
+import StudentProfile from "../pages/student/StudentProfile";
+//import StudentSettings from "../pages/student/StudentSettings";
+
+// AUTH
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
-import { ROUTES } from "./RoutesConstant";
 import VerifyOtp from "../pages/auth/VerifyOtp";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
+import { getAuthData } from "../utils/auth";
+import ProtectedRoute from "./ProtectedRoutes";
 
 export default function AppRoutes() {
   return (
     <Routes>
+      {/* AUTH ROUTES */}
       <Route path="/login" element={<Login />} />
-      <Route path={ROUTES.REGISTER} element={<Register />} />
-      <Route path={ROUTES.VerifyOtp} element={<VerifyOtp />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/verify-otp" element={<VerifyOtp />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
-
       <Route path="/reset-password" element={<ResetPassword />} />
+
+      {/* ================= COMMON LAYOUT ================= */}
       <Route path="/" element={<MainLayout />}>
+        {/* DEFAULT REDIRECT BASED ON ROLE */}
         <Route
           index
           element={
             <ProtectedRoute>
+              <RoleRedirect />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ================= OWNER ROUTES ================= */}
+        <Route
+          path="dashboard"
+          element={
+            <ProtectedRoute role="ROLE_ADMIN">
               <Dashboard />
             </ProtectedRoute>
           }
@@ -39,7 +65,7 @@ export default function AppRoutes() {
         <Route
           path="students"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="ROLE_ADMIN">
               <Students />
             </ProtectedRoute>
           }
@@ -48,7 +74,7 @@ export default function AppRoutes() {
         <Route
           path="rooms"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="ROLE_ADMIN">
               <Room />
             </ProtectedRoute>
           }
@@ -57,7 +83,7 @@ export default function AppRoutes() {
         <Route
           path="payments"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="ROLE_ADMIN">
               <Payment />
             </ProtectedRoute>
           }
@@ -66,7 +92,7 @@ export default function AppRoutes() {
         <Route
           path="complaints"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="ROLE_ADMIN">
               <Complaints />
             </ProtectedRoute>
           }
@@ -75,7 +101,7 @@ export default function AppRoutes() {
         <Route
           path="reminders"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="ROLE_ADMIN">
               <Reminders />
             </ProtectedRoute>
           }
@@ -84,7 +110,7 @@ export default function AppRoutes() {
         <Route
           path="notificationdrawers"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="ROLE_ADMIN">
               <NotificationDrawer />
             </ProtectedRoute>
           }
@@ -93,7 +119,7 @@ export default function AppRoutes() {
         <Route
           path="reports"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="ROLE_ADMIN">
               <Reports />
             </ProtectedRoute>
           }
@@ -102,12 +128,95 @@ export default function AppRoutes() {
         <Route
           path="settings"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="ROLE_ADMIN">
               <Settings />
             </ProtectedRoute>
           }
         />
+
+        {/* ================= STUDENT ROUTES ================= */}
+        <Route
+          path="student/dashboard"
+          element={
+            <ProtectedRoute role="ROLE_USER">
+              <StudentDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="student/payments"
+          element={
+            <ProtectedRoute role="ROLE_USER">
+              <StudentPayments />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="student/complaints"
+          element={
+            <ProtectedRoute role="ROLE_USER">
+              <StudentComplaints />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="student/rooms"
+          element={
+            <ProtectedRoute role="ROLE_USER">
+              <StudentRooms />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="student/notifications"
+          element={
+            <ProtectedRoute role="ROLE_USER">
+              <StudentNotifications />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="student/profile"
+          element={
+            <ProtectedRoute role="ROLE_USER">
+              <StudentProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* <Route
+          path="student/settings"
+          element={
+            <ProtectedRoute role="ROLE_USER">
+              <StudentSettings />
+            </ProtectedRoute>
+          }
+        /> */}
       </Route>
+
+      {/* FALLBACK */}
+      <Route path="*" element={<Navigate to="" />} />
     </Routes>
   );
+}
+
+/* ================= ROLE REDIRECT ================= */
+function RoleRedirect() {
+  const auth = getAuthData();
+  const role = auth?.user?.roleName;
+
+  if (role === "ROLE_ADMIN") {
+    return <Navigate to="/dashboard" />;
+  }
+
+  if (role === "ROLE_USER") {
+    return <Navigate to="/student/dashboard" />;
+  }
+
+  return <Navigate to="/login" />;
 }

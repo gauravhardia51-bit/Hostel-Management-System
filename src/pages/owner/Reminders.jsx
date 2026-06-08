@@ -4,13 +4,13 @@ import { Card, CardContent, Button, MenuItem, Select } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 
-import SendReminderDrawer from "../feature/reminders/SendReminderDrawer";
+import SendReminderDrawer from "../../feature/reminders/SendReminderDrawer.jsx";
 
-import api from "../api/Api.jsx";
+import api from "../../api/Api.jsx";
 
-import Pagination from "../components/common/Pagination.jsx";
+import Pagination from "../../components/common/Pagination.jsx";
 
-import { formatDateForDisplay } from "../utils/formatDate.js";
+import { formatDateForDisplay } from "../../utils/formatDate.js";
 
 export default function Reminders() {
   const [loading, setLoading] = useState(false);
@@ -53,10 +53,6 @@ export default function Reminders() {
 
       const toDate = localStorage.getItem("toDate");
 
-      console.log("FROM DATE => ", fromDate);
-
-      console.log("TO DATE => ", toDate);
-
       const res = await api.get("/reminder/all", {
         params: {
           pageNo: page,
@@ -76,8 +72,6 @@ export default function Reminders() {
       });
 
       const data = res.data;
-
-      console.log("Reminder Response", data);
 
       setReminders(data.payLoad || []);
 
@@ -103,10 +97,7 @@ export default function Reminders() {
     window.addEventListener("dateFilterUpdated", handleDateChange);
 
     return () => {
-      window.removeEventListener(
-        "dateFilterUpdated",
-        handleDateChange,
-      );
+      window.removeEventListener("dateFilterUpdated", handleDateChange);
     };
   }, []);
 
@@ -171,11 +162,7 @@ export default function Reminders() {
           </span>
         </td>
 
-        <td>
-          {r.sentAt
-            ? formatDateForDisplay(r.sentAt)
-            : "-"}
-        </td>
+        <td>{r.sentAt ? formatDateForDisplay(r.sentAt) : "-"}</td>
       </tr>
     ));
   };
@@ -186,9 +173,7 @@ export default function Reminders() {
 
       <div className="flex justify-between items-center mb-4">
         <div>
-          <h2 className="text-lg font-semibold">
-            Reminders
-          </h2>
+          <h2 className="text-lg font-semibold">Reminders</h2>
         </div>
 
         <Button
@@ -229,21 +214,13 @@ export default function Reminders() {
           }}
           className="bg-white rounded-md"
         >
-          <MenuItem value="ALL">
-            All Status
-          </MenuItem>
+          <MenuItem value="ALL">All Status</MenuItem>
 
-          <MenuItem value="SENT">
-            Sent
-          </MenuItem>
+          <MenuItem value="SENT">Sent</MenuItem>
 
-          <MenuItem value="PENDING">
-            Pending
-          </MenuItem>
+          <MenuItem value="PENDING">Pending</MenuItem>
 
-          <MenuItem value="FAILED">
-            Failed
-          </MenuItem>
+          <MenuItem value="FAILED">Failed</MenuItem>
         </Select>
 
         {/* SEARCH */}

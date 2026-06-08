@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import api from "../api/Api";
+import api from "../../api/Api";
 
 import {
   Card,
@@ -113,10 +113,7 @@ export default function Settings() {
 
       const payload = Object.fromEntries(
         Object.entries(userData).filter(
-          ([, value]) =>
-            value !== null &&
-            value !== undefined &&
-            value !== "",
+          ([, value]) => value !== null && value !== undefined && value !== "",
         ),
       );
 
@@ -173,9 +170,7 @@ export default function Settings() {
     } catch (error) {
       console.log(error);
 
-      toast.error(
-        error?.response?.data?.message || "Update failed ❌",
-      );
+      toast.error(error?.response?.data?.message || "Update failed ❌");
     } finally {
       setUserLoading(false);
     }
@@ -211,9 +206,7 @@ export default function Settings() {
     } catch (error) {
       console.log(error);
 
-      toast.error(
-        error?.response?.data?.message || "Update failed ❌",
-      );
+      toast.error(error?.response?.data?.message || "Update failed ❌");
     } finally {
       setHostelLoading(false);
     }
@@ -247,9 +240,7 @@ export default function Settings() {
             <div className="max-w-3xl">
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h3 className="font-semibold text-lg">
-                    User Profile
-                  </h3>
+                  <h3 className="font-semibold text-lg">User Profile</h3>
 
                   <p className="text-sm text-gray-500">
                     Update your account details
@@ -257,10 +248,7 @@ export default function Settings() {
                 </div>
 
                 {!editMode && (
-                  <Button
-                    variant="contained"
-                    onClick={() => setEditMode(true)}
-                  >
+                  <Button variant="contained" onClick={() => setEditMode(true)}>
                     Edit
                   </Button>
                 )}
@@ -287,11 +275,7 @@ export default function Settings() {
 
                 <TextField
                   label="Role"
-                  value={
-                    userData.roleId === 1
-                      ? "Owner"
-                      : "Student"
-                  }
+                  value={userData.roleId === 1 ? "Owner" : "Student"}
                   disabled
                   fullWidth
                 />
@@ -315,15 +299,10 @@ export default function Settings() {
                     onClick={handleUpdate}
                     disabled={userLoading}
                   >
-                    {userLoading
-                      ? "Saving..."
-                      : "Save Changes"}
+                    {userLoading ? "Saving..." : "Save Changes"}
                   </Button>
 
-                  <Button
-                    variant="outlined"
-                    onClick={() => setEditMode(false)}
-                  >
+                  <Button variant="outlined" onClick={() => setEditMode(false)}>
                     Cancel
                   </Button>
                 </div>
@@ -336,9 +315,7 @@ export default function Settings() {
             <div>
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h3 className="text-lg font-semibold">
-                    Hostel Information
-                  </h3>
+                  <h3 className="text-lg font-semibold">Hostel Information</h3>
 
                   <p className="text-sm text-gray-500">
                     Manage your hostel details
@@ -348,9 +325,7 @@ export default function Settings() {
                 {!hostelEditMode && (
                   <Button
                     variant="contained"
-                    onClick={() =>
-                      setHostelEditMode(true)
-                    }
+                    onClick={() => setHostelEditMode(true)}
                   >
                     Edit
                   </Button>
@@ -401,16 +376,12 @@ export default function Settings() {
                     onClick={handleHostelUpdate}
                     disabled={hostelLoading}
                   >
-                    {hostelLoading
-                      ? "Saving..."
-                      : "Save Changes"}
+                    {hostelLoading ? "Saving..." : "Save Changes"}
                   </Button>
 
                   <Button
                     variant="outlined"
-                    onClick={() =>
-                      setHostelEditMode(false)
-                    }
+                    onClick={() => setHostelEditMode(false)}
                   >
                     Cancel
                   </Button>
@@ -422,30 +393,16 @@ export default function Settings() {
           {/* ================= RENT ================= */}
           {tab === 2 && (
             <div className="grid grid-cols-2 gap-4">
-              <TextField
-                label="Default Rent (₹)"
-                fullWidth
-              />
+              <TextField label="Default Rent (₹)" fullWidth />
 
-              <TextField
-                label="Due Date (1-31)"
-                fullWidth
-              />
+              <TextField label="Due Date (1-31)" fullWidth />
 
-              <TextField
-                label="Late Fee (₹/day)"
-                fullWidth
-              />
+              <TextField label="Late Fee (₹/day)" fullWidth />
 
-              <TextField
-                label="Grace Period (days)"
-                fullWidth
-              />
+              <TextField label="Grace Period (days)" fullWidth />
 
               <div className="col-span-2">
-                <Button variant="contained">
-                  Save Changes
-                </Button>
+                <Button variant="contained">Save Changes</Button>
               </div>
             </div>
           )}
@@ -468,12 +425,9 @@ export default function Settings() {
                 label="Send Payment Reminders"
               />
 
-              <Button variant="contained">
-                Save Changes
-              </Button>
+              <Button variant="contained">Save Changes</Button>
             </div>
           )}
-
 
           {/* ================= SUBSCRIPTION ================= */}
           {tab === 4 && (
@@ -488,10 +442,7 @@ export default function Settings() {
                 </p>
               </div>
 
-              <Button
-                variant="contained"
-                color="secondary"
-              >
+              <Button variant="contained" color="secondary">
                 Upgrade Plan
               </Button>
             </div>

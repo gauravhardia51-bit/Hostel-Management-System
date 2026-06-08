@@ -28,7 +28,6 @@ export default function AddStudentDrawer({
   mode = "add",
 }) {
   const { hostelId } = getHostelsData();
-  console.log("Rooms in AddStudentDrawer: ", rooms);
   const {
     values: form,
     errors,
@@ -37,21 +36,20 @@ export default function AddStudentDrawer({
     resetForm,
     setValues,
   } = useFormValidation(
-  {
-    name: "",
-    phone: "",
-    email: "",
-    roomId: "",
-    joinDate: "",
-    status: "ACTIVE",
-  },
-  (values) => validateStudent(values, mode)
-);
+    {
+      name: "",
+      phone: "",
+      email: "",
+      roomId: "",
+      joinDate: "",
+      status: "ACTIVE",
+    },
+    (values) => validateStudent(values, mode),
+  );
 
   // ✅ Prefill edit
   useEffect(() => {
     if (editData) {
-      console.log("Edit data in drawer: ", editData);
       setValues({
         id: editData.id || "",
         name: editData.name || "",
@@ -67,7 +65,6 @@ export default function AddStudentDrawer({
   }, [editData, open]);
 
   const handleSubmit = () => {
-    console.log("Form values on submit: ", form);
     if (!validateAll()) return; // ❌ stop if error
     let payload = {
       name: form.name,

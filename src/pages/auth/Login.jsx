@@ -8,8 +8,6 @@ import {
   IconButton,
   Checkbox,
   FormControlLabel,
-  MenuItem,
-  Select,
 } from "@mui/material";
 
 import EmailIcon from "@mui/icons-material/Email";
@@ -17,24 +15,22 @@ import LockIcon from "@mui/icons-material/Lock";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import ApartmentIcon from "@mui/icons-material/Apartment";
+
 import api from "../../api/Api";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { setAuthData } from "../../utils/auth";
 
 export default function Login() {
   const navigate = useNavigate();
-
   const [showPassword, setShowPassword] = useState(false);
-
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
     userCode: "",
     password: "",
-    hostelId: "",
   });
 
-  // handle input
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -46,54 +42,51 @@ export default function Login() {
     try {
       setLoading(true);
 
-      const response = await api.post(
-        "http://localhost:9001/rentrova/api/auth/login",
-        {
-          userCode: form.userCode,
-          password: form.password,
-        },
-      );
-
-      // ===== JWT TOKEN =====
-      const token = response.data.payLoad.accessToken;
-      //   console.log(response.data);
-      //   console.log(localStorage.getItem("token"));
-      // ===== SAVE TOKEN =====
-      localStorage.setItem("token", token);
-      const decoded = jwtDecode(token);
-
-      const hostelRes = await api.get("/hostel/all", {
-        params: {
-          userId: decoded.userId,
-        },
+      // ✅ LOGIN API
+      const response = await api.post("/auth/login", {
+        userCode: form.userCode,
+        password: form.password,
       });
 
-      const hostels = hostelRes.data.payLoad || [];
+      const token = response?.data?.payLoad?.accessToken;
 
-      // save hostels
-      localStorage.setItem("hostels", JSON.stringify(hostels));
-
-      // save first hostel id automatically
-      if (hostels.length > 0) {
-        localStorage.setItem("hostelId", hostels[0].id);
+      if (!token) {
+        alert("Invalid login response");
+        return;
       }
 
-      // // ===== SAVE HOSTEL =====
-      // const hostels = response.data.payLoad;
-      // localStorage.setItem("hostels", JSON.stringify(hostels));
-      // ===== SAVE USER =====
+      // ✅ DECODE TOKEN
+      const decoded = jwtDecode(token);
+      const userId = decoded.userId;
 
+      // ✅ FETCH USER
       const userRes = await api.get("/users/id", {
-        params: {
-          id: decoded.userId,
-        },
+        params: { id: userId },
       });
 
-      localStorage.setItem("user", JSON.stringify(userRes.data.payLoad));
+      const user = userRes?.data?.payLoad;
 
+      // ✅ FETCH HOSTELS
+      const hostelRes = await api.get("/hostel/all", {
+        params: { userId },
+      });
+
+      const hostels = hostelRes?.data?.payLoad || [];
+
+      // ✅ STORE AUTH DATA (Token + User + Hostels)
+      const auth = {
+        token,
+        user,
+        hostels,
+        hostelId: hostels?.[0]?.id || null,
+      };
+
+      setAuthData(auth);
+
+      // ✅ REDIRECT
       navigate("/");
     } catch (error) {
-      console.log(error);
+      console.error("Login Error:", error);
       alert(error?.response?.data?.message || "Login Failed");
     } finally {
       setLoading(false);
@@ -113,7 +106,6 @@ export default function Login() {
             </div>
 
             <h1 className="text-3xl font-bold text-gray-800">RentRova</h1>
-
             <p className="text-sm text-gray-500 mt-1">
               Hostel Management System
             </p>
@@ -122,11 +114,10 @@ export default function Login() {
           {/* Title */}
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-800">Login</h2>
-
             <p className="text-sm text-gray-500">Welcome back 👋</p>
           </div>
 
-          {/* Email */}
+          {/* User Code */}
           <div className="mb-4">
             <TextField
               fullWidth
@@ -135,14 +126,12 @@ export default function Login() {
               value={form.userCode}
               onChange={handleChange}
               size="small"
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <EmailIcon fontSize="small" />
-                    </InputAdornment>
-                  ),
-                },
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <EmailIcon fontSize="small" />
+                  </InputAdornment>
+                ),
               }}
             />
           </div>
@@ -156,43 +145,21 @@ export default function Login() {
             value={form.password}
             onChange={handleChange}
             size="small"
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LockIcon fontSize="small" />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPassword(!showPassword)}>
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              },
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LockIcon fontSize="small" />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
             }}
           />
-
-          {/* Hostel Select */}
-          {/* <div className="mb-4">
-            <Select
-              fullWidth
-              displayEmpty
-              size="small"
-              name="hostelId"
-              value={form.hostelId}
-              onChange={handleChange}
-            >
-              <MenuItem value="">Select Hostel</MenuItem>
-
-              {hostels.map((hostel) => (
-                <MenuItem key={hostel.id} value={hostel.id}>
-                  {hostel.id} - {hostel.hostelName}
-                </MenuItem>
-              ))}
-            </Select>
-          </div> */}
 
           {/* Remember */}
           <div className="flex justify-between items-center mb-5">
@@ -225,7 +192,8 @@ export default function Login() {
           >
             {loading ? "Please wait..." : "Login"}
           </Button>
-          {/* Signup Link */}
+
+          {/* Signup */}
           <div className="mt-5 text-center">
             <p className="text-sm text-gray-500">
               Don't have an account?{" "}
@@ -237,6 +205,7 @@ export default function Login() {
               </span>
             </p>
           </div>
+
           {/* Footer */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">

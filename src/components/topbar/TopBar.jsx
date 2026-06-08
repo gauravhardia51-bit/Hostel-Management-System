@@ -187,21 +187,19 @@ export default function TopBar({ collapsed, setCollapsed }) {
                 <Button
                   variant="contained"
                   onClick={() => {
-                    if (!fromDate || !toDate) return;
+                    if (fromDate) {
+                      localStorage.setItem("fromDate", fromDate.getTime());
+                    }
 
-                    localStorage.setItem(
-                      "fromDate",
-                      fromDate.getTime()
-                    );
+                    if (toDate) {
+                      localStorage.setItem("toDate", toDate.getTime());
+                    }
 
-                    localStorage.setItem(
-                      "toDate",
-                      toDate.getTime()
-                    );
+                    console.log("FROM:", localStorage.getItem("fromDate"));
 
-                    window.dispatchEvent(
-                      new Event("dateFilterUpdated")
-                    );
+                    console.log("TO:", localStorage.getItem("toDate"));
+
+                    window.dispatchEvent(new Event("dateFilterUpdated"));
 
                     closeDatePopup();
                   }}

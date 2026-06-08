@@ -3,116 +3,69 @@ import { Card } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 import api from "../../api/Api";
-import { getHostelsData } from "../../utils/auth";
+import { getAuthData } from "../../utils/auth";
 
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-} from "recharts";
+import { PieChart, Pie, Cell, Tooltip } from "recharts";
 
-const COLORS = [
-  "#22c55e",
-  "#ef4444",
-];
+const COLORS = ["#22c55e", "#ef4444"];
 
 export default function Data() {
+  const navigate = useNavigate();
 
-  const navigate =
-    useNavigate();
-
-  const [payments, setPayments] =
-    useState([]);
+  const [payments, setPayments] = useState([]);
 
   // ================= FETCH PAYMENTS =================
 
-  const fetchPayments =
-    async () => {
+  const fetchPayments = async () => {
+    try {
+      const auth = getAuthData();
+      const hostelId = auth?.hostelId;
 
-      try {
+      if (!hostelId) return;
 
-        const { hostelId } =
-          getHostelsData();
+      const res = await api.get("/payment/all", {
+        params: {
+          hostelId,
+        },
+      });
 
-        if (!hostelId) return;
-
-        const res =
-          await api.get(
-            "/payment/all",
-            {
-              params: {
-                hostelId,
-              },
-            }
-          );
-
-        setPayments(
-          res.data.payLoad || []
-        );
-
-      } catch (error) {
-
-        console.log(
-          "Payment Error:",
-          error
-        );
-
-      }
-    };
+      setPayments(res.data.payLoad || []);
+    } catch (error) {
+      console.log("Payment Error:", error);
+    }
+  };
 
   useEffect(() => {
-
     fetchPayments();
-
   }, []);
 
   // ================= COUNTS =================
 
-  const paidPayments =
-    payments.filter(
-      (p) =>
-        p.status === "PAID"
-    );
+  const paidPayments = payments.filter((p) => p.status === "PAID");
 
-  const pendingPayments =
-    payments.filter(
-      (p) =>
-        p.status ===
-        "PENDING"
-    );
+  const pendingPayments = payments.filter((p) => p.status === "PENDING");
 
   const pieData = [
     {
       name: "PAID",
-      value:
-        paidPayments.length,
+      value: paidPayments.length,
     },
     {
       name: "PENDING",
-      value:
-        pendingPayments.length,
+      value: pendingPayments.length,
     },
   ];
 
   // ================= PIE CLICK =================
 
-  const handlePieClick =
-    (data) => {
-
-      navigate(
-        `/payments?status=${data.name}`
-      );
-
-    };
+  const handlePieClick = (data) => {
+    navigate(`/payments?status=${data.name}`);
+  };
 
   return (
     <>
       <Card className="p-4 rounded-xl">
-
-        <h3 className="text-sm font-semibold mb-3">
-          Payment Status
-        </h3>
+        <h3 className="text-sm font-semibold mb-3">Payment Status</h3>
 
         {/* CHART */}
         <div
@@ -123,12 +76,7 @@ export default function Data() {
             [&_*]:outline-none
           "
         >
-
-          <PieChart
-            width={260}
-            height={220}
-          >
-
+          <PieChart width={260} height={220}>
             <Pie
               data={pieData}
               cx="50%"
@@ -136,62 +84,36 @@ export default function Data() {
               innerRadius={55}
               outerRadius={80}
               dataKey="value"
-              onClick={
-                handlePieClick
-              }
+              onClick={handlePieClick}
               stroke="none"
             >
-
-              {pieData.map(
-                (
-                  entry,
-                  index
-                ) => (
-                  <Cell
-                    key={index}
-                    fill={
-                      COLORS[index]
-                    }
-                    style={{
-                      outline:
-                        "none",
-                      cursor:
-                        "pointer",
-                    }}
-                  />
-                )
-              )}
-
+              {pieData.map((entry, index) => (
+                <Cell
+                  key={index}
+                  fill={COLORS[index]}
+                  style={{
+                    outline: "none",
+                    cursor: "pointer",
+                  }}
+                />
+              ))}
             </Pie>
 
             <Tooltip />
-
           </PieChart>
-
         </div>
 
         {/* LABELS */}
         <div className="flex justify-around text-xs mt-3">
-
           <span
             className="
               text-green-600
               font-medium
               cursor-pointer
             "
-            onClick={() =>
-              navigate(
-                "/payments?status=PAID"
-              )
-            }
+            onClick={() => navigate("/payments?status=PAID")}
           >
-
-            Paid (
-            {
-              paidPayments.length
-            }
-            )
-
+            Paid ({paidPayments.length})
           </span>
 
           <span
@@ -200,23 +122,11 @@ export default function Data() {
               font-medium
               cursor-pointer
             "
-            onClick={() =>
-              navigate(
-                "/payments?status=PENDING"
-              )
-            }
+            onClick={() => navigate("/payments?status=PENDING")}
           >
-
-            Pending (
-            {
-              pendingPayments.length
-            }
-            )
-
+            Pending ({pendingPayments.length})
           </span>
-
         </div>
-
       </Card>
     </>
   );

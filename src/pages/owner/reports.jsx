@@ -14,7 +14,7 @@ import {
   Cell,
 } from "recharts";
 
-import api from "../api/Api";
+import api from "../../api/Api";
 
 export default function Reports() {
   const [month, setMonth] = useState("April");
