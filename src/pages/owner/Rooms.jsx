@@ -41,7 +41,6 @@ export default function Rooms() {
       setRooms(data.payLoad || []);
       setTotalPages(data.totalPage || 0);
       setTotalElements(data.totalRow || 0);
-      console.log("41 Fetched rooms:", data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -127,7 +126,6 @@ export default function Rooms() {
   };
 
   const handleSave = async (formData) => {
-    console.log("Saving room with data:", formData.roomNumber);
     try {
       if (mode === "edit") {
         await api.put(`/room/update`, formData);

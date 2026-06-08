@@ -70,8 +70,7 @@ export default function Login() {
       const hostelRes = await api.get("/hostel/all", {
         params: { userId },
       });
-      console.log("Hostel Response:", hostelRes);
-      console.log("User Data:", user);
+
       const hostels = hostelRes?.data?.payLoad || [];
 
       // ✅ STORE AUTH DATA (Token + User + Hostels)

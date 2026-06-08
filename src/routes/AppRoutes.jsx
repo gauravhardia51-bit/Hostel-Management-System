@@ -16,6 +16,10 @@ import Reports from "../pages/owner/reports";
 import StudentDashboard from "../pages/student/StudentDashboard";
 import StudentPayments from "../pages/student/StudentPayments";
 import StudentComplaints from "../pages/student/StudentComplaints";
+import StudentRooms from "../pages/student/StudentRooms";
+import StudentNotifications from "../pages/student/StudentNotifications";
+import StudentProfile from "../pages/student/StudentProfile";
+//import StudentSettings from "../pages/student/StudentSettings";
 
 // AUTH
 import Login from "../pages/auth/Login";
@@ -157,10 +161,46 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="student/rooms"
+          element={
+            <ProtectedRoute role="ROLE_USER">
+              <StudentRooms />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="student/notifications"
+          element={
+            <ProtectedRoute role="ROLE_USER">
+              <StudentNotifications />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="student/profile"
+          element={
+            <ProtectedRoute role="ROLE_USER">
+              <StudentProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* <Route
+          path="student/settings"
+          element={
+            <ProtectedRoute role="ROLE_USER">
+              <StudentSettings />
+            </ProtectedRoute>
+          }
+        /> */}
       </Route>
 
       {/* FALLBACK */}
-      <Route path="*" element={<Navigate to="/login" />} />
+      <Route path="*" element={<Navigate to="" />} />
     </Routes>
   );
 }
@@ -169,7 +209,7 @@ export default function AppRoutes() {
 function RoleRedirect() {
   const auth = getAuthData();
   const role = auth?.user?.roleName;
-  console.log("RoleRedirect: role =", role);
+
   if (role === "ROLE_ADMIN") {
     return <Navigate to="/dashboard" />;
   }

@@ -23,6 +23,7 @@ import AddStudentDrawer from "../../feature/students/AddStudentDrawer.jsx";
 import { formatDateForDisplay } from "../../utils/formatDate.js";
 import Pagination from "../../components/common/Pagination.jsx";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { getAuthData } from "../../utils/auth";
 
 export default function Students() {
   const [loading, setLoading] = useState(false);
@@ -35,7 +36,9 @@ export default function Students() {
   const [open, setOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [mode, setMode] = useState("add"); // add | edit | view
-  //const [hostelId, setHostelId] = useState("");
+  const auth = getAuthData();
+  const hostelId = auth?.hostelId;
+
   const getStatusStyle = (status) => {
     return status === "ACTIVE"
       ? "bg-green-100 text-green-600"
@@ -50,7 +53,7 @@ export default function Students() {
         params: {
           pageNo: page,
           pageSize: 10,
-          hostelId: localStorage.getItem("hostelId"),
+          hostelId: hostelId,
           search: search,
           //phone: search,
         },
@@ -60,14 +63,15 @@ export default function Students() {
         params: {
           //pageNo: page,
           //pageSize: 10,
-          hostelId: localStorage.getItem("hostelId"),
+          hostelId: hostelId,
           //search: search,
         },
       });
 
       const data = res.data;
       const roomData = response.data;
-      //console.log("Student Response: ", data);
+      console.log("Student Response: ", data);
+      console.log("Room Response: ", roomData);
       setRooms(roomData.payLoad || []);
       setStudents(data.payLoad || []);
       setTotalPages(data.totalPage || 0);
@@ -165,7 +169,6 @@ export default function Students() {
   };
 
   const handleSave = async (formData) => {
-    console.log("Form Data in Students.jsx: ", formData);
     try {
       if (mode === "edit") {
         await api.put(`/student/update`, formData);

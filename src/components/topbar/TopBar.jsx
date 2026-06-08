@@ -144,12 +144,7 @@ export default function TopBar({ collapsed, setCollapsed }) {
                       localStorage.setItem("toDate", toDate.getTime());
                     }
 
-                    console.log("FROM:", localStorage.getItem("fromDate"));
-
-                    console.log("TO:", localStorage.getItem("toDate"));
-
                     window.dispatchEvent(new Event("dateFilterUpdated"));
-
                     closeDatePopup();
                   }}
                 >

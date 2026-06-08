@@ -14,7 +14,7 @@ export const getAuthData = () => {
   }
 };
 
-// const auth = JSON.parse(localStorage.getItem("auth"))
+// const auth = getAuthData();
 
 // auth.token
 // auth.user

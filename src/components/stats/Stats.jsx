@@ -1,7 +1,7 @@
 import "./Stats.css";
 import { useState, useEffect } from "react";
 import api from "../../api/Api";
-import { getHostelsData } from "../../utils/auth";
+import { getAuthData } from "../../utils/auth";
 import { useNavigate } from "react-router-dom";
 
 // MUI
@@ -18,7 +18,6 @@ import WarningIcon from "@mui/icons-material/Warning";
 
 export default function Stats() {
   const navigate = useNavigate();
-
   const [dashboardData, setDashboardData] = useState({});
   const [payments, setPayments] = useState([]);
   const [complaints, setComplaints] = useState([]);
@@ -27,7 +26,8 @@ export default function Stats() {
 
   const fetchDashboardData = async () => {
     try {
-      const { hostelId } = getHostelsData();
+      const auth = getAuthData();
+      const hostelId = auth?.hostelId;
 
       if (!hostelId) return;
 
@@ -44,7 +44,6 @@ export default function Stats() {
       ).getTime();
 
       const toMillis = new Date(today.setHours(23, 59, 59, 999)).getTime();
-
       const [dashboardRes, paymentRes, complaintRes] = await Promise.all([
         api.get("/dashboard/data/all", {
           params: {
@@ -68,7 +67,7 @@ export default function Stats() {
       ]);
 
       setDashboardData(dashboardRes.data.payLoad);
-
+      console.log("Dashboard Response", dashboardRes.data);
       setPayments(paymentRes.data.payLoad?.slice(0, 3));
 
       setComplaints(complaintRes.data.payLoad?.slice(0, 3));

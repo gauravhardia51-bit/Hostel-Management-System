@@ -53,10 +53,6 @@ export default function Reminders() {
 
       const toDate = localStorage.getItem("toDate");
 
-      console.log("FROM DATE => ", fromDate);
-
-      console.log("TO DATE => ", toDate);
-
       const res = await api.get("/reminder/all", {
         params: {
           pageNo: page,
@@ -76,8 +72,6 @@ export default function Reminders() {
       });
 
       const data = res.data;
-
-      console.log("Reminder Response", data);
 
       setReminders(data.payLoad || []);
 

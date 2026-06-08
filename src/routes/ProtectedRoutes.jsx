@@ -1,17 +1,10 @@
-// import { Navigate } from "react-router-dom";
-// import { isLoggedIn } from "../utils/auth";
-
-// export default function ProtectedRoute({ children }) {
-//   return isLoggedIn() ? children : <Navigate to="/login" />;
-// }
-
 import { Navigate } from "react-router-dom";
+import { getAuthData } from "../utils/auth";
 
 export default function ProtectedRoute({ children, role }) {
-  const auth = JSON.parse(localStorage.getItem("auth"));
-
-  const token = auth.token;
-  const userRole = auth.user?.role;
+  const auth = getAuthData();
+  const token = auth?.token;
+  const userRole = auth.user?.roleName;
 
   // ❌ Not logged in
   if (!token) {
@@ -32,23 +25,3 @@ export default function ProtectedRoute({ children, role }) {
   // ✅ Allowed
   return children;
 }
-
-// import { Navigate } from "react-router-dom";
-
-// export default function ProtectedRoute({ children, role }) {
-//   const token = localStorage.getItem("token");
-//   const userRole = localStorage.getItem("role");
-
-//   // ❌ Not logged in
-//   if (!token) {
-//     return <Navigate to="/login" replace />;
-//   }
-
-//   // ❌ Role mismatch → block access (DON'T redirect smartly)
-//   if (role && role !== userRole) {
-//     return <Navigate to="/" replace />;
-//   }
-
-//   // ✅ Allowed
-//   return children;
-// }

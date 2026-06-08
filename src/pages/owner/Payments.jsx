@@ -76,11 +76,6 @@ export default function Payments() {
     try {
       setLoading(true);
 
-      // ✅ DEBUG
-      console.log("FROM DATE:", localStorage.getItem("fromDate"));
-
-      console.log("TO DATE:", localStorage.getItem("toDate"));
-
       const res = await api.get("/payment/all", {
         params: {
           pageNo: page,
@@ -102,12 +97,8 @@ export default function Payments() {
 
       const data = res.data;
 
-      console.log("Payment Response", data);
-
       setPayments(data.payLoad || []);
-
       setTotalPages(data.totalPage || 0);
-
       setTotalElements(data.totalRow || 0);
     } catch (err) {
       console.error(err);
