@@ -6,7 +6,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import api from "../../api/Api.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
 import { toast } from "react-toastify";
-import { formatDateForDisplay } from "../../utils/formatDate.js";
+import { formatDateForDisplay } from "../utils/formatDate.js";
+import { useLocation } from "react-router-dom";
 
 export default function Complaints() {
   const [loading, setLoading] = useState(false);
@@ -20,7 +21,11 @@ export default function Complaints() {
   const [status, setStatus] = useState("ALL");
 
   // ================= FETCH =================
+  const location = useLocation();
 
+  const queryParams = new URLSearchParams(location.search);
+
+  const complaintId = queryParams.get("complaintId");
   const fetchComplaints = async () => {
     try {
       setLoading(true);
@@ -45,6 +50,8 @@ export default function Complaints() {
           creationStartTime: fromDate || undefined,
 
           creationEndTime: toDate || undefined,
+
+          id: complaintId || undefined,
         },
       });
 
