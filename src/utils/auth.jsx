@@ -1,41 +1,65 @@
-export const setToken = (token) => {
-  localStorage.setItem("token", token);
+// ✅ Save everything in one object
+export const setAuthData = (auth) => {
+  localStorage.setItem("auth", JSON.stringify(auth));
 };
 
-export const getToken = () => {
-  return localStorage.getItem("token");
+// ✅ Get full auth object
+export const getAuthData = () => {
+  try {
+    const raw = localStorage.getItem("auth");
+    return raw ? JSON.parse(raw) : null;
+  } catch (err) {
+    console.error("Auth parse error:", err);
+    return null;
+  }
 };
 
+// const auth = JSON.parse(localStorage.getItem("auth"))
+
+// auth.token
+// auth.user
+// auth.hostels
+// auth.hostelId
+
+//const { hostelId, selectedHostel } = getHostelsData();
+
+// ✅ Logout
 export const logout = () => {
-  localStorage.removeItem("token");
+  localStorage.removeItem("auth"); // 🔥 remove full object
   window.location.href = "/login";
 };
 
+// ✅ Check login
 export const isLoggedIn = () => {
-  return !!localStorage.getItem("token");
+  const auth = getAuthData();
+  return !!auth?.token;
 };
 
+// ✅ Get hostel related data
 export const getHostelsData = () => {
   try {
-    // ✅ Get raw values
-    const hostelIdRaw = localStorage.getItem("hostelId");
-    const hostelsRaw = localStorage.getItem("hostels");
+    const auth = getAuthData();
 
-    // ✅ Parse safely
-    const hostelId = hostelIdRaw ? Number(hostelIdRaw) : null;
+    if (!auth) {
+      return {
+        hostelId: null,
+        hostels: [],
+        selectedHostel: null,
+      };
+    }
 
-    const hostels = hostelsRaw ? JSON.parse(hostelsRaw) : [];
+    const hostelId = auth.hostelId || null;
+    const hostels = auth.hostels || [];
 
-    // ✅ Get selected hostel object
     const selectedHostel = hostels.find((h) => h.id === hostelId);
 
     return {
       hostelId,
       hostels,
-      selectedHostel, // 🔥 IMPORTANT (use in sidebar, header etc.)
+      selectedHostel,
     };
   } catch (err) {
-    console.error("Auth parse error:", err);
+    console.error("Hostel parse error:", err);
 
     return {
       hostelId: null,
@@ -43,4 +67,14 @@ export const getHostelsData = () => {
       selectedHostel: null,
     };
   }
+};
+
+// ✅ Optional: update hostelId (very useful)
+export const updateHostelId = (newHostelId) => {
+  const auth = getAuthData();
+  if (!auth) return;
+
+  auth.hostelId = newHostelId;
+
+  localStorage.setItem("auth", JSON.stringify(auth));
 };

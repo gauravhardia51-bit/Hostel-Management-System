@@ -3,10 +3,10 @@ import { Card, CardContent, MenuItem, Select } from "@mui/material";
 
 import SearchIcon from "@mui/icons-material/Search";
 
-import api from "../api/Api.jsx";
-import Pagination from "../components/common/Pagination.jsx";
+import api from "../../api/Api.jsx";
+import Pagination from "../../components/common/Pagination.jsx";
 import { toast } from "react-toastify";
-import { formatDateForDisplay } from "../utils/formatDate.js";
+import { formatDateForDisplay } from "../../utils/formatDate.js";
 
 export default function Complaints() {
   const [loading, setLoading] = useState(false);
@@ -71,10 +71,7 @@ export default function Complaints() {
     window.addEventListener("dateFilterUpdated", handleDateChange);
 
     return () => {
-      window.removeEventListener(
-        "dateFilterUpdated",
-        handleDateChange,
-      );
+      window.removeEventListener("dateFilterUpdated", handleDateChange);
     };
   }, []);
 
@@ -93,9 +90,7 @@ export default function Complaints() {
   const handleStatusChange = async (complaint, newStatus) => {
     if (complaint.status === newStatus) return;
 
-    const confirm = window.confirm(
-      `Change status to "${newStatus}"?`,
-    );
+    const confirm = window.confirm(`Change status to "${newStatus}"?`);
 
     if (!confirm) return;
 
@@ -174,9 +169,7 @@ export default function Complaints() {
 
       return (
         <tr key={c.id} className="border-b hover:bg-gray-50">
-          <td className="py-3">
-            {page * 10 + index + 1}
-          </td>
+          <td className="py-3">{page * 10 + index + 1}</td>
 
           <td>{c.ticketNumber}</td>
 
@@ -188,9 +181,7 @@ export default function Complaints() {
             <Select
               size="small"
               value={c.status}
-              onChange={(e) =>
-                handleStatusChange(c, e.target.value)
-              }
+              onChange={(e) => handleStatusChange(c, e.target.value)}
               renderValue={(selected) => (
                 <span
                   style={{
@@ -232,17 +223,13 @@ export default function Complaints() {
             >
               <MenuItem value="OPEN">OPEN</MenuItem>
 
-              <MenuItem value="IN_PROGRESS">
-                IN PROGRESS
-              </MenuItem>
+              <MenuItem value="IN_PROGRESS">IN PROGRESS</MenuItem>
 
               <MenuItem value="CLOSED">CLOSED</MenuItem>
             </Select>
           </td>
 
-          <td>
-            {formatDateForDisplay(c.dateOfCreation)}
-          </td>
+          <td>{formatDateForDisplay(c.dateOfCreation)}</td>
         </tr>
       );
     });
@@ -253,9 +240,7 @@ export default function Complaints() {
       {/* HEADER */}
 
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">
-          Complaints
-        </h2>
+        <h2 className="text-lg font-semibold">Complaints</h2>
       </div>
 
       {/* FILTERS */}
@@ -270,21 +255,13 @@ export default function Complaints() {
             setStatus(e.target.value);
           }}
         >
-          <MenuItem value="ALL">
-            All Status
-          </MenuItem>
+          <MenuItem value="ALL">All Status</MenuItem>
 
-          <MenuItem value="OPEN">
-            Open
-          </MenuItem>
+          <MenuItem value="OPEN">Open</MenuItem>
 
-          <MenuItem value="IN_PROGRESS">
-            In Progress
-          </MenuItem>
+          <MenuItem value="IN_PROGRESS">In Progress</MenuItem>
 
-          <MenuItem value="CLOSED">
-            Closed
-          </MenuItem>
+          <MenuItem value="CLOSED">Closed</MenuItem>
         </Select>
 
         {/* SEARCH */}

@@ -5,11 +5,11 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import { useEffect, useState } from "react";
-import api from "../api/Api.jsx";
-import AddRoomDrawer from "../feature/rooms/AddRoomDrawer.jsx";
+import api from "../../api/Api.jsx";
+import AddRoomDrawer from "../../feature/rooms/AddRoomDrawer.jsx";
 import SearchIcon from "@mui/icons-material/Search";
 import "./Rooms.css";
-import Pagination from "../components/common/Pagination.jsx";
+import Pagination from "../../components/common/Pagination.jsx";
 import { toast } from "react-toastify";
 
 export default function Rooms() {

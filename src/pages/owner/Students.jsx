@@ -13,15 +13,15 @@ import AddIcon from "@mui/icons-material/Add";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
-import Sidebar from "../components/sidebar/Sidebar.jsx";
-import TopBar from "../components/topbar/TopBar.jsx";
-import api from "../api/Api.jsx";
+import Sidebar from "../../components/sidebar/Sidebar.jsx";
+import TopBar from "../../components/topbar/TopBar.jsx";
+import api from "../../api/Api.jsx";
 import { Link } from "react-router-dom";
-import { ROUTES } from "../routes/RoutesConstant.js";
+import { ROUTES } from "../../routes/RoutesConstant.js";
 import { useEffect, useState } from "react";
-import AddStudentDrawer from "../feature/students/AddStudentDrawer.jsx";
-import { formatDateForDisplay } from "../utils/formatDate.js";
-import Pagination from "../components/common/Pagination.jsx";
+import AddStudentDrawer from "../../feature/students/AddStudentDrawer.jsx";
+import { formatDateForDisplay } from "../../utils/formatDate.js";
+import Pagination from "../../components/common/Pagination.jsx";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 export default function Students() {
