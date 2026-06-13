@@ -15,7 +15,7 @@ import {
 } from "recharts";
 
 import api from "../../api/Api";
-
+import { getAuthData } from "../../utils/auth";
 export default function Reports() {
   const [month, setMonth] = useState("April");
 
@@ -30,7 +30,8 @@ export default function Reports() {
   });
 
   const COLORS = ["#4ade80", "#f87171"];
-
+const auth = getAuthData();
+const hostelId = auth?.hostelId;
   // ================= DATE HELPER =================
   const getMonthRange = (monthName) => {
     const year = new Date().getFullYear();
@@ -49,7 +50,6 @@ export default function Reports() {
 
     const loadData = async () => {
       try {
-        const hostelId = localStorage.getItem("hostelId");
         const { start, end } = getMonthRange(month);
 
         const res = await api.get("/reports", {

@@ -11,6 +11,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import "./Rooms.css";
 import Pagination from "../../components/common/Pagination.jsx";
 import { toast } from "react-toastify";
+import { getAuthData } from "../../utils/auth";
 
 export default function Rooms() {
   const [loading, setLoading] = useState(false);
@@ -23,6 +24,9 @@ export default function Rooms() {
   const [mode, setMode] = useState("add"); // add | edit | view
   const [search, setSearch] = useState("");
 
+  const auth = getAuthData();
+const hostelId = auth?.hostelId;
+
   const fetchRooms = async () => {
     try {
       setLoading(true);
@@ -31,7 +35,7 @@ export default function Rooms() {
         params: {
           pageNo: page,
           pageSize: 10,
-          hostelId: localStorage.getItem("hostelId"),
+          hostelId: hostelId,
           search: search,
         },
       });

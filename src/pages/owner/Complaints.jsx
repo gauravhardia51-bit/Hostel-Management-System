@@ -8,6 +8,7 @@ import Pagination from "../../components/common/Pagination.jsx";
 import { toast } from "react-toastify";
 import { formatDateForDisplay } from "../../utils/formatDate.js";
 import { useLocation } from "react-router-dom";
+import { getAuthData } from "../../utils/auth";
 
 export default function Complaints() {
   const [loading, setLoading] = useState(false);
@@ -26,6 +27,10 @@ export default function Complaints() {
   const queryParams = new URLSearchParams(location.search);
 
   const complaintId = queryParams.get("complaintId");
+
+  const auth = getAuthData();
+const hostelId = auth?.hostelId;
+
   const fetchComplaints = async () => {
     try {
       setLoading(true);
@@ -41,7 +46,7 @@ export default function Complaints() {
           pageNo: page,
           pageSize: 10,
 
-          hostelId: Number(localStorage.getItem("hostelId")),
+          hostelId: hostelId,
 
           search: search || undefined,
 
@@ -105,7 +110,7 @@ export default function Complaints() {
       await api.put("/complaint/update", {
         id: complaint.id,
         status: newStatus,
-        hostelId: Number(localStorage.getItem("hostelId")),
+        hostelId: hostelId,
       });
 
       toast.success("Status updated ✅");

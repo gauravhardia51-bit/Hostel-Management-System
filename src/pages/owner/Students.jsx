@@ -24,6 +24,12 @@ import { formatDateForDisplay } from "../../utils/formatDate.js";
 import Pagination from "../../components/common/Pagination.jsx";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { getAuthData } from "../../utils/auth";
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
+import Tooltip from "@mui/material/Tooltip";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
 
 export default function Students() {
   const [loading, setLoading] = useState(false);
@@ -38,6 +44,15 @@ export default function Students() {
   const [mode, setMode] = useState("add"); // add | edit | view
   const auth = getAuthData();
   const hostelId = auth?.hostelId;
+  const [notificationOpen, setNotificationOpen] = useState(false);
+
+  const [notificationStudent, setNotificationStudent] = useState(null);
+  const [notificationSettings, setNotificationSettings] = useState(null);
+
+  const [notificationData, setNotificationData] = useState({
+    title: "",
+    message: "",
+  });
 
   const getStatusStyle = (status) => {
     return status === "ACTIVE"
@@ -45,6 +60,33 @@ export default function Students() {
       : "bg-red-100 text-red-500";
   };
 
+  const openNotificationDialog = (student) => {
+    setNotificationStudent(student);
+
+    setNotificationData({
+      title: "",
+      message: "",
+    });
+
+    setNotificationOpen(true);
+  };
+
+  const sendNotification = async () => {
+    try {
+      await api.post("/notification/send/student", {
+        studentId: notificationStudent.id,
+        hostelId: hostelId,
+        title: notificationData.title,
+        message: notificationData.message,
+      });
+
+      toast.success("Notification sent successfully");
+
+      setNotificationOpen(false);
+    } catch (error) {
+      toast.error("Failed to send notification");
+    }
+  };
   const fetchStudents = async () => {
     try {
       setLoading(true);
@@ -109,6 +151,26 @@ export default function Students() {
     }
   };
 
+  const loadNotificationSettings = async () => {
+    try {
+      const response = await api.get("/notification/setting/all", {
+        params: {
+          hostelId,
+        },
+      });
+
+      setNotificationSettings(response.data.payLoad?.[0]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (hostelId) {
+      loadNotificationSettings();
+    }
+  }, [hostelId]);
+
   const renderRows = () => {
     if (loading) {
       return (
@@ -163,6 +225,19 @@ export default function Students() {
           <IconButton size="small" onClick={() => handleDelete(s.id)}>
             <DeleteIcon fontSize="small" />
           </IconButton>
+          {notificationSettings?.customNotificationEnabled ? (
+            <IconButton size="small" onClick={() => openNotificationDialog(s)}>
+              <NotificationsActiveIcon fontSize="small" />
+            </IconButton>
+          ) : (
+            <Tooltip title="Please upgrade your plan">
+              <span>
+                <IconButton disabled size="small">
+                  <NotificationsActiveIcon fontSize="small" />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
         </td>
       </tr>
     ));
@@ -277,6 +352,61 @@ export default function Students() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog
+        open={notificationOpen}
+        onClose={() => setNotificationOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Send Notification</DialogTitle>
+
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Student"
+            margin="normal"
+            value={notificationStudent?.name || ""}
+            disabled
+          />
+
+          <TextField
+            fullWidth
+            label="Title"
+            margin="normal"
+            value={notificationData.title}
+            onChange={(e) =>
+              setNotificationData({
+                ...notificationData,
+                title: e.target.value,
+              })
+            }
+          />
+
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            label="Message"
+            margin="normal"
+            value={notificationData.message}
+            onChange={(e) =>
+              setNotificationData({
+                ...notificationData,
+                message: e.target.value,
+              })
+            }
+          />
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setNotificationOpen(false)}>Cancel</Button>
+
+          <Button variant="contained" onClick={sendNotification}>
+            Send
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
