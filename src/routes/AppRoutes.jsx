@@ -11,7 +11,7 @@ import Reminders from "../pages/owner/Reminders";
 import NotificationDrawer from "../components/notifications/NotificationDrawers";
 import Settings from "../pages/owner/Settings";
 import Reports from "../pages/owner/reports";
-
+import Notifications from "../pages/owner/notifications";
 // STUDENT PAGES (CREATE THESE)
 import StudentDashboard from "../pages/student/StudentDashboard";
 import StudentPayments from "../pages/student/StudentPayments";
@@ -39,7 +39,14 @@ export default function AppRoutes() {
       <Route path="/verify-otp" element={<VerifyOtp />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-
+      <Route
+        path="notifications"
+        element={
+          <ProtectedRoute role="ROLE_ADMIN">
+            <Notifications />
+          </ProtectedRoute>
+        }
+      />
       {/* ================= COMMON LAYOUT ================= */}
       <Route path="/" element={<MainLayout />}>
         {/* DEFAULT REDIRECT BASED ON ROLE */}

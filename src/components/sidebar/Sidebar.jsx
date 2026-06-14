@@ -72,6 +72,7 @@ export default function Sidebar({ collapsed }) {
     { path: "reminders", label: "Reminders", icon: "🔔" },
     { path: "complaints", label: "Complaints", icon: "⚠" },
     { path: "reports", label: "Reports", icon: "📊" },
+    { path: "notifications", label: "Notifications", icon: "📢" },
     { path: "settings", label: "Settings", icon: "⚙" },
   ];
 

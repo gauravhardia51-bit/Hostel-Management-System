@@ -30,8 +30,8 @@ export default function Reports() {
   });
 
   const COLORS = ["#4ade80", "#f87171"];
-const auth = getAuthData();
-const hostelId = auth?.hostelId;
+  const auth = getAuthData();
+  const hostelId = auth?.hostelId;
   // ================= DATE HELPER =================
   const getMonthRange = (monthName) => {
     const year = new Date().getFullYear();
