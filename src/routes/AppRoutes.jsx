@@ -39,14 +39,6 @@ export default function AppRoutes() {
       <Route path="/verify-otp" element={<VerifyOtp />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route
-        path="notifications"
-        element={
-          <ProtectedRoute role="ROLE_ADMIN">
-            <Notifications />
-          </ProtectedRoute>
-        }
-      />
       {/* ================= COMMON LAYOUT ================= */}
       <Route path="/" element={<MainLayout />}>
         {/* DEFAULT REDIRECT BASED ON ROLE */}
@@ -137,6 +129,15 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute role="ROLE_ADMIN">
               <Settings />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="notifications"
+          element={
+            <ProtectedRoute role="ROLE_ADMIN">
+              <Notifications />
             </ProtectedRoute>
           }
         />
