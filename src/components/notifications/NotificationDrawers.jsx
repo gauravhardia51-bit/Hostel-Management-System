@@ -7,11 +7,13 @@ import { Drawer, IconButton, Badge, Divider, Button } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { getAuthData } from "../../utils/auth";
 
 export default function NotificationDrawer() {
   const navigate = useNavigate();
 
-  const hostelId = localStorage.getItem("hostelId");
+  const auth = getAuthData();
+  const hostelId = auth?.hostelId;
 
   const [open, setOpen] = useState(false);
 
@@ -160,17 +162,17 @@ export default function NotificationDrawer() {
       await markAsRead(n.id);
     }
 
-   if (n.type === "COMPLAINT") {
-  navigate(`/complaints?complaintId=${n.commonId}`);
-}
+    if (n.type === "COMPLAINT") {
+      navigate(`/complaints?complaintId=${n.commonId}`);
+    }
 
-if (n.type === "PAYMENT") {
-  navigate(`/payments?paymentId=${n.commonId}`);
-}
+    if (n.type === "PAYMENT") {
+      navigate(`/payments?paymentId=${n.commonId}`);
+    }
 
-if (n.type === "STUDENT") {
-  navigate(`/students?studentId=${n.commonId}`);
-}
+    if (n.type === "STUDENT") {
+      navigate(`/students?studentId=${n.commonId}`);
+    }
 
     if (n.type === "SYSTEM") {
       navigate("/");

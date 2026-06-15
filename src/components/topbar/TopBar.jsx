@@ -17,12 +17,20 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { getAuthData } from "../../utils/auth";
 
 export default function TopBar({ collapsed, setCollapsed }) {
   const navigate = useNavigate();
-
   // ===== USER =====
   const [user, setUser] = useState(null);
+  const auth = getAuthData();
+
+  const roleLabel =
+    auth?.user?.roleName === "ROLE_ADMIN"
+      ? "Owner"
+      : auth?.user?.roleName === "ROLE_USER"
+        ? "Student"
+        : "User";
 
   useEffect(() => {
     const loadUser = () => {
@@ -59,7 +67,7 @@ export default function TopBar({ collapsed, setCollapsed }) {
     const currentMonthStart = new Date(
       today.getFullYear(),
       today.getMonth(),
-      1
+      1,
     );
 
     if (savedFromDate && savedToDate) {
@@ -77,37 +85,21 @@ export default function TopBar({ collapsed, setCollapsed }) {
         setFromDate(currentMonthStart);
         setToDate(today);
 
-        localStorage.setItem(
-          "fromDate",
-          currentMonthStart.getTime()
-        );
+        localStorage.setItem("fromDate", currentMonthStart.getTime());
 
-        localStorage.setItem(
-          "toDate",
-          today.getTime()
-        );
+        localStorage.setItem("toDate", today.getTime());
 
-        window.dispatchEvent(
-          new Event("dateFilterUpdated")
-        );
+        window.dispatchEvent(new Event("dateFilterUpdated"));
       }
     } else {
       setFromDate(currentMonthStart);
       setToDate(today);
 
-      localStorage.setItem(
-        "fromDate",
-        currentMonthStart.getTime()
-      );
+      localStorage.setItem("fromDate", currentMonthStart.getTime());
 
-      localStorage.setItem(
-        "toDate",
-        today.getTime()
-      );
+      localStorage.setItem("toDate", today.getTime());
 
-      window.dispatchEvent(
-        new Event("dateFilterUpdated")
-      );
+      window.dispatchEvent(new Event("dateFilterUpdated"));
     }
   }, []);
 
@@ -129,10 +121,7 @@ export default function TopBar({ collapsed, setCollapsed }) {
     <div className="topbar">
       {/* LEFT */}
       <div className="menu-icon">
-        <IconButton
-          size="small"
-          onClick={() => setCollapsed(!collapsed)}
-        >
+        <IconButton size="small" onClick={() => setCollapsed(!collapsed)}>
           <MenuIcon />
         </IconButton>
       </div>
@@ -141,10 +130,7 @@ export default function TopBar({ collapsed, setCollapsed }) {
       <div className="date-bar">
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <div className="date-filter">
-            <IconButton
-              onClick={openDatePopup}
-              className="calendar-btn"
-            >
+            <IconButton onClick={openDatePopup} className="calendar-btn">
               <CalendarMonthIcon />
             </IconButton>
 
@@ -231,11 +217,9 @@ export default function TopBar({ collapsed, setCollapsed }) {
 
           {!collapsed && (
             <div>
-              <p className="owner-name">
-                {user?.name || "User"}
-              </p>
+              <p className="owner-name">{user?.name || "User"}</p>
 
-              <p className="user">Owner</p>
+              <p className="user">{roleLabel}</p>
             </div>
           )}
         </div>

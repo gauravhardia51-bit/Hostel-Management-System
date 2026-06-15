@@ -13,7 +13,6 @@ import Pagination from "../../components/common/Pagination.jsx";
 import { toast } from "react-toastify";
 
 import { formatDateForDisplay } from "../../utils/formatDate.js";
-import { getAuthData } from "../../utils/auth";
 
 export default function Payments() {
   // ================= STATES =================
@@ -37,13 +36,15 @@ export default function Payments() {
   const [mode, setMode] = useState("add");
 
   const [status, setStatus] = useState("ALL");
+  const auth = getAuthData();
+  const hostelId = auth?.hostelId;
 
   // ✅ GLOBAL DATE REFRESH
   const [dateRefresh, setDateRefresh] = useState(0);
 
   // ================= DATE EVENT =================
-const auth = getAuthData();
-const hostelId = auth?.hostelId;
+  const auth = getAuthData();
+  const hostelId = auth?.hostelId;
   useEffect(() => {
     const handleDateChange = () => {
       setDateRefresh((prev) => prev + 1);
@@ -134,7 +135,7 @@ const hostelId = auth?.hostelId;
 
         status: newStatus,
 
-        hostelId: hostelId,
+        hostelId: Number(localStorage.getItem("hostelId")),
       });
 
       toast.success("Payment status updated ✅");

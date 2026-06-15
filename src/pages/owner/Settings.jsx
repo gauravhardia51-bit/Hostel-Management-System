@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import api from "../../api/Api";
+<<<<<<< Updated upstream
 import LockIcon from "@mui/icons-material/Lock";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import UpgradeIcon from "@mui/icons-material/Upgrade";
 import Tooltip from "@mui/material/Tooltip";
 import { getAuthData } from "../../utils/auth";
+=======
+import { getAuthData } from "../../utils/auth";
+
+>>>>>>> Stashed changes
 import {
   Card,
   CardContent,
@@ -170,6 +175,11 @@ export default function Settings() {
 
   const loadHostel = async () => {
     try {
+<<<<<<< Updated upstream
+=======
+      const auth = getAuthData();
+      const hostelId = auth?.hostelId;
+>>>>>>> Stashed changes
 
       if (!hostelId) return;
 

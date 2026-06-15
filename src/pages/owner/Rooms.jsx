@@ -11,7 +11,6 @@ import SearchIcon from "@mui/icons-material/Search";
 import "./Rooms.css";
 import Pagination from "../../components/common/Pagination.jsx";
 import { toast } from "react-toastify";
-import { getAuthData } from "../../utils/auth";
 
 export default function Rooms() {
   const [loading, setLoading] = useState(false);
@@ -25,11 +24,14 @@ export default function Rooms() {
   const [search, setSearch] = useState("");
 
   const auth = getAuthData();
-const hostelId = auth?.hostelId;
+  const hostelId = auth?.hostelId;
 
   const fetchRooms = async () => {
     try {
       setLoading(true);
+
+      const auth = getAuthData();
+      const hostelId = auth?.hostelId;
 
       const res = await api.get("/room/all", {
         params: {
@@ -232,7 +234,7 @@ const hostelId = auth?.hostelId;
               pageSize={10}
               onPageChange={setPage}
               maxVisible={5}
-              label="students"
+              label="rooms"
             />
           </div>
         </CardContent>

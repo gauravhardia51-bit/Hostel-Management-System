@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, Select, MenuItem, Button } from "@mui/material";
-
+import { getAuthData } from "../../utils/auth";
 import DownloadIcon from "@mui/icons-material/Download";
 
 import {
@@ -50,6 +50,7 @@ export default function Reports() {
 
     const loadData = async () => {
       try {
+        const hostelId = localStorage.getItem("hostelId");
         const { start, end } = getMonthRange(month);
 
         const res = await api.get("/reports", {
