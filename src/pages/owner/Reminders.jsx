@@ -11,6 +11,7 @@ import api from "../../api/Api.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
 
 import { formatDateForDisplay } from "../../utils/formatDate.js";
+import { getAuthData } from "../../utils/auth";
 
 export default function Reminders() {
   const [loading, setLoading] = useState(false);
@@ -32,8 +33,7 @@ export default function Reminders() {
   const hostelId = auth?.hostelId;
 
   // ================= STATUS STYLE =================
-  const auth = getAuthData();
-  const hostelId = auth?.hostelId;
+
   const getStatusStyle = (status) => {
     if (status === "SENT") {
       return "bg-green-100 text-green-600";

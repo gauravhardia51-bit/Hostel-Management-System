@@ -15,7 +15,6 @@ import {
 } from "recharts";
 
 import api from "../../api/Api";
-import { getAuthData } from "../../utils/auth";
 export default function Reports() {
   const [month, setMonth] = useState("April");
 

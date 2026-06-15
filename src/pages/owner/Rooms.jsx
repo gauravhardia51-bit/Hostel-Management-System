@@ -30,9 +30,6 @@ export default function Rooms() {
     try {
       setLoading(true);
 
-      const auth = getAuthData();
-      const hostelId = auth?.hostelId;
-
       const res = await api.get("/room/all", {
         params: {
           pageNo: page,

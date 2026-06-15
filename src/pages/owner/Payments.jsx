@@ -13,6 +13,7 @@ import Pagination from "../../components/common/Pagination.jsx";
 import { toast } from "react-toastify";
 
 import { formatDateForDisplay } from "../../utils/formatDate.js";
+import { getAuthData } from "../../utils/auth";
 
 export default function Payments() {
   // ================= STATES =================
@@ -43,8 +44,6 @@ export default function Payments() {
   const [dateRefresh, setDateRefresh] = useState(0);
 
   // ================= DATE EVENT =================
-  const auth = getAuthData();
-  const hostelId = auth?.hostelId;
   useEffect(() => {
     const handleDateChange = () => {
       setDateRefresh((prev) => prev + 1);
