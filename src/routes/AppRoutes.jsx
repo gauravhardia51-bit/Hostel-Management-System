@@ -16,7 +16,7 @@ import Notifications from "../pages/owner/notifications";
 import StudentDashboard from "../pages/student/StudentDashboard";
 import StudentPayments from "../pages/student/StudentPayments";
 import StudentComplaints from "../pages/student/StudentComplaints";
-import StudentRooms from "../pages/student/StudentRooms";
+import StudentRoom from "../pages/student/StudentRoom";
 import StudentNotifications from "../pages/student/StudentNotifications";
 import StudentProfile from "../pages/student/StudentProfile";
 //import StudentSettings from "../pages/student/StudentSettings";
@@ -174,7 +174,7 @@ export default function AppRoutes() {
           path="student/rooms"
           element={
             <ProtectedRoute role="ROLE_USER">
-              <StudentRooms />
+              <StudentRoom />
             </ProtectedRoute>
           }
         />
