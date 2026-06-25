@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 
 import { formatDateForDisplay } from "../../utils/formatDate.js";
 import { getAuthData } from "../../utils/auth";
+import CustomSelect from "../../components/common/CustomSelect.jsx";
 
 export default function Payments() {
   // ================= STATES =================
@@ -295,25 +296,27 @@ export default function Payments() {
 
       {/* FILTERS */}
 
-      <div className="flex gap-3 mb-4 flex-wrap">
+      <div className="flex gap-3 mb-4">
         {/* STATUS */}
 
-        <Select
-          size="small"
+        <CustomSelect
           value={status}
           onChange={(e) => {
             setPage(0);
-
             setStatus(e.target.value);
           }}
-          className="bg-white rounded-md"
+          displayEmpty
+          renderValue={(selected) => {
+            if (!selected || selected === "ALL") {
+              return <span style={{ color: "#9ca3af" }}>All Status</span>;
+            }
+            return selected;
+          }}
         >
           <MenuItem value="ALL">All Status</MenuItem>
-
           <MenuItem value="PAID">Paid</MenuItem>
-
           <MenuItem value="PENDING">Pending</MenuItem>
-        </Select>
+        </CustomSelect>
 
         {/* SEARCH */}
 

@@ -4,6 +4,7 @@ import {
   Card,
   CardContent,
   Button,
+  MenuItem,
   IconButton,
   TextField,
 } from "@mui/material";
@@ -30,6 +31,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
+import CustomSelect from "../../components/common/CustomSelect.jsx";
 
 export default function Students() {
   const [loading, setLoading] = useState(false);
@@ -39,6 +41,7 @@ export default function Students() {
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [search, setSearch] = useState("");
+  const [selectedRoom, setSelectedRoom] = useState("");
   const [open, setOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [mode, setMode] = useState("add"); // add | edit | view
@@ -97,7 +100,7 @@ export default function Students() {
           pageSize: 10,
           hostelId: hostelId,
           search: search,
-          //phone: search,
+          roomId: selectedRoom || undefined,
         },
       });
 
@@ -131,7 +134,7 @@ export default function Students() {
     }, 500);
 
     return () => clearTimeout(delay);
-  }, [page, search]);
+  }, [page, search, selectedRoom]);
 
   const handleDelete = async (id) => {
     const confirm = window.confirm("Are you sure you want to delete?");
@@ -297,13 +300,39 @@ export default function Students() {
       </div>
 
       {/* Search */}
-      <div className="search-bar">
-        <div className="search">
+      <div className="flex gap-3 mb-4">
+        <CustomSelect
+          value={selectedRoom}
+          displayEmpty
+          onChange={(e) => {
+            setPage(0);
+            setSelectedRoom(e.target.value);
+          }}
+          renderValue={(selected) => {
+            if (!selected) {
+              return <span style={{ color: "#9ca3af" }}>All Rooms</span>;
+            }
+
+            const room = rooms.find((r) => r.id === selected);
+            return room?.roomNumber || "";
+          }}
+        >
+          <MenuItem value="">
+            <em>All Rooms</em>
+          </MenuItem>
+
+          {rooms.map((room) => (
+            <MenuItem key={room.id} value={room.id}>
+              {room.roomNumber}
+            </MenuItem>
+          ))}
+        </CustomSelect>
+        <div className="flex items-center bg-white border rounded-md px-2 w-64">
           <SearchIcon className="search-icon" />
           <input
             type="text"
-            placeholder="Search student by name or phone..."
-            className="w-full px-2 py-2 outline-none text-sm"
+            placeholder="Search by name or phone..."
+            className="flex-1 px-3 py-2 outline-none text-sm"
             value={search}
             onChange={(e) => {
               setPage(0); // reset page

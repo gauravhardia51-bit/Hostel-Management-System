@@ -11,6 +11,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import "./Rooms.css";
 import Pagination from "../../components/common/Pagination.jsx";
 import { toast } from "react-toastify";
+import { getAuthData } from "../../utils/Auth";
 
 export default function Rooms() {
   const [loading, setLoading] = useState(false);

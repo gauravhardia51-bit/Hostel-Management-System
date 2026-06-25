@@ -12,6 +12,7 @@ import Pagination from "../../components/common/Pagination.jsx";
 
 import { formatDateForDisplay } from "../../utils/formatDate.js";
 import { getAuthData } from "../../utils/auth";
+import CustomSelect from "../../components/common/CustomSelect.jsx";
 
 export default function Reminders() {
   const [loading, setLoading] = useState(false);
@@ -207,7 +208,7 @@ export default function Reminders() {
       <div className="flex gap-3 mb-4">
         {/* STATUS FILTER */}
 
-        <Select
+        <CustomSelect
           size="small"
           value={status}
           onChange={(e) => {
@@ -216,15 +217,18 @@ export default function Reminders() {
             setStatus(e.target.value);
           }}
           className="bg-white rounded-md"
+          renderValue={(selected) => {
+            if (!selected || selected === "ALL") {
+              return <span style={{ color: "#9ca3af" }}>All Status</span>;
+            }
+            return selected;
+          }}
         >
           <MenuItem value="ALL">All Status</MenuItem>
-
           <MenuItem value="SENT">Sent</MenuItem>
-
           <MenuItem value="PENDING">Pending</MenuItem>
-
           <MenuItem value="FAILED">Failed</MenuItem>
-        </Select>
+        </CustomSelect>
 
         {/* SEARCH */}
 
