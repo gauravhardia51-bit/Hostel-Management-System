@@ -135,7 +135,7 @@ export default function Payments() {
 
         status: newStatus,
 
-        hostelId: Number(localStorage.getItem("hostelId")),
+        hostelId: Number(auth?.hostelId),
       });
 
       toast.success("Payment status updated ✅");

@@ -17,7 +17,7 @@ import {
   convertToTimestamp,
   formatDateForBackend,
 } from "../../utils/formatDate";
-import { getHostelsData } from "../../utils/auth";
+import { getAuthData, getHostelsData } from "../../utils/auth";
 
 export default function AddStudentDrawer({
   open,
@@ -64,9 +64,12 @@ export default function AddStudentDrawer({
     }
   }, [editData, open]);
 
+  const auth = getAuthData();
+  console.log("Auth Data in AddStudentDrawer: ", auth);
   const handleSubmit = () => {
     if (!validateAll()) return; // ❌ stop if error
     let payload = {
+      token: auth.token,
       name: form.name,
       phone: form.phone,
       roomId: Number(form.roomId),
@@ -74,12 +77,15 @@ export default function AddStudentDrawer({
       status: form.status,
       hostelId: Number(hostelId),
     };
+    console.log("Mode: ", mode);
     if (mode === "edit" && form.id) {
       payload.id = form.id;
     }
-    if (mode === "add" && editData?.email) {
-      payload.email = editData.email;
+    if (mode === "add" && form.email) {
+      console.log("Edit Data Email: ", form.email);
+      payload.email = form.email;
     }
+    console.log("Student Payload: ", payload);
     onSave(payload);
     onClose();
   };

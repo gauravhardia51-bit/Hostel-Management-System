@@ -35,7 +35,7 @@ export default function TopBar({ collapsed, setCollapsed }) {
   useEffect(() => {
     const loadUser = () => {
       try {
-        const storedUser = localStorage.getItem("user");
+        const storedUser = auth?.user;
         setUser(storedUser ? JSON.parse(storedUser) : null);
       } catch {
         console.log("Invalid user data");

@@ -49,7 +49,7 @@ export default function Reports() {
 
     const loadData = async () => {
       try {
-        const hostelId = localStorage.getItem("hostelId");
+        const hostelId = auth?.hostelId;
         const { start, end } = getMonthRange(month);
 
         const res = await api.get("/reports", {

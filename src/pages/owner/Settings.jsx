@@ -147,7 +147,7 @@ export default function Settings() {
   // ================= LOAD USER =================
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = auth?.user;
 
     if (user) {
       setUserData({
@@ -218,7 +218,7 @@ export default function Settings() {
 
       // ================= UPDATE USER LOCAL STORAGE =================
 
-      const existingUser = JSON.parse(localStorage.getItem("user"));
+      const existingUser = auth?.user;
 
       const updatedUser = {
         ...existingUser,
@@ -241,7 +241,7 @@ export default function Settings() {
       setHostelData(updatedHostelData);
 
       // update hostel localStorage list also
-      const hostels = JSON.parse(localStorage.getItem("hostels")) || [];
+      const hostels = JSON.parse(auth?.hostels) || [];
 
       const updatedHostels = hostels.map((h) =>
         h.id === updatedHostelData.id
@@ -282,7 +282,7 @@ export default function Settings() {
       await api.put("/hostel/update", hostelData);
 
       // update localStorage
-      const hostels = JSON.parse(localStorage.getItem("hostels")) || [];
+      const hostels = JSON.parse(auth?.hostels) || [];
 
       const updatedHostels = hostels.map((h) =>
         h.id === hostelData.id

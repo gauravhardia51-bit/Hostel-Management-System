@@ -48,10 +48,8 @@ export default function Students() {
   const auth = getAuthData();
   const hostelId = auth?.hostelId;
   const [notificationOpen, setNotificationOpen] = useState(false);
-
   const [notificationStudent, setNotificationStudent] = useState(null);
   const [notificationSettings, setNotificationSettings] = useState(null);
-
   const [notificationData, setNotificationData] = useState({
     title: "",
     message: "",
@@ -106,17 +104,12 @@ export default function Students() {
 
       const response = await api.get("/room/all", {
         params: {
-          //pageNo: page,
-          //pageSize: 10,
           hostelId: hostelId,
-          //search: search,
         },
       });
 
       const data = res.data;
       const roomData = response.data;
-      console.log("Student Response: ", data);
-      console.log("Room Response: ", roomData);
       setRooms(roomData.payLoad || []);
       setStudents(data.payLoad || []);
       setTotalPages(data.totalPage || 0);
