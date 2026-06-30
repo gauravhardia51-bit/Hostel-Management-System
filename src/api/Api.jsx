@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getAuthData } from "../utils/auth";
 
 const api = axios.create({
   baseURL: "http://localhost:9001/rentrova/api",
@@ -13,7 +14,8 @@ const publicRoutes = [
 ];
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  const auth = getAuthData();
+  const token = auth?.token;
 
   const isPublicRoute = publicRoutes.some((route) =>
     config.url?.includes(route),

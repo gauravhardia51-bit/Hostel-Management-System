@@ -4,6 +4,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import "./sidebar.css";
 import { ROUTES } from "../../routes/RoutesConstant";
 import { getHostelsData } from "../../utils/auth";
+import { getAuthData } from "../../utils/auth";
 import { FormControl, Select, MenuItem } from "@mui/material";
 
 const active = ({ isActive }) =>
@@ -13,7 +14,8 @@ export default function Sidebar({ collapsed }) {
   const navigate = useNavigate();
 
   // ✅ Get auth (role)
-  const auth = JSON.parse(localStorage.getItem("auth")) || {};
+  const auth = getAuthData();
+  //console.log("Auth Data in Sidebar:", auth); // Debugging line
   const role = auth?.user?.roleName;
 
   // ✅ Logout
@@ -46,13 +48,13 @@ export default function Sidebar({ collapsed }) {
   }, [hostelId]);
 
   const handleChange = (event) => {
-    const value = event.target.value;
+    const value = Number(event.target.value);
     setSelectedHostel(value);
 
     // ✅ Update auth instead of separate key
     const updatedAuth = {
       ...auth,
-      hostelId: value,
+      hostelId: Number(value),
     };
 
     localStorage.setItem("auth", JSON.stringify(updatedAuth));
@@ -65,7 +67,7 @@ export default function Sidebar({ collapsed }) {
   // =========================
 
   const adminMenu = [
-    { path: "/", label: "Dashboard", icon: "🏠" },
+    { path: "/dashboard", label: "Dashboard", icon: "🏠" },
     { path: "students", label: "Students", icon: "👨‍🎓" },
     { path: "rooms", label: "Rooms", icon: "🛏" },
     { path: "payments", label: "Payments", icon: "💳" },
@@ -77,7 +79,7 @@ export default function Sidebar({ collapsed }) {
   ];
 
   const studentMenu = [
-    { path: "/", label: "Dashboard", icon: "🏠" },
+    { path: "/student/dashboard", label: "Dashboard", icon: "🏠" },
     { path: "student/rooms", label: "My Room", icon: "🛏" },
     { path: "student/payments", label: "Payments", icon: "💳" },
     { path: "student/complaints", label: "Complaints", icon: "⚠" },
@@ -111,13 +113,15 @@ export default function Sidebar({ collapsed }) {
           <div className="hostel-info">
             <FormControl fullWidth size="small">
               <Select
-                value={selectedHostel || ""}
+                value={Number(selectedHostel) || ""}
                 onChange={handleChange}
                 displayEmpty
                 variant="standard"
                 disableUnderline
                 renderValue={(selected) => {
-                  const hostel = hostels.find((h) => h.id === selected);
+                  const hostel = hostels.find(
+                    (h) => Number(h.id) === Number(selected),
+                  );
 
                   return (
                     <div className="flex flex-col">
@@ -145,10 +149,6 @@ export default function Sidebar({ collapsed }) {
                   },
                 }}
               >
-                <MenuItem value="">
-                  <em>Select Hostel</em>
-                </MenuItem>
-
                 {hostels.map((h) => (
                   <MenuItem key={h.id} value={h.id}>
                     {h.hostelName}

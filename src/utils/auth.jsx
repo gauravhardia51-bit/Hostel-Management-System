@@ -14,15 +14,6 @@ export const getAuthData = () => {
   }
 };
 
-// const auth = getAuthData();
-
-// auth.token
-// auth.user
-// auth.hostels
-// auth.hostelId
-
-//const { hostelId, selectedHostel } = getHostelsData();
-
 // ✅ Logout
 export const logout = () => {
   localStorage.removeItem("auth"); // 🔥 remove full object
@@ -48,10 +39,13 @@ export const getHostelsData = () => {
       };
     }
 
-    const hostelId = auth.hostelId || null;
     const hostels = auth.hostels || [];
 
-    const selectedHostel = hostels.find((h) => h.id === hostelId);
+    // ✅ Use saved hostelId if available, otherwise first hostel
+    const hostelId = Number(auth.hostelId) || null;
+
+    const selectedHostel =
+      hostels.find((h) => Number(h.id) === hostelId) || null;
 
     return {
       hostelId,
@@ -72,9 +66,12 @@ export const getHostelsData = () => {
 // ✅ Optional: update hostelId (very useful)
 export const updateHostelId = (newHostelId) => {
   const auth = getAuthData();
+
   if (!auth) return;
 
-  auth.hostelId = newHostelId;
+  auth.hostelId = Number(newHostelId);
 
   localStorage.setItem("auth", JSON.stringify(auth));
+
+  window.dispatchEvent(new Event("hostelUpdated"));
 };

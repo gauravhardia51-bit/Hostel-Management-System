@@ -18,7 +18,6 @@ import ApartmentIcon from "@mui/icons-material/Apartment";
 
 import api from "../../api/Api";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
 import { setAuthData } from "../../utils/auth";
 
 export default function Login() {
@@ -47,7 +46,7 @@ export default function Login() {
         userCode: form.userCode,
         password: form.password,
       });
-
+      //console.log("Login Response:", response?.data?.payLoad);
       const token = response?.data?.payLoad?.accessToken;
 
       if (!token) {
@@ -55,30 +54,12 @@ export default function Login() {
         return;
       }
 
-      // ✅ DECODE TOKEN
-      const decoded = jwtDecode(token);
-      const userId = decoded.userId;
-
-      // ✅ FETCH USER
-      const userRes = await api.get("/users/id", {
-        params: { id: userId },
-      });
-
-      const user = userRes?.data?.payLoad;
-
-      // ✅ FETCH HOSTELS
-      const hostelRes = await api.get("/hostel/all", {
-        params: { userId },
-      });
-
-      const hostels = hostelRes?.data?.payLoad || [];
-
       // ✅ STORE AUTH DATA (Token + User + Hostels)
       const auth = {
         token,
-        user,
-        hostels,
-        hostelId: hostels?.[0]?.id || null,
+        user: response.data.payLoad.user || null,
+        hostels: response.data.payLoad.hostels || [],
+        hostelId: Number(response.data.payLoad.hostels?.[0]?.id) || null,
       };
 
       setAuthData(auth);

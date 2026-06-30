@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { Card } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-
 import api from "../../api/Api";
 import { getAuthData } from "../../utils/auth";
-
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
 
 const COLORS = ["#22c55e", "#ef4444"];
@@ -19,8 +17,8 @@ export default function Data() {
   const fetchPayments = async () => {
     try {
       const auth = getAuthData();
-      const hostelId = auth?.hostelId;
-
+      const hostelId = auth.hostelId;
+      //console.log("Fetching payments for hostelId:", hostelId); // Debugging line
       if (!hostelId) return;
 
       const res = await api.get("/payment/all", {
