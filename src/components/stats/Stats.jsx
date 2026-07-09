@@ -67,7 +67,6 @@ export default function Stats() {
       ]);
 
       setDashboardData(dashboardRes.data.payLoad);
-      console.log("Dashboard Response", dashboardRes.data);
       setPayments(paymentRes.data.payLoad?.slice(0, 3));
 
       setComplaints(complaintRes.data.payLoad?.slice(0, 3));

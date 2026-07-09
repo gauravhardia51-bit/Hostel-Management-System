@@ -84,8 +84,6 @@ export default function Settings() {
         },
       });
 
-      console.log(response.data.payLoad);
-
       setNotificationSettings(response.data.payLoad?.[0] || {});
     } catch (error) {
       console.log(error);

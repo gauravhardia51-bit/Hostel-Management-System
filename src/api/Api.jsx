@@ -16,7 +16,6 @@ const publicRoutes = [
 api.interceptors.request.use((config) => {
   const auth = getAuthData();
   const token = auth?.token;
-
   const isPublicRoute = publicRoutes.some((route) =>
     config.url?.includes(route),
   );

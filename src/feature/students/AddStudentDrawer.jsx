@@ -65,7 +65,6 @@ export default function AddStudentDrawer({
   }, [editData, open]);
 
   const auth = getAuthData();
-  console.log("Auth Data in AddStudentDrawer: ", auth);
   const handleSubmit = () => {
     if (!validateAll()) return; // ❌ stop if error
     let payload = {
@@ -77,15 +76,12 @@ export default function AddStudentDrawer({
       status: form.status,
       hostelId: Number(hostelId),
     };
-    console.log("Mode: ", mode);
     if (mode === "edit" && form.id) {
       payload.id = form.id;
     }
     if (mode === "add" && form.email) {
-      console.log("Edit Data Email: ", form.email);
       payload.email = form.email;
     }
-    console.log("Student Payload: ", payload);
     onSave(payload);
     onClose();
   };
