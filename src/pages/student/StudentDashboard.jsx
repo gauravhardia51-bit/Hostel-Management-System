@@ -1,42 +1,30 @@
-// import React from "react";
-// import StStats from "../../components/stats/StStats";
-// import StDetails from "../../components/details/StDetails";
-
-// export default function StudentDashboard() {
-//   return (
-//     <div>
-//       <StStats />
-//       <StDetails />
-//     </div>
-//   );
-// }
-
 import { useEffect, useState } from "react";
 import { Card } from "@mui/material";
-import { PieChart, Pie, Cell } from "recharts";
+import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
+import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+
 import api from "../../api/Api";
 import { getAuthData } from "../../utils/auth";
-
-const COLORS = ["#22c55e", "#ef4444"];
 
 export default function StudentDashboard() {
   const [data, setData] = useState(null);
 
   const auth = getAuthData();
-  const userId = auth?.user?.id;
-  const token = auth?.token;
+
   const fetchDashboard = async () => {
     try {
       const response = await api.get("/student/dashboard", {
         params: {
-          userId: userId,
-          token: token,
+          userId: auth?.user?.id,
+          token: auth?.token,
         },
       });
 
       setData(response.data.payLoad);
     } catch (error) {
-      console.log("Dashboard Error :", error);
+      console.log(error);
     }
   };
 
@@ -52,257 +40,160 @@ export default function StudentDashboard() {
     );
   }
 
-  const pieData = [
+  const cards = [
     {
-      name: "Paid",
-      value: data.paymentOverview.paidPercentage,
+      title: "My Room",
+      value: data.roomNumber,
+      sub: `${data.sharingCount} Sharing`,
+      icon: <MeetingRoomIcon fontSize="small" />,
+      bg: "bg-purple-100",
+      color: "text-purple-600",
     },
+
     {
-      name: "Pending",
-      value: data.paymentOverview.pendingPercentage,
+      title: "Pending Amount",
+      value: `₹${data.pendingAmount.toLocaleString()}`,
+      sub:
+        data.pendingAmount > 0
+          ? "Payment Pending"
+          : "No Pending Payment",
+      icon: <AccountBalanceWalletIcon fontSize="small" />,
+      bg: "bg-red-100",
+      color: "text-red-600",
+    },
+
+    {
+      title: "Complaints",
+      value: data.totalComplaints,
+      sub: `${data.openComplaints} Open • ${data.closedComplaints} Closed`,
+      icon: <ReportProblemIcon fontSize="small" />,
+      bg: "bg-green-100",
+      color: "text-green-600",
+    },
+
+    {
+      title: "Notifications",
+      value: data.unreadNotifications,
+      sub: "Unread Notifications",
+      icon: <NotificationsIcon fontSize="small" />,
+      bg: "bg-yellow-100",
+      color: "text-yellow-600",
     },
   ];
 
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-5">Student Dashboard</h2>
+      <div className="mb-5">
+        <h2 className="text-xl font-semibold">
+          Welcome, {data.studentName}
+        </h2>
 
-      {/* ================= TOP CARDS ================= */}
-
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        {/* ROOM */}
-
-        <Card className="rounded-xl shadow-sm p-5">
-          <p className="text-gray-500 text-sm">My Room</p>
-
-          <h2 className="text-2xl font-bold mt-1">{data.summary.roomNumber}</h2>
-
-          <p className="text-xs text-gray-500 mt-1">
-            {data.summary.sharingType}
-          </p>
-        </Card>
-
-        {/* PENDING AMOUNT */}
-
-        <Card className="rounded-xl shadow-sm p-5">
-          <p className="text-gray-500 text-sm">Pending Amount</p>
-
-          <h2 className="text-2xl font-bold text-red-500 mt-1">
-            ₹{data.summary.pendingAmount.toLocaleString()}
-          </h2>
-
-          <p className="text-xs text-red-500 mt-1">
-            Please pay before due date
-          </p>
-        </Card>
-
-        {/* COMPLAINTS */}
-
-        <Card className="rounded-xl shadow-sm p-5">
-          <p className="text-gray-500 text-sm">Complaints</p>
-
-          <h2 className="text-2xl font-bold mt-1">
-            {data.summary.complaintCount}
-          </h2>
-
-          <p className="text-xs text-gray-500 mt-1">Active complaints</p>
-        </Card>
-
-        {/* NOTIFICATIONS */}
-
-        <Card className="rounded-xl shadow-sm p-5">
-          <p className="text-gray-500 text-sm">Notifications</p>
-
-          <h2 className="text-2xl font-bold mt-1">
-            {data.summary.notificationCount}
-          </h2>
-
-          <p className="text-xs text-gray-500 mt-1">Unread notifications</p>
-        </Card>
+        <p className="text-sm text-gray-500">
+          Student Dashboard
+        </p>
       </div>
 
-      {/* ================= MIDDLE SECTION ================= */}
-      <div className="grid grid-cols-2 gap-6 mb-6">
-        {/* PAYMENT OVERVIEW */}
-        <Card className="p-5 rounded-xl shadow-sm">
-          <h3 className="text-lg font-semibold mb-3">Payment Overview</h3>
+      {/* Top Cards */}
 
-          <h2 className="text-2xl font-bold mb-4">
-            ₹{data.paymentOverview.totalRent.toLocaleString()}
-          </h2>
+      <div className="grid grid-cols-4 gap-5 mb-6">
+        {cards.map((item, index) => (
+          <Card key={index} className="rounded-xl shadow-sm">
+            <div className="p-5 flex items-center gap-4">
+              <div className={`${item.bg} p-3 rounded-lg ${item.color}`}>
+                {item.icon}
+              </div>
 
-          <div className="flex justify-center">
-            <PieChart width={260} height={220}>
-              <Pie
-                data={pieData}
-                cx="50%"
-                cy="50%"
-                innerRadius={55}
-                outerRadius={85}
-                dataKey="value"
-                stroke="none"
-              >
-                {pieData.map((entry, index) => (
-                  <Cell key={index} fill={COLORS[index]} />
-                ))}
-              </Pie>
-            </PieChart>
-          </div>
+              <div>
+                <p className="text-sm text-gray-500">
+                  {item.title}
+                </p>
 
-          <div className="flex justify-center gap-8 mt-2">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-green-500"></div>
-              <span>Paid ({data.paymentOverview.paidPercentage}%)</span>
+                <h2 className="text-2xl font-bold">
+                  {item.value}
+                </h2>
+
+                <p className="text-xs text-gray-500 mt-1">
+                  {item.sub}
+                </p>
+              </div>
             </div>
-
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-500"></div>
-              <span>Pending ({data.paymentOverview.pendingPercentage}%)</span>
-            </div>
-          </div>
-        </Card>
-
-        {/* ROOM DETAILS */}
-        <Card className="p-5 rounded-xl shadow-sm">
-          <h3 className="text-lg font-semibold mb-3">Room Details</h3>
-
-          <img
-            src={data.roomDetails.image}
-            alt="Room"
-            className="rounded-lg h-44 w-full object-cover mb-4"
-          />
-
-          <div className="space-y-2 text-sm">
-            <p>
-              <span className="font-semibold">Room Number :</span>{" "}
-              {data.roomDetails.roomNumber}
-            </p>
-
-            <p>
-              <span className="font-semibold">Floor :</span>{" "}
-              {data.roomDetails.floor}
-            </p>
-
-            <p>
-              <span className="font-semibold">Sharing :</span>{" "}
-              {data.roomDetails.sharingType}
-            </p>
-
-            <p>
-              <span className="font-semibold">Joined On :</span>{" "}
-              {new Date(data.roomDetails.joinedOn).toLocaleDateString("en-IN")}
-            </p>
-          </div>
-        </Card>
+          </Card>
+        ))}
       </div>
 
-      {/* ================= TABLES ================= */}
+      {/* Details */}
 
       <div className="grid grid-cols-2 gap-6">
-        {/* RECENT PAYMENTS */}
-
         <Card className="rounded-xl shadow-sm p-5">
-          <div className="flex justify-between mb-4">
-            <h3 className="font-semibold">Recent Payments</h3>
+          <h3 className="font-semibold text-lg mb-5">
+            Room Details
+          </h3>
 
-            <button className="text-indigo-600 text-sm">View All</button>
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-gray-500">Student Name</span>
+
+              <span className="font-medium">
+                {data.studentName}
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-gray-500">Room Number</span>
+
+              <span className="font-medium">
+                {data.roomNumber}
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-gray-500">Sharing</span>
+
+              <span className="font-medium">
+                {data.sharingCount} Sharing
+              </span>
+            </div>
           </div>
-
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-gray-500 border-b">
-                <th className="pb-2">Month</th>
-
-                <th>Amount</th>
-
-                <th>Due Date</th>
-
-                <th>Status</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {data.recentPayments.map((payment, index) => (
-                <tr key={index} className="border-b h-12">
-                  <td>{payment.month}</td>
-
-                  <td>₹{payment.amount}</td>
-
-                  <td>
-                    {new Date(payment.dueDate).toLocaleDateString("en-IN")}
-                  </td>
-
-                  <td>
-                    <span
-                      className={`px-2 py-1 rounded text-xs
-
-${
-  payment.status === "PAID"
-    ? "bg-green-100 text-green-600"
-    : "bg-red-100 text-red-600"
-}`}
-                    >
-                      {payment.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </Card>
 
-        {/* RECENT COMPLAINTS */}
-
         <Card className="rounded-xl shadow-sm p-5">
-          <div className="flex justify-between mb-4">
-            <h3 className="font-semibold">Recent Complaints</h3>
+          <h3 className="font-semibold text-lg mb-5">
+            Complaint Summary
+          </h3>
 
-            <button className="text-indigo-600 text-sm">View All</button>
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span>Total Complaints</span>
+
+              <span className="font-semibold">
+                {data.totalComplaints}
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span>Open</span>
+
+              <span className="text-red-600 font-semibold">
+                {data.openComplaints}
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span>In Progress</span>
+
+              <span className="text-yellow-600 font-semibold">
+                {data.inProgressComplaints}
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span>Closed</span>
+
+              <span className="text-green-600 font-semibold">
+                {data.closedComplaints}
+              </span>
+            </div>
           </div>
-
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-gray-500 border-b">
-                <th className="pb-2">Ticket</th>
-
-                <th>Issue</th>
-
-                <th>Date</th>
-
-                <th>Status</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {data.recentComplaints.map((complaint, index) => (
-                <tr key={index} className="border-b h-12">
-                  <td>{complaint.ticketNumber}</td>
-
-                  <td className="max-w-[180px] truncate">{complaint.issue}</td>
-
-                  <td>
-                    {new Date(complaint.date).toLocaleDateString("en-IN")}
-                  </td>
-
-                  <td>
-                    <span
-                      className={`px-2 py-1 rounded text-xs
-
-${
-  complaint.status === "CLOSED"
-    ? "bg-green-100 text-green-600"
-    : complaint.status === "IN_PROGRESS"
-      ? "bg-yellow-100 text-yellow-700"
-      : "bg-red-100 text-red-600"
-}`}
-                    >
-                      {complaint.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </Card>
       </div>
     </div>

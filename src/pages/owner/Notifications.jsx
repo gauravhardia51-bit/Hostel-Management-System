@@ -17,6 +17,9 @@ import { toast } from "react-toastify";
 
 import api from "../../api/Api";
 import { getAuthData } from "../../utils/auth";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 export default function Notifications() {
   const auth = getAuthData();
@@ -189,46 +192,61 @@ export default function Notifications() {
             <div>
               <Card variant="outlined" className="mb-6">
                 <CardContent>
-                  <div className="grid md:grid-cols-4 gap-4">
-                    <TextField
-                      label="Search"
-                      size="small"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                    />
+                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+  <TextField
+    label="Search"
+    size="small"
+    fullWidth
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+  />
 
-                    <TextField
-                      label="From Date"
-                      type="date"
-                      size="small"
-                      value={fromDate}
-                      onChange={(e) => setFromDate(e.target.value)}
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                    />
+  <LocalizationProvider dateAdapter={AdapterDateFns}>
+  <DatePicker
+    label="From Date"
+    value={fromDate ? new Date(fromDate) : null}
+    format="dd/MM/yyyy"
+    onChange={(value) =>
+      setFromDate(value ? value.toISOString().split("T")[0] : "")
+    }
+    slotProps={{
+      textField: {
+        size: "small",
+        fullWidth: true,
+      },
+    }}
+  />
+</LocalizationProvider>
 
-                    <TextField
-                      label="To Date"
-                      type="date"
-                      size="small"
-                      value={toDate}
-                      onChange={(e) => setToDate(e.target.value)}
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                    />
+<LocalizationProvider dateAdapter={AdapterDateFns}>
+  <DatePicker
+    label="To Date"
+    value={toDate ? new Date(toDate) : null}
+    format="dd/MM/yyyy"
+    onChange={(value) =>
+      setToDate(value ? value.toISOString().split("T")[0] : "")
+    }
+    slotProps={{
+      textField: {
+        size: "small",
+        fullWidth: true,
+      },
+    }}
+  />
+</LocalizationProvider>
 
-                    <Button
-                      variant="contained"
-                      onClick={() => {
-                        setPageNo(1);
-                        loadHistory();
-                      }}
-                    >
-                      Search
-                    </Button>
-                  </div>
+  <Button
+    variant="contained"
+    size="medium"
+    sx={{ minHeight: 40 }}
+    onClick={() => {
+      setPageNo(1);
+      loadHistory();
+    }}
+  >
+    Search
+  </Button>
+</div>
                 </CardContent>
               </Card>
 
