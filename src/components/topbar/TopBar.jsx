@@ -32,24 +32,7 @@ export default function TopBar({ collapsed, setCollapsed }) {
         ? "Student"
         : "User";
 
-  useEffect(() => {
-    const loadUser = () => {
-      try {
-        const storedUser = auth?.user;
-        setUser(storedUser ? JSON.parse(storedUser) : null);
-      } catch {
-        console.log("Invalid user data");
-      }
-    };
-
-    loadUser();
-
-    window.addEventListener("userUpdated", loadUser);
-
-    return () => {
-      window.removeEventListener("userUpdated", loadUser);
-    };
-  }, []);
+  useEffect(() => { const loadUser = () => { const currentAuth = getAuthData(); setUser(currentAuth?.user || null); }; loadUser(); window.addEventListener("userUpdated", loadUser); return () => { window.removeEventListener("userUpdated", loadUser); }; }, []);
 
   // ===== DATE =====
 
