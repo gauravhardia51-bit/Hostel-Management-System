@@ -1,174 +1,93 @@
-// import { useEffect, useState } from "react";
-// import { Card } from "@mui/material";
-// import api from "../../api/Api";
-
-// export default function StudentRoom() {
-//   const [loading, setLoading] = useState(false);
-//   const [rooms, setRooms] = useState([]);
-//   const [page, setPage] = useState(0);
-//   const [open, setOpen] = useState(false);
-//   const [totalPages, setTotalPages] = useState(0);
-//   const [totalElements, setTotalElements] = useState(0);
-//   const [selectedRoom, setSelectedRoom] = useState(null);
-//   const [mode, setMode] = useState("add"); // add | edit | view
-//   const [search, setSearch] = useState("");
-
-//   const auth = getAuthData();
-//   const hostelId = auth?.hostelId;
-
-//   const fetchRooms = async () => {
-//     try {
-//       setLoading(true);
-
-//       const res = await api.get("/student/room", {
-//         params: {
-//           pageNo: page,
-//           pageSize: 10,
-//           hostelId: hostelId,
-//           search: search,
-//         },
-//       });
-
-//       const data = res.data;
-
-//       setRooms(data.payLoad || []);
-//       setTotalPages(data.totalPage || 0);
-//       setTotalElements(data.totalRow || 0);
-//     } catch (err) {
-//       console.error(err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     const delay = setTimeout(() => {
-//       fetchRooms();
-//     }, 300);
-
-//     return () => clearTimeout(delay);
-//   }, [page, search]);
-
-//   if (!room) return <p>Loading...</p>;
-
-//   return (
-//     <div className="p-4">
-//       <h2 className="text-lg font-semibold mb-4">My Room</h2>
-
-//       {/* ROOM INFO */}
-//       <Card className="p-4 rounded-xl mb-6">
-//         <h3 className="font-semibold mb-3">Room Information</h3>
-
-//         <div className="grid grid-cols-2 gap-4">
-//           {/* LEFT */}
-//           <div className="space-y-2 text-sm">
-//             <p>
-//               <b>Room Number:</b> {room.roomNumber}
-//             </p>
-//             <p>
-//               <b>Floor:</b> {room.floor}
-//             </p>
-//             <p>
-//               <b>Sharing Type:</b> {room.capacity} Members
-//             </p>
-//             <p>
-//               <b>Occupied:</b> {room.occupied} Members
-//             </p>
-//             <p>
-//               <b>Joined On:</b>{" "}
-//               {new Date(room.joinedAt).toLocaleDateString("en-IN")}
-//             </p>
-//           </div>
-
-//           {/* RIGHT IMAGE */}
-//           <div>
-//             <img
-//               src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2"
-//               alt="room"
-//               className="rounded-lg w-full h-40 object-cover"
-//             />
-//           </div>
-//         </div>
-//       </Card>
-
-//       {/* ROOMMATES */}
-//       <Card className="p-4 rounded-xl">
-//         <h3 className="font-semibold mb-3">Roommates</h3>
-
-//         {roommates.map((r, i) => (
-//           <div
-//             key={i}
-//             className="flex justify-between items-center border-b py-3"
-//           >
-//             <div>
-//               <p className="font-medium">{r.name}</p>
-//               <p className="text-xs text-gray-500">{r.phone}</p>
-//             </div>
-
-//             {r.isYou && (
-//               <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">
-//                 You
-//               </span>
-//             )}
-//           </div>
-//         ))}
-
-//         <button className="mt-4 w-full border rounded p-2 text-indigo-600">
-//           View All Room Details
-//         </button>
-//       </Card>
-//     </div>
-//   );
-// }
-
 import { useEffect, useState } from "react";
 import { Card } from "@mui/material";
+import api from "../../api/Api";
+import { toast } from "react-toastify";
+import { formatDateForDisplay } from "../../utils/formatDate";
+import { getAuthData } from "../../utils/auth";
 
 export default function StudentRoom() {
   const [roomData, setRoomData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const auth = getAuthData();
+  //const userId = auth?.user.id;
 
-  // ================= DUMMY DATA =================
-  useEffect(() => {
-    const dummyResponse = {
-      payLoad: {
-        room: {
-          roomNumber: "R-204",
-          floor: "2nd Floor",
-          capacity: 3,
-          occupied: 2,
-          joinedAt: 1711929600000,
+  //   {
+  //   "timeStamp": "...",
+  //   "status": 200,
+  //   "message": "Success",
+  //   "payLoad": {
+  //     "room": {
+  //       "roomNumber": "R-204",
+  //       "floor": "2nd Floor",
+  //       "capacity": 3,
+  //       "occupied": 2,
+  //       "joinedAt": 1711929600000
+  //     },
+  //     "roommates": [
+  //       {
+  //         "name": "Rahul Sharma",
+  //         "phone": "9876543210",
+  //         "isYou": true
+  //       },
+  //       {
+  //         "name": "Aman Verma",
+  //         "phone": "9123456780",
+  //         "isYou": false
+  //       }
+  //     ]
+  //   }
+  // }
+
+  const fetchRoom = async () => {
+    try {
+      setLoading(true);
+
+      const res = await api.get("/student/all", {
+        params: {
+          userId: auth?.user.id,
         },
-        roommates: [
-          {
-            name: "Rahul Sharma",
-            phone: "9876543210",
-            isYou: true,
-          },
-          {
-            name: "Aman Verma",
-            phone: "9123456780",
-            isYou: false,
-          },
-        ],
-      },
-    };
+      });
 
-    setRoomData(dummyResponse.payLoad);
+      const data = res.data.payLoad[0];
+      console.log("Student data:", data);
+
+      const response = await api.get("/student/id", {
+        params: {
+          id: data?.id,
+        },
+      });
+      setRoomData(response.data.payLoad);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load room details");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRoom();
   }, []);
 
-  if (!roomData) return <p>Loading...</p>;
+  if (loading) {
+    return <div className="text-center py-10">Loading...</div>;
+  }
+
+  if (!roomData) {
+    return <div className="text-center py-10">No room assigned.</div>;
+  }
 
   const { room, roommates } = roomData;
-
+  console.log("Room Data:", roomData);
   return (
     <div>
       {/* PAGE TITLE */}
       <h2 className="text-lg font-semibold mb-4">My Room</h2>
 
-      {/* ================= ROOM INFO ================= */}
+      {/* ROOM INFO */}
       <Card className="p-5 rounded-xl mb-6">
         <div className="grid grid-cols-2 gap-6 items-center">
-          {/* LEFT DETAILS */}
+          {/* LEFT */}
           <div>
             <h3 className="font-semibold mb-4">Room Information</h3>
 
@@ -196,47 +115,54 @@ export default function StudentRoom() {
               <div>
                 <p className="text-gray-500">Joined On</p>
                 <p className="font-medium">
-                  {new Date(room.joinedAt).toLocaleDateString("en-IN")}
+                  {formatDateForDisplay(room.joinedAt)}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* RIGHT IMAGE */}
+          {/* IMAGE */}
           <div>
             <img
               src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2"
               alt="Room"
-              className="rounded-lg w-full h-[200px] object-cover"
+              className="rounded-lg w-full h-[220px] object-cover"
             />
           </div>
         </div>
       </Card>
 
-      {/* ================= ROOMMATES ================= */}
+      {/* ROOMMATES */}
       <Card className="p-5 rounded-xl">
         <h3 className="font-semibold mb-4">Roommates</h3>
 
-        {roommates.map((mate, index) => (
-          <div
-            key={index}
-            className="flex justify-between items-center border-b py-3"
-          >
-            <div>
-              <p className="font-medium">{mate.name}</p>
-              <p className="text-gray-500 text-sm">{mate.phone}</p>
-            </div>
-
-            {mate.isYou && (
-              <span className="bg-green-100 text-green-600 text-xs px-2 py-1 rounded">
-                You
-              </span>
-            )}
+        {roommates.length === 0 ? (
+          <div className="text-center py-6 text-gray-500">
+            No roommates found.
           </div>
-        ))}
+        ) : (
+          roommates.map((mate, index) => (
+            <div
+              key={index}
+              className="flex justify-between items-center border-b py-3"
+            >
+              <div>
+                <p className="font-medium">{mate.name}</p>
 
-        <div className="mt-4">
-          <button className="w-full bg-indigo-100 text-indigo-600 py-2 rounded-lg">
+                <p className="text-gray-500 text-sm">{mate.phone}</p>
+              </div>
+
+              {mate.isYou && (
+                <span className="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full">
+                  You
+                </span>
+              )}
+            </div>
+          ))
+        )}
+
+        <div className="mt-5">
+          <button className="w-full border border-indigo-500 text-indigo-600 hover:bg-indigo-50 py-2 rounded-lg transition">
             View All Room Details
           </button>
         </div>

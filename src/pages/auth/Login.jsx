@@ -61,7 +61,7 @@ export default function Login() {
         hostels: response.data.payLoad.hostels || [],
         hostelId: Number(response.data.payLoad.hostels?.[0]?.id) || null,
       };
-
+      console.log("Auth Data:", auth);
       setAuthData(auth);
 
       // ✅ REDIRECT

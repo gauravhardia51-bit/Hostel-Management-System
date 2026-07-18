@@ -67,22 +67,24 @@ export default function Sidebar({ collapsed }) {
   // =========================
 
   const adminMenu = [
-    { path: "/dashboard", label: "Dashboard", icon: "🏠" },
+    //{ path: "/dashboard", label: "Dashboard", icon: "🏠" },
     { path: "students", label: "Students", icon: "👨‍🎓" },
     { path: "rooms", label: "Rooms", icon: "🛏" },
     { path: "payments", label: "Payments", icon: "💳" },
     { path: "reminders", label: "Reminders", icon: "🔔" },
     { path: "complaints", label: "Complaints", icon: "⚠" },
+    { path: "RoomInspectionList", label: "Room Inspections", icon: "📝" },
     { path: "reports", label: "Reports", icon: "📊" },
     { path: "notifications", label: "Notifications", icon: "📢" },
     { path: "settings", label: "Settings", icon: "⚙" },
   ];
 
   const studentMenu = [
-    { path: "/student/dashboard", label: "Dashboard", icon: "🏠" },
+    //{ path: "/student/dashboard", label: "Dashboard", icon: "🏠" },
     { path: "student/rooms", label: "My Room", icon: "🛏" },
     { path: "student/payments", label: "Payments", icon: "💳" },
     { path: "student/complaints", label: "Complaints", icon: "⚠" },
+    { path: "student/room-inspection", label: "Room Inspection", icon: "📝" },
     { path: "student/notifications", label: "Notifications", icon: "🔔" },
     { path: "student/profile", label: "Profile", icon: "👤" },
     { path: "student/settings", label: "Settings", icon: "⚙" },

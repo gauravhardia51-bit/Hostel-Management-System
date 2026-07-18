@@ -20,6 +20,8 @@ import StudentRoom from "../pages/student/StudentRoom";
 import StudentNotifications from "../pages/student/StudentNotifications";
 import StudentProfile from "../pages/student/StudentProfile";
 //import StudentSettings from "../pages/student/StudentSettings";
+import StudentRoomInspection from "../pages/student/StudentRoomInspection";
+import RoomInspectionList from "../pages/owner/RoomInspectionList";
 
 // AUTH
 import Login from "../pages/auth/Login";
@@ -142,6 +144,15 @@ export default function AppRoutes() {
           }
         />
 
+        <Route
+          path="RoomInspectionList"
+          element={
+            <ProtectedRoute role="ROLE_ADMIN">
+              <RoomInspectionList />
+            </ProtectedRoute>
+          }
+        />
+
         {/* ================= STUDENT ROUTES ================= */}
         <Route
           path="student/dashboard"
@@ -193,6 +204,15 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute role="ROLE_USER">
               <StudentProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="student/room-inspection"
+          element={
+            <ProtectedRoute role="ROLE_USER">
+              <StudentRoomInspection />
             </ProtectedRoute>
           }
         />
