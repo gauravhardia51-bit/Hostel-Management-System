@@ -19,6 +19,8 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { getAuthData } from "../../utils/auth";
 
+import { setDateFilter, getDateFilter } from "../../utils/auth";
+
 export default function TopBar({ collapsed, setCollapsed }) {
   const navigate = useNavigate();
   // ===== USER =====
@@ -32,7 +34,17 @@ export default function TopBar({ collapsed, setCollapsed }) {
         ? "Student"
         : "User";
 
-  useEffect(() => { const loadUser = () => { const currentAuth = getAuthData(); setUser(currentAuth?.user || null); }; loadUser(); window.addEventListener("userUpdated", loadUser); return () => { window.removeEventListener("userUpdated", loadUser); }; }, []);
+  useEffect(() => {
+    const loadUser = () => {
+      const currentAuth = getAuthData();
+      setUser(currentAuth?.user || null);
+    };
+    loadUser();
+    window.addEventListener("userUpdated", loadUser);
+    return () => {
+      window.removeEventListener("userUpdated", loadUser);
+    };
+  }, []);
 
   // ===== DATE =====
 
@@ -42,11 +54,9 @@ export default function TopBar({ collapsed, setCollapsed }) {
   const [toDate, setToDate] = useState(today);
 
   useEffect(() => {
-    const savedFromDate = localStorage.getItem("fromDate");
-    const savedToDate = localStorage.getItem("toDate");
+    const { fromDate: savedFromDate, toDate: savedToDate } = getDateFilter();
 
     const today = new Date();
-
     const currentMonthStart = new Date(
       today.getFullYear(),
       today.getMonth(),
@@ -54,35 +64,24 @@ export default function TopBar({ collapsed, setCollapsed }) {
     );
 
     if (savedFromDate && savedToDate) {
-      const from = new Date(Number(savedFromDate));
-      const to = new Date(Number(savedToDate));
-
       const sameMonth =
-        from.getMonth() === today.getMonth() &&
-        from.getFullYear() === today.getFullYear();
+        savedFromDate.getMonth() === today.getMonth() &&
+        savedFromDate.getFullYear() === today.getFullYear();
 
       if (sameMonth) {
-        setFromDate(from);
-        setToDate(to);
+        setFromDate(savedFromDate);
+        setToDate(savedToDate);
       } else {
         setFromDate(currentMonthStart);
         setToDate(today);
 
-        localStorage.setItem("fromDate", currentMonthStart.getTime());
-
-        localStorage.setItem("toDate", today.getTime());
-
-        window.dispatchEvent(new Event("dateFilterUpdated"));
+        setDateFilter(currentMonthStart, today);
       }
     } else {
       setFromDate(currentMonthStart);
       setToDate(today);
 
-      localStorage.setItem("fromDate", currentMonthStart.getTime());
-
-      localStorage.setItem("toDate", today.getTime());
-
-      window.dispatchEvent(new Event("dateFilterUpdated"));
+      setDateFilter(currentMonthStart, today);
     }
   }, []);
 
