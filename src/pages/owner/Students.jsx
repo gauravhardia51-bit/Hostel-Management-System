@@ -240,22 +240,34 @@ export default function Students() {
   };
 
   const handleSave = async (formData) => {
-    try {
-      if (mode === "edit") {
-        await api.put(`/student/update`, formData);
-        toast.success("Student updated successfully ✅");
-      } else {
-        await api.post("/student/add", formData);
-        toast.success("Student added successfully ✅");
-      }
-      fetchStudents(); // refresh table
-      setOpen(false);
-      setSelectedStudent(null);
-    } catch (err) {
-      console.error("FULL ERROR:", err.response);
-      toast.error("Something went wrong ❌");
+  try {
+    if (mode === "edit") {
+      await api.put("/student/update", formData);
+      toast.success("Student updated successfully ✅");
+    } else {
+      await api.post("/student/add", formData);
+      toast.success("Student added successfully ✅");
     }
-  };
+
+    fetchStudents(); // refresh table
+    setOpen(false);
+    setSelectedStudent(null);
+
+    return true;
+  } catch (err) {
+    console.error("FULL ERROR:", err);
+
+    const message =
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      err?.message ||
+      "Something went wrong";
+
+    toast.error(message);
+
+    return false;
+  }
+};
 
   return (
     <div>
