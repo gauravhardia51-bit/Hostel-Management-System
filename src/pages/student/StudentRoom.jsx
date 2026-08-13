@@ -4,59 +4,23 @@ import api from "../../api/Api";
 import { toast } from "react-toastify";
 import { formatDateForDisplay } from "../../utils/formatDate";
 import { getAuthData } from "../../utils/auth";
+import { useMemo } from "react";
 
 export default function StudentRoom() {
   const [roomData, setRoomData] = useState(null);
   const [loading, setLoading] = useState(false);
   const auth = getAuthData();
-  //const userId = auth?.user.id;
-
-  //   {
-  //   "timeStamp": "...",
-  //   "status": 200,
-  //   "message": "Success",
-  //   "payLoad": {
-  //     "room": {
-  //       "roomNumber": "R-204",
-  //       "floor": "2nd Floor",
-  //       "capacity": 3,
-  //       "occupied": 2,
-  //       "joinedAt": 1711929600000
-  //     },
-  //     "roommates": [
-  //       {
-  //         "name": "Rahul Sharma",
-  //         "phone": "9876543210",
-  //         "isYou": true
-  //       },
-  //       {
-  //         "name": "Aman Verma",
-  //         "phone": "9123456780",
-  //         "isYou": false
-  //       }
-  //     ]
-  //   }
-  // }
 
   const fetchRoom = async () => {
     try {
       setLoading(true);
 
-      const res = await api.get("/student/all", {
+      const res = await api.get("/room-data/user-id", {
         params: {
           userId: auth?.user.id,
         },
       });
-
-      const data = res.data.payLoad[0];
-      console.log("Student data:", data);
-
-      const response = await api.get("/student/id", {
-        params: {
-          id: data?.id,
-        },
-      });
-      setRoomData(response.data.payLoad);
+      setRoomData(res.data.payLoad);
     } catch (error) {
       console.error(error);
       toast.error("Failed to load room details");
@@ -64,6 +28,12 @@ export default function StudentRoom() {
       setLoading(false);
     }
   };
+
+  const { room = {}, roommates = [] } = roomData || {};
+
+  const sortedRoommates = useMemo(() => {
+    return [...roommates].sort((a, b) => Number(b.isYou) - Number(a.isYou));
+  }, [roommates]);
 
   useEffect(() => {
     fetchRoom();
@@ -77,8 +47,6 @@ export default function StudentRoom() {
     return <div className="text-center py-10">No room assigned.</div>;
   }
 
-  const { room, roommates } = roomData;
-  console.log("Room Data:", roomData);
   return (
     <div>
       {/* PAGE TITLE */}
@@ -122,13 +90,13 @@ export default function StudentRoom() {
           </div>
 
           {/* IMAGE */}
-          <div>
+          {/* <div>
             <img
               src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2"
               alt="Room"
               className="rounded-lg w-full h-[220px] object-cover"
             />
-          </div>
+          </div> */}
         </div>
       </Card>
 
@@ -136,19 +104,18 @@ export default function StudentRoom() {
       <Card className="p-5 rounded-xl">
         <h3 className="font-semibold mb-4">Roommates</h3>
 
-        {roommates.length === 0 ? (
+        {sortedRoommates.length === 0 ? (
           <div className="text-center py-6 text-gray-500">
             No roommates found.
           </div>
         ) : (
-          roommates.map((mate, index) => (
+          sortedRoommates.map((mate, index) => (
             <div
               key={index}
               className="flex justify-between items-center border-b py-3"
             >
               <div>
                 <p className="font-medium">{mate.name}</p>
-
                 <p className="text-gray-500 text-sm">{mate.phone}</p>
               </div>
 
@@ -161,11 +128,11 @@ export default function StudentRoom() {
           ))
         )}
 
-        <div className="mt-5">
+        {/* <div className="mt-5">
           <button className="w-full border border-indigo-500 text-indigo-600 hover:bg-indigo-50 py-2 rounded-lg transition">
             View All Room Details
           </button>
-        </div>
+        </div> */}
       </Card>
     </div>
   );

@@ -30,6 +30,12 @@ export default function Complaints() {
   const hostelId = auth?.hostelId;
   const complaintId = queryParams.get("complaintId");
 
+  const STATUS_TRANSITIONS = {
+    OPEN: ["OPEN", "IN_PROGRESS", "CLOSED"],
+    IN_PROGRESS: ["IN_PROGRESS", "CLOSED"],
+    CLOSED: ["CLOSED"],
+  };
+
   const fetchComplaints = async () => {
     try {
       setLoading(true);
@@ -189,7 +195,7 @@ export default function Complaints() {
           <td>{c.complaintMessage}</td>
 
           <td>
-            <Select
+            {/* <Select
               size="small"
               value={c.status}
               onChange={(e) => handleStatusChange(c, e.target.value)}
@@ -237,6 +243,56 @@ export default function Complaints() {
               <MenuItem value="IN_PROGRESS">IN PROGRESS</MenuItem>
 
               <MenuItem value="CLOSED">CLOSED</MenuItem>
+            </Select> */}
+
+            <Select
+              size="small"
+              value={c.status}
+              onChange={(e) => handleStatusChange(c, e.target.value)}
+              renderValue={(selected) => (
+                <span
+                  style={{
+                    background: style.bg,
+                    color: style.color,
+                    padding: "4px 10px",
+                    borderRadius: "8px",
+                    fontSize: "11px",
+                    fontWeight: 600,
+                  }}
+                >
+                  {selected.replace("_", " ")}
+                </span>
+              )}
+              sx={{
+                minWidth: 120,
+                height: "30px",
+
+                backgroundColor: style.bg,
+
+                color: style.color,
+
+                borderRadius: "8px",
+
+                "& fieldset": {
+                  border: "none",
+                },
+
+                "& .MuiSelect-icon": {
+                  display: "none",
+                },
+
+                "& .MuiSelect-select": {
+                  padding: "4px 8px",
+                  display: "flex",
+                  alignItems: "center",
+                },
+              }}
+            >
+              {STATUS_TRANSITIONS[c.status].map((item) => (
+                <MenuItem key={item} value={item}>
+                  {item.replace("_", " ")}
+                </MenuItem>
+              ))}
             </Select>
           </td>
 

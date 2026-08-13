@@ -113,15 +113,24 @@ export default function AddRoomDrawer({
           />
 
           <TextField
+            select
             fullWidth
-            type="number"
             label="Capacity"
             name="capacity"
             value={form.capacity}
             onChange={handleChange}
             error={!!errors.capacity}
             helperText={errors.capacity}
-          />
+          >
+            <MenuItem value="">
+              <em>Select Capacity</em>
+            </MenuItem>
+
+            <MenuItem value={1}>1 Sharing</MenuItem>
+            <MenuItem value={2}>2 Sharing</MenuItem>
+            <MenuItem value={3}>3 Sharing</MenuItem>
+            <MenuItem value={4}>4 Sharing</MenuItem>
+          </TextField>
 
           <TextField
             fullWidth
@@ -130,7 +139,7 @@ export default function AddRoomDrawer({
             name="occupied"
             value={form.occupied}
             onChange={handleChange}
-            disabled={mode === "edit"}
+            disabled
             error={!!errors.occupied}
             helperText={errors.occupied}
           />
@@ -142,7 +151,7 @@ export default function AddRoomDrawer({
             name="status"
             value={form.status}
             onChange={handleChange}
-            disabled={mode === "edit"}
+            disabled
             error={!!errors.status}
             helperText={errors.status}
           >

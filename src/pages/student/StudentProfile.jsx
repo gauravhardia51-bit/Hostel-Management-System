@@ -1,107 +1,28 @@
-// import { useEffect, useState } from "react";
-// import { Card, Avatar, Button } from "@mui/material";
-
-// export default function StudentProfile() {
-//   const [profile, setProfile] = useState(null);
-
-//   // ================= DUMMY DATA =================
-//   useEffect(() => {
-//     const dummyProfile = {
-//       name: "Rahul Kumar",
-//       email: "rahul@gmail.com",
-//       phone: "9876543210",
-//       address: "123, MG Road, Indore, MP",
-//       joinDate: 1711929600000,
-//     };
-
-//     setProfile(dummyProfile);
-//   }, []);
-
-//   return (
-//     <div>
-//       <div className="flex justify-between mb-4">
-//         <h2 className="text-lg font-semibold">Profile</h2>
-
-//         <Button variant="contained">Edit Profile</Button>
-//       </div>
-
-//       <div className="grid grid-cols-3 gap-6">
-//         {/* LEFT CARD */}
-//         <Card className="p-4 rounded-xl text-center">
-//           <Avatar
-//             sx={{
-//               width: 80,
-//               height: 80,
-//               margin: "auto",
-//               bgcolor: "#4f46e5",
-//             }}
-//           >
-//             {profile?.name?.charAt(0)}
-//           </Avatar>
-
-//           <h3 className="mt-3 font-semibold">{profile?.name}</h3>
-//           <p className="text-gray-500 text-sm">{profile?.email}</p>
-//           <p className="text-gray-500 text-sm">{profile?.phone}</p>
-//         </Card>
-
-//         {/* RIGHT DETAILS */}
-//         <Card className="p-4 rounded-xl col-span-2">
-//           <h3 className="font-semibold mb-4">Personal Information</h3>
-
-//           <div className="grid grid-cols-2 gap-4 text-sm">
-//             <div>
-//               <p className="text-gray-500">Full Name</p>
-//               <p>{profile?.name}</p>
-//             </div>
-
-//             <div>
-//               <p className="text-gray-500">Email</p>
-//               <p>{profile?.email}</p>
-//             </div>
-
-//             <div>
-//               <p className="text-gray-500">Phone</p>
-//               <p>{profile?.phone}</p>
-//             </div>
-
-//             <div>
-//               <p className="text-gray-500">Join Date</p>
-//               <p>{new Date(profile?.joinDate).toLocaleDateString("en-IN")}</p>
-//             </div>
-
-//             <div className="col-span-2">
-//               <p className="text-gray-500">Address</p>
-//               <p>{profile?.address}</p>
-//             </div>
-//           </div>
-//         </Card>
-//       </div>
-//     </div>
-//   );
-// }
-
 import { useEffect, useState } from "react";
 import { Card, Avatar, Button } from "@mui/material";
 import api from "../../api/Api";
 import { toast } from "react-toastify";
 import { formatDateForDisplay } from "../../utils/formatDate";
 import { getAuthData } from "../../utils/auth";
+import StEditProfileDrawer from "../../feature/profile/StEditprofiledrawer";
 
 export default function StudentProfile() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const auth = getAuthData();
+  const [open, setOpen] = useState(false);
+
   const fetchProfile = async () => {
     try {
       setLoading(true);
 
-      const response = await api.get("/users/id", {
+      const response = await api.get("/room-data/user-id", {
         params: {
-          id: auth?.user.id,
+          userId: auth?.user.id,
         },
       });
       console.log("Profile response:", response.data);
-      setProfile(response.data.payLoad);
+      //setProfile(response.data.payLoad.profile);
     } catch (error) {
       console.log(error);
       toast.error("Unable to load profile");
@@ -118,6 +39,36 @@ export default function StudentProfile() {
     return <div className="text-center py-10">Loading...</div>;
   }
 
+  const handleSave = async (data) => {
+    try {
+      await api.put("/student/profile/update", {
+        id: data.id,
+        name: data.name,
+        phone: data.phone,
+      });
+
+      if (data.image) {
+        const formData = new FormData();
+
+        formData.append("studentId", data.id);
+        formData.append("file", data.image);
+
+        await api.post("/student/profile/upload", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      }
+
+      toast.success("Profile Updated");
+      setOpen(false); // ✅ close drawer
+      fetchProfile(); // ✅ refresh profile
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Something went wrong");
+    }
+  };
+
   if (!profile) {
     return <div className="text-center py-10">No profile found.</div>;
   }
@@ -128,13 +79,31 @@ export default function StudentProfile() {
       <div className="flex justify-between items-center mb-5">
         <h2 className="text-xl font-semibold">My Profile</h2>
 
-        <Button variant="contained">Edit Profile</Button>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#4f46e5",
+            textTransform: "none",
+            borderRadius: "8px",
+          }}
+          onClick={() => setOpen(true)}
+        >
+          Edit Profile
+        </Button>
+
+        <StEditProfileDrawer
+          open={open}
+          onClose={() => setOpen(false)}
+          onSave={handleSave}
+          editData={profile}
+        />
       </div>
 
       <div className="grid grid-cols-3 gap-6">
         {/* Left Card */}
         <Card className="p-6 rounded-xl text-center">
           <Avatar
+            src={profile.profileImage}
             sx={{
               width: 90,
               height: 90,
@@ -143,10 +112,10 @@ export default function StudentProfile() {
               fontSize: 34,
             }}
           >
-            {profile.name?.charAt(0)}
+            {profile.studentName?.charAt(0)}
           </Avatar>
 
-          <h3 className="mt-4 text-lg font-semibold">{profile.name}</h3>
+          <h3 className="mt-4 text-lg font-semibold">{profile.studentName}</h3>
 
           <p className="text-gray-500 mt-2">Student</p>
 
@@ -168,12 +137,12 @@ export default function StudentProfile() {
           <div className="grid grid-cols-2 gap-5">
             <div>
               <p className="text-gray-500 text-sm">Student Name</p>
-              <p className="font-medium">{profile.name}</p>
+              <p className="font-medium">{profile.studentName}</p>
             </div>
 
             <div>
               <p className="text-gray-500 text-sm">Phone Number</p>
-              <p className="font-medium">{profile.phone}</p>
+              <p className="font-medium">{profile.studentPhone}</p>
             </div>
 
             <div>
@@ -189,23 +158,8 @@ export default function StudentProfile() {
             <div>
               <p className="text-gray-500 text-sm">Joining Date</p>
               <p className="font-medium">
-                {formatDateForDisplay(profile.joinDate)}
+                {formatDateForDisplay(profile.joinedAt)}
               </p>
-            </div>
-
-            <div>
-              <p className="text-gray-500 text-sm">Status</p>
-              <p className="font-medium">{profile.status}</p>
-            </div>
-
-            <div>
-              <p className="text-gray-500 text-sm">Room ID</p>
-              <p className="font-medium">{profile.roomId}</p>
-            </div>
-
-            <div>
-              <p className="text-gray-500 text-sm">Hostel ID</p>
-              <p className="font-medium">{profile.hostelId}</p>
             </div>
           </div>
         </Card>
