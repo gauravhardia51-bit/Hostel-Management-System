@@ -9,7 +9,7 @@ export default function StudentPayments() {
   const auth = getAuthData();
 
   const studentId = auth?.user?.id;
-  const hostelId = auth?.hostelsId;
+  const hostelId = auth?.hostelId;
 
   const [payments, setPayments] = useState([]);
   const [page, setPage] = useState(0);
@@ -33,7 +33,6 @@ export default function StudentPayments() {
       });
 
       const data = response.data;
-      console.log("Payments data:", data);
       setPayments(data.payLoad || []);
       setTotalPages(data.totalPage || 0);
       setTotalElements(data.totalRow || 0);

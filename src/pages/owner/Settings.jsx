@@ -7,7 +7,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import UpgradeIcon from "@mui/icons-material/Upgrade";
 import Tooltip from "@mui/material/Tooltip";
-import { getAuthData } from "../../utils/auth";
+import { getAuthData, setAuthData } from "../../utils/auth";
 
 import {
   Card,
@@ -223,10 +223,6 @@ export default function Settings() {
         ...payload,
       };
 
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-
-      window.dispatchEvent(new Event("userUpdated"));
-
       // ================= UPDATE HOSTEL OWNER NAME =================
 
       const updatedHostelData = {
@@ -239,7 +235,7 @@ export default function Settings() {
       setHostelData(updatedHostelData);
 
       // update hostel localStorage list also
-      const hostels = JSON.parse(auth?.hostels) || [];
+      const hostels = auth?.hostels || [];
 
       const updatedHostels = hostels.map((h) =>
         h.id === updatedHostelData.id
@@ -250,8 +246,15 @@ export default function Settings() {
           : h,
       );
 
-      localStorage.setItem("hostels", JSON.stringify(updatedHostels));
+      // Save to unified auth object
+      const updatedAuth = {
+        ...auth,
+        user: updatedUser,
+        hostels: updatedHostels,
+      };
+      setAuthData(updatedAuth);
 
+      window.dispatchEvent(new Event("userUpdated"));
       window.dispatchEvent(new Event("hostelUpdated"));
 
       setUserData({
@@ -280,7 +283,7 @@ export default function Settings() {
       await api.put("/hostel/update", hostelData);
 
       // update localStorage
-      const hostels = JSON.parse(auth?.hostels) || [];
+      const hostels = auth?.hostels || [];
 
       const updatedHostels = hostels.map((h) =>
         h.id === hostelData.id
@@ -291,7 +294,11 @@ export default function Settings() {
           : h,
       );
 
-      localStorage.setItem("hostels", JSON.stringify(updatedHostels));
+      const updatedAuth = {
+        ...auth,
+        hostels: updatedHostels,
+      };
+      setAuthData(updatedAuth);
 
       window.dispatchEvent(new Event("hostelUpdated"));
 

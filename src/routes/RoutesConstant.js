@@ -1,7 +1,5 @@
 // routes/routeConstants.js
 
-import VerifyOtp from "../pages/auth/VerifyOtp";
-
 export const ROUTES = {
   // Auth
   LOGIN: "/login",

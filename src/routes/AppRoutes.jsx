@@ -19,7 +19,7 @@ import StudentComplaints from "../pages/student/StudentComplaints";
 import StudentRoom from "../pages/student/StudentRoom";
 import StudentNotifications from "../pages/student/StudentNotifications";
 import StudentProfile from "../pages/student/StudentProfile";
-//import StudentSettings from "../pages/student/StudentSettings";
+import StudentSettings from "../pages/student/StudentSettings";
 import StudentRoomInspection from "../pages/student/StudentRoomInspection";
 import RoomInspectionList from "../pages/owner/RoomInspectionList";
 
@@ -31,6 +31,7 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
 import { getAuthData } from "../utils/auth";
 import ProtectedRoute from "./ProtectedRoutes";
+import NotFound from "../pages/NotFound";
 
 export default function AppRoutes() {
   return (
@@ -217,18 +218,18 @@ export default function AppRoutes() {
           }
         />
 
-        {/* <Route
+        <Route
           path="student/settings"
           element={
             <ProtectedRoute role="ROLE_USER">
               <StudentSettings />
             </ProtectedRoute>
           }
-        /> */}
+        />
       </Route>
 
       {/* FALLBACK */}
-      <Route path="*" element={<Navigate to="" />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

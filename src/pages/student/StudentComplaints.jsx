@@ -19,7 +19,7 @@ import { toast } from "react-toastify";
 
 export default function StudentComplaints() {
   const auth = getAuthData();
-  const hostelId = auth?.hostelsId;
+  const hostelId = auth?.hostelId;
   const [complaints, setComplaints] = useState([]);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [page, setPage] = useState(0);
@@ -43,7 +43,6 @@ export default function StudentComplaints() {
       });
 
       const data = response.data;
-      console.log("FETCH COMPLAINTS => ", data);
       setComplaints(data.payLoad || []);
 
       setTotalPages(data.totalPage || 0);

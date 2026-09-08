@@ -118,8 +118,6 @@ export default function Reminders() {
   // ================= SAVE =================
 
   const handleSave = async (data) => {
-    console.log("Saved:", data);
-
     fetchReminders();
   };
 

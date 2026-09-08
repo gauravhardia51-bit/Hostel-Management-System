@@ -21,8 +21,7 @@ export default function StudentProfile() {
           userId: auth?.user.id,
         },
       });
-      console.log("Profile response:", response.data);
-      //setProfile(response.data.payLoad.profile);
+      setProfile(response.data.payLoad?.profile || response.data.payLoad);
     } catch (error) {
       console.log(error);
       toast.error("Unable to load profile");

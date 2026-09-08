@@ -43,8 +43,7 @@ export default function Complaints() {
       const fromDate = localStorage.getItem("fromDate");
       const toDate = localStorage.getItem("toDate");
 
-      console.log("FROM DATE => ", fromDate);
-      console.log("TO DATE => ", toDate);
+
 
       const res = await api.get("/complaint/all", {
         params: {

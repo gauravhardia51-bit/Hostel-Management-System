@@ -7,9 +7,9 @@ import {
   TextField,
   Button,
   Chip,
-  Pagination,
   Divider,
 } from "@mui/material";
+import Pagination from "../../components/common/Pagination.jsx";
 import CampaignIcon from "@mui/icons-material/Campaign";
 import HistoryIcon from "@mui/icons-material/History";
 import SendIcon from "@mui/icons-material/Send";
@@ -36,9 +36,11 @@ export default function Notifications() {
 
   const [history, setHistory] = useState([]);
 
-  const [pageNo, setPageNo] = useState(1);
+  const [page, setPage] = useState(0);
 
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+
+  const [totalElements, setTotalElements] = useState(0);
 
   const [search, setSearch] = useState("");
 
@@ -56,7 +58,7 @@ export default function Notifications() {
           search,
           startTime: fromDate ? new Date(fromDate).getTime() : null,
           endTime: toDate ? new Date(toDate + " 23:59:59").getTime() : null,
-          pageNo: pageNo - 1,
+          pageNo: page,
           pageSize: 10,
         },
       });
@@ -65,7 +67,9 @@ export default function Notifications() {
 
       setHistory(data);
 
-      setTotalPages(response.data?.totalPages || 1);
+      const totalPagesVal = response.data?.totalPage || response.data?.totalPages || 0;
+      setTotalPages(totalPagesVal);
+      setTotalElements(response.data?.totalRow || response.data?.totalRows || (totalPagesVal * 10));
     } catch (error) {
       console.log(error);
     } finally {
@@ -114,7 +118,7 @@ export default function Notifications() {
     if (tab === 1) {
       loadHistory();
     }
-  }, [tab, pageNo, search]);
+  }, [tab, page, search]);
 
   return (
     <div>
@@ -240,7 +244,7 @@ export default function Notifications() {
     size="medium"
     sx={{ minHeight: 40 }}
     onClick={() => {
-      setPageNo(1);
+      setPage(0);
       loadHistory();
     }}
   >
@@ -311,12 +315,14 @@ export default function Notifications() {
                 ))}
               </div>
 
-              <div className="flex justify-center mt-6">
+              <div className="flex justify-end mt-6">
                 <Pagination
-                  page={pageNo}
-                  count={totalPages}
-                  onChange={(e, value) => setPageNo(value)}
-                  color="primary"
+                  page={page}
+                  totalPages={totalPages}
+                  totalElements={totalElements}
+                  pageSize={10}
+                  onPageChange={setPage}
+                  label="notifications"
                 />
               </div>
             </div>
