@@ -1,202 +1,109 @@
-// import { useEffect, useState } from "react";
-// import { Card } from "@mui/material";
-// import api from "../../api/Api";
-
-// export default function StudentRoom() {
-//   const [loading, setLoading] = useState(false);
-//   const [rooms, setRooms] = useState([]);
-//   const [page, setPage] = useState(0);
-//   const [open, setOpen] = useState(false);
-//   const [totalPages, setTotalPages] = useState(0);
-//   const [totalElements, setTotalElements] = useState(0);
-//   const [selectedRoom, setSelectedRoom] = useState(null);
-//   const [mode, setMode] = useState("add"); // add | edit | view
-//   const [search, setSearch] = useState("");
-
-//   const auth = getAuthData();
-//   const hostelId = auth?.hostelId;
-
-//   const fetchRooms = async () => {
-//     try {
-//       setLoading(true);
-
-//       const res = await api.get("/student/room", {
-//         params: {
-//           pageNo: page,
-//           pageSize: 10,
-//           hostelId: hostelId,
-//           search: search,
-//         },
-//       });
-
-//       const data = res.data;
-
-//       setRooms(data.payLoad || []);
-//       setTotalPages(data.totalPage || 0);
-//       setTotalElements(data.totalRow || 0);
-//     } catch (err) {
-//       console.error(err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     const delay = setTimeout(() => {
-//       fetchRooms();
-//     }, 300);
-
-//     return () => clearTimeout(delay);
-//   }, [page, search]);
-
-//   if (!room) return <p>Loading...</p>;
-
-//   return (
-//     <div className="p-4">
-//       <h2 className="text-lg font-semibold mb-4">My Room</h2>
-
-//       {/* ROOM INFO */}
-//       <Card className="p-4 rounded-xl mb-6">
-//         <h3 className="font-semibold mb-3">Room Information</h3>
-
-//         <div className="grid grid-cols-2 gap-4">
-//           {/* LEFT */}
-//           <div className="space-y-2 text-sm">
-//             <p>
-//               <b>Room Number:</b> {room.roomNumber}
-//             </p>
-//             <p>
-//               <b>Floor:</b> {room.floor}
-//             </p>
-//             <p>
-//               <b>Sharing Type:</b> {room.capacity} Members
-//             </p>
-//             <p>
-//               <b>Occupied:</b> {room.occupied} Members
-//             </p>
-//             <p>
-//               <b>Joined On:</b>{" "}
-//               {new Date(room.joinedAt).toLocaleDateString("en-IN")}
-//             </p>
-//           </div>
-
-//           {/* RIGHT IMAGE */}
-//           <div>
-//             <img
-//               src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2"
-//               alt="room"
-//               className="rounded-lg w-full h-40 object-cover"
-//             />
-//           </div>
-//         </div>
-//       </Card>
-
-//       {/* ROOMMATES */}
-//       <Card className="p-4 rounded-xl">
-//         <h3 className="font-semibold mb-3">Roommates</h3>
-
-//         {roommates.map((r, i) => (
-//           <div
-//             key={i}
-//             className="flex justify-between items-center border-b py-3"
-//           >
-//             <div>
-//               <p className="font-medium">{r.name}</p>
-//               <p className="text-xs text-gray-500">{r.phone}</p>
-//             </div>
-
-//             {r.isYou && (
-//               <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">
-//                 You
-//               </span>
-//             )}
-//           </div>
-//         ))}
-
-//         <button className="mt-4 w-full border rounded p-2 text-indigo-600">
-//           View All Room Details
-//         </button>
-//       </Card>
-//     </div>
-//   );
-// }
-
-import { useEffect, useState } from "react";
-import { Card } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Card, CardContent } from "@mui/material";
+import BoltIcon from "@mui/icons-material/Bolt";
+import ElectricMeterIcon from "@mui/icons-material/ElectricMeter";
+import { getAuthData } from "../../utils/auth";
+import api from "../../api/Api.jsx";
 
 export default function StudentRoom() {
   const [roomData, setRoomData] = useState(null);
+  const auth = getAuthData();
+  const hostelId = auth?.hostelId;
+  const defaultRate = parseFloat(localStorage.getItem(`hostel_${hostelId}_unit_rate`)) || 10;
 
-  // ================= DUMMY DATA =================
   useEffect(() => {
-    const dummyResponse = {
-      payLoad: {
-        room: {
-          roomNumber: "R-204",
-          floor: "2nd Floor",
-          capacity: 3,
-          occupied: 2,
-          joinedAt: 1711929600000,
-        },
-        roommates: [
-          {
-            name: "Rahul Sharma",
-            phone: "9876543210",
-            isYou: true,
+    const fetchRoom = async () => {
+      try {
+        const res = await api.get("/student/room");
+        if (res.data?.payLoad) {
+          setRoomData(res.data.payLoad);
+          return;
+        }
+      } catch (e) {
+        // Fallback demo data
+        const dummyResponse = {
+          payLoad: {
+            room: {
+              roomNumber: "R-204",
+              floor: "2nd Floor",
+              capacity: 3,
+              occupied: 2,
+              joinedAt: 1711929600000,
+              currentMeterReading: 1560,
+              previousMeterReading: 1450,
+              lastMonthUnits: 110,
+              submeterRate: defaultRate,
+              lastBillAmount: 110 * defaultRate,
+            },
+            roommates: [
+              {
+                name: "Rahul Sharma",
+                phone: "9876543210",
+                isYou: true,
+              },
+              {
+                name: "Aman Verma",
+                phone: "9123456780",
+                isYou: false,
+              },
+            ],
           },
-          {
-            name: "Aman Verma",
-            phone: "9123456780",
-            isYou: false,
-          },
-        ],
-      },
+        };
+        setRoomData(dummyResponse.payLoad);
+      }
     };
 
-    setRoomData(dummyResponse.payLoad);
-  }, []);
+    fetchRoom();
+  }, [defaultRate]);
 
-  if (!roomData) return <p>Loading...</p>;
+  if (!roomData) return <p className="p-4 text-gray-500">Loading room details...</p>;
 
   const { room, roommates } = roomData;
+  const units = room.lastMonthUnits || Math.max(0, (room.currentMeterReading || 0) - (room.previousMeterReading || 0)) || 60;
+  const unitRate = room.submeterRate || defaultRate || 10;
+  const totalRoomBill = units * unitRate;
+  const studentShare = Math.round((totalRoomBill / (room.occupied || 1)) * 100) / 100;
 
   return (
-    <div>
+    <div className="space-y-5">
       {/* PAGE TITLE */}
-      <h2 className="text-lg font-semibold mb-4">My Room</h2>
+      <div>
+        <h2 className="text-xl font-bold text-gray-800">My Room</h2>
+        <p className="text-xs text-gray-500">Room details, roommates, and electricity sub-meter status</p>
+      </div>
 
       {/* ================= ROOM INFO ================= */}
-      <Card className="p-5 rounded-xl mb-6">
-        <div className="grid grid-cols-2 gap-6 items-center">
+      <Card className="p-5 rounded-xl border border-gray-100 shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
           {/* LEFT DETAILS */}
           <div>
-            <h3 className="font-semibold mb-4">Room Information</h3>
+            <h3 className="font-semibold text-gray-800 mb-4">Room Information</h3>
 
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-gray-500">Room Number</p>
-                <p className="font-medium">{room.roomNumber}</p>
+                <p className="text-gray-500 text-xs">Room Number</p>
+                <p className="font-bold text-gray-900 text-base">{room.roomNumber}</p>
               </div>
 
               <div>
-                <p className="text-gray-500">Floor</p>
-                <p className="font-medium">{room.floor}</p>
+                <p className="text-gray-500 text-xs">Floor</p>
+                <p className="font-medium text-gray-800">{room.floor || "1st Floor"}</p>
               </div>
 
               <div>
-                <p className="text-gray-500">Sharing Type</p>
-                <p className="font-medium">{room.capacity} Sharing</p>
+                <p className="text-gray-500 text-xs">Sharing Type</p>
+                <p className="font-medium text-gray-800">{room.capacity} Sharing</p>
               </div>
 
               <div>
-                <p className="text-gray-500">Occupied</p>
-                <p className="font-medium">{room.occupied} Members</p>
+                <p className="text-gray-500 text-xs">Occupied</p>
+                <p className="font-medium text-gray-800">{room.occupied} Members</p>
               </div>
 
               <div>
-                <p className="text-gray-500">Joined On</p>
-                <p className="font-medium">
-                  {new Date(room.joinedAt).toLocaleDateString("en-IN")}
+                <p className="text-gray-500 text-xs">Joined On</p>
+                <p className="font-medium text-gray-800">
+                  {new Date(room.joinedAt || Date.now()).toLocaleDateString("en-IN")}
                 </p>
               </div>
             </div>
@@ -205,40 +112,82 @@ export default function StudentRoom() {
           {/* RIGHT IMAGE */}
           <div>
             <img
-              src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2"
+              src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=600&q=80"
               alt="Room"
-              className="rounded-lg w-full h-[200px] object-cover"
+              className="rounded-xl w-full h-[180px] object-cover shadow-sm"
             />
           </div>
         </div>
       </Card>
 
-      {/* ================= ROOMMATES ================= */}
-      <Card className="p-5 rounded-xl">
-        <h3 className="font-semibold mb-4">Roommates</h3>
-
-        {roommates.map((mate, index) => (
-          <div
-            key={index}
-            className="flex justify-between items-center border-b py-3"
-          >
-            <div>
-              <p className="font-medium">{mate.name}</p>
-              <p className="text-gray-500 text-sm">{mate.phone}</p>
+      {/* ================= ELECTRICITY SUB-METER CARD ================= */}
+      <Card className="p-5 rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50/70 via-amber-50/30 to-white shadow-sm">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-amber-500 text-white rounded-lg shadow-sm">
+              <BoltIcon />
             </div>
-
-            {mate.isYou && (
-              <span className="bg-green-100 text-green-600 text-xs px-2 py-1 rounded">
-                You
-              </span>
-            )}
+            <div>
+              <h3 className="font-bold text-gray-800">Room Electricity & Sub-Meter</h3>
+              <p className="text-xs text-gray-500">Unit-based electricity billing (₹{unitRate}/unit)</p>
+            </div>
           </div>
-        ))}
 
-        <div className="mt-4">
-          <button className="w-full bg-indigo-100 text-indigo-600 py-2 rounded-lg">
-            View All Room Details
-          </button>
+          <div className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold flex items-center gap-1">
+            <ElectricMeterIcon sx={{ fontSize: 14 }} />
+            <span>Active Meter Tracking</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-white/90 rounded-xl border border-amber-100">
+          <div>
+            <p className="text-[11px] text-gray-500 font-medium">Current Meter Reading</p>
+            <p className="text-lg font-bold text-gray-800">{room.currentMeterReading || 1560} <span className="text-xs font-normal text-gray-500">kWh</span></p>
+          </div>
+
+          <div>
+            <p className="text-[11px] text-gray-500 font-medium">Electricity Tariff Rate</p>
+            <p className="text-lg font-bold text-amber-700">₹{unitRate} <span className="text-xs font-normal text-gray-500">/ unit</span></p>
+          </div>
+
+          <div>
+            <p className="text-[11px] text-gray-500 font-medium">Room Total Consumption</p>
+            <p className="text-lg font-bold text-indigo-700">{units} <span className="text-xs font-normal text-gray-500">Units</span></p>
+          </div>
+
+          <div>
+            <p className="text-[11px] text-gray-500 font-medium">Your Monthly Share</p>
+            <p className="text-lg font-bold text-green-600">₹{studentShare}</p>
+          </div>
+        </div>
+
+        <p className="text-[11px] text-gray-500 mt-3">
+          💡 <b>How it's calculated:</b> Room meter consumption ({units} units) × ₹{unitRate}/unit = ₹{totalRoomBill}, divided equally among {room.occupied} room occupants = <b>₹{studentShare} / student</b>.
+        </p>
+      </Card>
+
+      {/* ================= ROOMMATES ================= */}
+      <Card className="p-5 rounded-xl border border-gray-100 shadow-sm">
+        <h3 className="font-semibold text-gray-800 mb-3">Roommates</h3>
+
+        <div className="divide-y divide-gray-100">
+          {roommates.map((mate, index) => (
+            <div
+              key={index}
+              className="flex justify-between items-center py-3"
+            >
+              <div>
+                <p className="font-medium text-gray-800 text-sm">{mate.name}</p>
+                <p className="text-gray-400 text-xs">{mate.phone}</p>
+              </div>
+
+              {mate.isYou && (
+                <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                  You
+                </span>
+              )}
+            </div>
+          ))}
         </div>
       </Card>
     </div>

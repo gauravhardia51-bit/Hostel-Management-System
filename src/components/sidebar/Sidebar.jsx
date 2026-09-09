@@ -1,30 +1,30 @@
 import { NavLink, Link, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import LogoutIcon from "@mui/icons-material/Logout";
 import "./sidebar.css";
 import { ROUTES } from "../../routes/RoutesConstant";
-import { getHostelsData } from "../../utils/auth";
-import { getAuthData } from "../../utils/auth";
+import { getHostelsData, getAuthData } from "../../utils/auth";
 import { FormControl, Select, MenuItem } from "@mui/material";
+import { useApp } from "../../context/AppContext";
 
 const active = ({ isActive }) =>
   isActive ? "active" : "block p-2 rounded text-white";
 
 export default function Sidebar({ collapsed }) {
   const navigate = useNavigate();
+  const { t } = useApp();
 
-  // ✅ Get auth (role)
+  // Get auth (role)
   const auth = getAuthData();
-  //console.log("Auth Data in Sidebar:", auth); // Debugging line
   const role = auth?.user?.roleName;
 
-  // ✅ Logout
+  // Logout
   const handleLogout = () => {
     localStorage.removeItem("auth");
     navigate("/login", { replace: true });
   };
 
-  // ✅ Hostel Data
+  // Hostel Data
   const [hostelData, setHostelData] = useState(getHostelsData());
 
   useEffect(() => {
@@ -51,41 +51,39 @@ export default function Sidebar({ collapsed }) {
     const value = Number(event.target.value);
     setSelectedHostel(value);
 
-    // ✅ Update auth instead of separate key
     const updatedAuth = {
       ...auth,
       hostelId: Number(value),
     };
 
     localStorage.setItem("auth", JSON.stringify(updatedAuth));
-
     window.location.reload();
   };
 
   // =========================
-  // ✅ ROLE BASED MENU
+  // ROLE BASED MENU (Bilingual)
   // =========================
-
   const adminMenu = [
-    { path: "/dashboard", label: "Dashboard", icon: "🏠" },
-    { path: "students", label: "Students", icon: "👨‍🎓" },
-    { path: "rooms", label: "Rooms", icon: "🛏" },
-    { path: "payments", label: "Payments", icon: "💳" },
-    { path: "reminders", label: "Reminders", icon: "🔔" },
-    { path: "complaints", label: "Complaints", icon: "⚠" },
-    { path: "reports", label: "Reports", icon: "📊" },
-    { path: "notifications", label: "Notifications", icon: "📢" },
-    { path: "settings", label: "Settings", icon: "⚙" },
+    { path: "/dashboard", label: t("dashboard"), icon: "🏠" },
+    { path: "students", label: t("students"), icon: "👨‍🎓" },
+    { path: "rooms", label: t("rooms"), icon: "🛏" },
+    { path: "payments", label: t("payments"), icon: "💳" },
+    { path: "electricity", label: t("electricity"), icon: "⚡" },
+    { path: "reminders", label: t("reminders"), icon: "🔔" },
+    { path: "complaints", label: t("complaints"), icon: "⚠" },
+    { path: "reports", label: t("reports"), icon: "📊" },
+    { path: "notifications", label: t("notifications"), icon: "📢" },
+    { path: "settings", label: t("settings"), icon: "⚙" },
   ];
 
   const studentMenu = [
-    { path: "/student/dashboard", label: "Dashboard", icon: "🏠" },
-    { path: "student/rooms", label: "My Room", icon: "🛏" },
-    { path: "student/payments", label: "Payments", icon: "💳" },
-    { path: "student/complaints", label: "Complaints", icon: "⚠" },
-    { path: "student/notifications", label: "Notifications", icon: "🔔" },
-    { path: "student/profile", label: "Profile", icon: "👤" },
-    { path: "student/settings", label: "Settings", icon: "⚙" },
+    { path: "/student/dashboard", label: t("dashboard"), icon: "🏠" },
+    { path: "student/rooms", label: t("myRoom"), icon: "🛏" },
+    { path: "student/payments", label: t("myPayments"), icon: "💳" },
+    { path: "student/complaints", label: t("complaints"), icon: "⚠" },
+    { path: "student/notifications", label: t("notifications"), icon: "🔔" },
+    { path: "student/profile", label: t("profile") || "Profile", icon: "👤" },
+    { path: "settings", label: t("settings"), icon: "⚙" },
   ];
 
   const menu = role === "ROLE_USER" ? studentMenu : adminMenu;
@@ -102,7 +100,7 @@ export default function Sidebar({ collapsed }) {
               </div>
             ) : (
               <div className="w-full text-center">
-                <h1 className="text-2xl font-bold text-white">RentRova</h1>
+                <h1 className="text-2xl font-bold text-white tracking-wide">RentRova</h1>
               </div>
             )}
           </div>
@@ -164,7 +162,7 @@ export default function Sidebar({ collapsed }) {
           {menu.map((item, index) => (
             <li key={index}>
               <NavLink to={item.path} className={active}>
-                {collapsed ? item.icon : item.label}
+                {collapsed ? item.icon : <span className="flex items-center gap-2"><span>{item.icon}</span> <span>{item.label}</span></span>}
               </NavLink>
             </li>
           ))}
@@ -174,7 +172,7 @@ export default function Sidebar({ collapsed }) {
       {/* Logout */}
       <button className="logout" onClick={handleLogout}>
         <LogoutIcon fontSize="small" />
-        {!collapsed && "Logout"}
+        {!collapsed && t("logout")}
       </button>
     </div>
   );

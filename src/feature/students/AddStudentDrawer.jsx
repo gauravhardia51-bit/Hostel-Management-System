@@ -18,6 +18,7 @@ import {
   formatDateForBackend,
 } from "../../utils/formatDate";
 import { getAuthData, getHostelsData } from "../../utils/auth";
+import { useApp } from "../../context/AppContext";
 
 export default function AddStudentDrawer({
   open,
@@ -27,6 +28,7 @@ export default function AddStudentDrawer({
   editData,
   mode = "add",
 }) {
+  const { t, lang } = useApp();
   const { hostelId } = getHostelsData();
   const {
     values: form,
@@ -66,7 +68,7 @@ export default function AddStudentDrawer({
 
   const auth = getAuthData();
   const handleSubmit = () => {
-    if (!validateAll()) return; // ❌ stop if error
+    if (!validateAll()) return;
     let payload = {
       token: auth.token,
       name: form.name,
@@ -88,11 +90,11 @@ export default function AddStudentDrawer({
 
   return (
     <Drawer anchor="right" open={open} onClose={onClose}>
-      <Box sx={{ width: 450 }} className="h-full flex flex-col">
+      <Box sx={{ width: 450 }} className="h-full flex flex-col bg-white dark:bg-slate-900">
         {/* Header */}
-        <div className="flex justify-between items-center p-5 border-b">
-          <Typography variant="h6" fontWeight={700}>
-            {mode === "edit" ? "Edit Student" : "Add Student"}
+        <div className="flex justify-between items-center p-5 border-b dark:border-gray-800">
+          <Typography variant="h6" fontWeight={700} className="text-gray-800 dark:text-gray-100">
+            {mode === "edit" ? (lang === "hi" ? "छात्र विवरण बदलें" : "Edit Student") : t("addStudent")}
           </Typography>
           <IconButton onClick={onClose}>
             <CloseIcon />
@@ -100,10 +102,11 @@ export default function AddStudentDrawer({
         </div>
 
         {/* Form */}
-        <div className="p-5 space-y-4 flex-1">
+        <div className="p-5 space-y-4 flex-1 overflow-y-auto">
           <TextField
             fullWidth
-            label="Name"
+            size="small"
+            label={t("studentName")}
             name="name"
             value={form.name}
             onChange={handleChange}
@@ -113,7 +116,8 @@ export default function AddStudentDrawer({
 
           <TextField
             fullWidth
-            label="Phone"
+            size="small"
+            label={t("phone")}
             name="phone"
             value={form.phone}
             onChange={handleChange}
@@ -124,7 +128,8 @@ export default function AddStudentDrawer({
           {mode === "add" && (
             <TextField
               fullWidth
-              label="Email"
+              size="small"
+              label={t("email")}
               name="email"
               value={form.email}
               onChange={handleChange}
@@ -136,7 +141,8 @@ export default function AddStudentDrawer({
           <TextField
             select
             fullWidth
-            label="Room"
+            size="small"
+            label={t("room")}
             name="roomId"
             value={form.roomId}
             onChange={handleChange}
@@ -145,14 +151,16 @@ export default function AddStudentDrawer({
           >
             {rooms.map((r) => (
               <MenuItem key={r.id} value={r.id}>
-                Room {r.roomNumber}
+                {t("room")} {r.roomNumber || r.roomNo}
               </MenuItem>
             ))}
           </TextField>
 
           <TextField
             fullWidth
+            size="small"
             type="date"
+            label={t("joinedDate")}
             name="joinDate"
             value={form.joinDate}
             onChange={handleChange}
@@ -163,9 +171,9 @@ export default function AddStudentDrawer({
         </div>
 
         {/* Footer */}
-        <div className="p-5 border-t flex gap-2">
+        <div className="p-5 border-t dark:border-gray-800 flex gap-2 bg-white dark:bg-slate-900">
           <Button fullWidth variant="outlined" onClick={onClose}>
-            Cancel
+            {t("cancel")}
           </Button>
 
           <Button
@@ -174,9 +182,11 @@ export default function AddStudentDrawer({
             onClick={handleSubmit}
             sx={{
               background: "linear-gradient(to right, #4f46e5, #7c3aed)",
+              textTransform: "none",
+              fontWeight: 600,
             }}
           >
-            {mode === "edit" ? "Update Student" : "Save Student"}
+            {mode === "edit" ? t("update") : t("save")}
           </Button>
         </div>
       </Box>

@@ -5,10 +5,30 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== Base Styles ===== */
+/* ===== Theme Variables & Base Styles ===== */
+:root {
+  --bg-main: #f3f4f6;
+  --bg-card: #ffffff;
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --border-color: #e5e7eb;
+}
+
+html.dark {
+  --bg-main: #0f172a;
+  --bg-card: #1e293b;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+  color-scheme: dark;
+}
+
 @layer base {
   body {
-    @apply bg-gray-100 text-gray-800 font-sans;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   h1 {
@@ -22,6 +42,73 @@
   h3 {
     @apply text-lg font-medium;
   }
+}
+
+/* Dark theme overrides for common containers */
+html.dark .bg-gray-100 {
+  background-color: #0f172a !important;
+}
+
+html.dark .bg-white {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+html.dark .bg-slate-50 {
+  background-color: #1a2333 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .border,
+html.dark .border-b,
+html.dark .border-t,
+html.dark .border-gray-100,
+html.dark .border-gray-200 {
+  border-color: #334155 !important;
+}
+
+html.dark .text-gray-800,
+html.dark .text-gray-900 {
+  color: #f8fafc !important;
+}
+
+html.dark .text-gray-700,
+html.dark .text-gray-600 {
+  color: #cbd5e1 !important;
+}
+
+html.dark .text-gray-500,
+html.dark .text-gray-400 {
+  color: #94a3b8 !important;
+}
+
+html.dark tr:hover {
+  background-color: #273549 !important;
+}
+
+html.dark thead {
+  background-color: #1e293b !important;
+  color: #94a3b8 !important;
+}
+
+html.dark input,
+html.dark select,
+html.dark textarea {
+  color: #f8fafc !important;
+}
+
+html.dark .MuiPaper-root {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+html.dark .topbar {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html.dark .topbar .owner-name {
+  color: #f8fafc !important;
 }
 
 /* ===== Reusable Components ===== */
@@ -51,7 +138,7 @@
   }
 }
 
-/* ===== Utilities (optional custom) ===== */
+/* ===== Utilities ===== */
 @layer utilities {
   .flex-center {
     @apply flex items-center justify-center;

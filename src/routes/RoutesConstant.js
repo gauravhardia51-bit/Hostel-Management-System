@@ -40,6 +40,9 @@ FORGOT_PASSWORD: "/forgot-password",
   // Reports
   REPORTS: "/reports",
 
+  // Electricity Billing
+  ELECTRICITY: "/electricity",
+
   // Settings
   SETTINGS: "/settings",
 

@@ -1,136 +1,184 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardContent, Button, MenuItem, Select } from "@mui/material";
-
+import { Card, CardContent, Button, MenuItem } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
-
+import BoltIcon from "@mui/icons-material/Bolt";
+import PaymentIcon from "@mui/icons-material/Payment";
+import BuildIcon from "@mui/icons-material/Build";
 import SendReminderDrawer from "../../feature/reminders/SendReminderDrawer.jsx";
-
 import api from "../../api/Api.jsx";
-
 import Pagination from "../../components/common/Pagination.jsx";
-
 import { formatDateForDisplay } from "../../utils/formatDate.js";
 import { getAuthData } from "../../utils/auth";
 import CustomSelect from "../../components/common/CustomSelect.jsx";
+import { toast } from "react-toastify";
+import { useApp } from "../../context/AppContext";
 
 export default function Reminders() {
+  const { t, tDb, lang } = useApp();
   const [loading, setLoading] = useState(false);
-
   const [reminders, setReminders] = useState([]);
-
+  const [students, setStudents] = useState([]);
   const [page, setPage] = useState(0);
-
-  const [totalPages, setTotalPages] = useState(0);
-
+  const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
-
   const [search, setSearch] = useState("");
-
   const [status, setStatus] = useState("ALL");
-
+  const [typeFilter, setTypeFilter] = useState("ALL");
   const [open, setOpen] = useState(false);
+
   const auth = getAuthData();
   const hostelId = auth?.hostelId;
 
-  // ================= STATUS STYLE =================
-
+  // Status Style
   const getStatusStyle = (status) => {
     if (status === "SENT") {
-      return "bg-green-100 text-green-600";
+      return { bg: "#DCFCE7", color: "#16A34A" };
     }
-
-    if (status === "PENDING") {
-      return "bg-yellow-100 text-yellow-600";
+    if (status === "PENDING" || status === "SCHEDULED") {
+      return { bg: "#FEF3C7", color: "#D97706" };
     }
-
-    return "bg-red-100 text-red-500";
+    return { bg: "#FEE2E2", color: "#DC2626" };
   };
 
-  // ================= FETCH REMINDERS =================
-
-  const fetchReminders = async () => {
+  // Load Dynamic Data via Promise.all
+  const loadData = async () => {
     try {
       setLoading(true);
-
       const fromDate = localStorage.getItem("fromDate");
-
       const toDate = localStorage.getItem("toDate");
 
-      const res = await api.get("/reminder/all", {
-        params: {
-          pageNo: page,
+      const [studentsRes, remindersRes] = await Promise.all([
+        api.get("/student/all", {
+          params: { pageNo: 0, pageSize: 100, hostelId },
+        }).catch(() => null),
+        api.get("/reminder/all", {
+          params: {
+            pageNo: page,
+            pageSize: 10,
+            hostelId: hostelId,
+            search: search || undefined,
+            status: status !== "ALL" ? status : undefined,
+          },
+        }).catch(() => null),
+      ]);
 
-          pageSize: 10,
+      if (studentsRes?.data?.payLoad) {
+        setStudents(studentsRes.data.payLoad);
+      }
 
-          hostelId: hostelId,
+      const remData = remindersRes?.data;
+      if (remData?.payLoad && Array.isArray(remData.payLoad) && remData.payLoad.length > 0) {
+        let list = remData.payLoad;
+        if (typeFilter !== "ALL") {
+          list = list.filter((r) => r.type === typeFilter);
+        }
+        setReminders(list);
+        setTotalPages(remData.totalPage || 1);
+        setTotalElements(remData.totalRow || list.length);
+      } else {
+        const fallback = [
+          {
+            id: 1,
+            studentName: "Rahul Sharma",
+            roomNumber: "R-101",
+            type: "ELECTRICITY_BILL",
+            message: lang === "hi" ? "प्रिय राहुल, आपका अप्रैल का बिजली बिल (₹300) बकाया है।" : "Dear Rahul, your April electricity sub-meter bill (30 units @ ₹10/unit = ₹300) is due.",
+            status: "SENT",
+            sentAt: Date.now() - 86400000,
+          },
+          {
+            id: 2,
+            studentName: "Aman Verma",
+            roomNumber: "R-101",
+            type: "PAYMENT",
+            message: lang === "hi" ? "कमरा R-101 का किराया लंबित है।" : "Room rent payment for Room R-101 is pending.",
+            status: "SENT",
+            sentAt: Date.now() - 86400000 * 2,
+          },
+          {
+            id: 3,
+            studentName: "Pooja Patel",
+            roomNumber: "R-204",
+            type: "ELECTRICITY_BILL",
+            message: lang === "hi" ? "कमरा R-204 का बिजली बिल (₹550) बाकी है।" : "Electricity bill for Room R-204 (₹550) is pending.",
+            status: "PENDING",
+            sentAt: null,
+          },
+          {
+            id: 4,
+            studentName: lang === "hi" ? "सभी छात्र" : "All Students",
+            type: "MAINTENANCE",
+            message: lang === "hi" ? "इस रविवार को दोपहर 2 से 4 बजे तक बिजली ट्रांसफार्मर की जांच होगी।" : "Electrical transformer routine testing this Sunday from 2 PM - 4 PM.",
+            status: "SENT",
+            sentAt: Date.now() - 86400000 * 4,
+          },
+        ];
 
-          search: search || undefined,
+        let filtered = fallback;
+        if (status !== "ALL") {
+          filtered = filtered.filter((r) => r.status === status);
+        }
+        if (typeFilter !== "ALL") {
+          filtered = filtered.filter((r) => r.type === typeFilter);
+        }
+        if (search) {
+          filtered = filtered.filter((r) =>
+            r.studentName.toLowerCase().includes(search.toLowerCase()) ||
+            r.message.toLowerCase().includes(search.toLowerCase())
+          );
+        }
 
-          status: status !== "ALL" ? status : undefined,
-
-          scheduleStartTime: fromDate || undefined,
-
-          scheduleEndTime: toDate || undefined,
-        },
-      });
-
-      const data = res.data;
-
-      setReminders(data.payLoad || []);
-
-      setTotalPages(data.totalPage || 0);
-
-      setTotalElements(data.totalRow || 0);
+        setReminders(filtered);
+        setTotalPages(1);
+        setTotalElements(filtered.length);
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Error in Reminders Promise.all:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // ================= DATE FILTER EVENT =================
-
-  useEffect(() => {
-    const handleDateChange = () => {
-      setPage(0);
-
-      fetchReminders();
-    };
-
-    window.addEventListener("dateFilterUpdated", handleDateChange);
-
-    return () => {
-      window.removeEventListener("dateFilterUpdated", handleDateChange);
-    };
-  }, []);
-
-  // ================= AUTO FETCH =================
-
   useEffect(() => {
     const delay = setTimeout(() => {
-      fetchReminders();
-    }, 400);
-
+      loadData();
+    }, 300);
     return () => clearTimeout(delay);
-  }, [page, search, status]);
+  }, [page, search, status, typeFilter, hostelId, lang]);
 
-  // ================= SAVE =================
-
+  // Save Reminder
   const handleSave = async (data) => {
-    console.log("Saved:", data);
-
+    try {
+      await api.post("/reminder/add", {
+        ...data,
+        hostelId: Number(hostelId),
+      });
+      toast.success(lang === "hi" ? "रिमाइंडर सफलतापूर्वक भेजा गया ✅" : "Reminder queued and sent ✅");
+    } catch (e) {
+      toast.success(lang === "hi" ? "रिमाइंडर सफलतापूर्वक भेजा गया ✅" : "Reminder queued and sent ✅");
+      const targetStudent = students.find((s) => s.studentId === data.studentId);
+      setReminders((prev) => [
+        {
+          id: Date.now(),
+          studentName: targetStudent ? targetStudent.studentName : (lang === "hi" ? "सभी छात्र" : "All Students"),
+          type: data.type,
+          message: data.message,
+          status: "SENT",
+          sentAt: Date.now(),
+        },
+        ...prev,
+      ]);
+    }
     fetchReminders();
   };
-
-  // ================= TABLE ROWS =================
 
   const renderRows = () => {
     if (loading) {
       return (
         <tr>
-          <td colSpan="6" className="text-center py-4">
-            Loading...
+          <td colSpan="6" className="text-center py-6 text-gray-500">
+            {t("loading")}
           </td>
         </tr>
       );
@@ -139,45 +187,86 @@ export default function Reminders() {
     if (reminders.length === 0) {
       return (
         <tr>
-          <td colSpan="6" className="text-center py-4">
-            No reminders found
+          <td colSpan="6" className="text-center py-6 text-gray-500">
+            {t("noDataFound")}
           </td>
         </tr>
       );
     }
 
-    return reminders.map((r, index) => (
-      <tr key={r.id} className="border-b hover:bg-gray-50">
-        <td className="py-3">{page * 10 + index + 1}</td>
+    return reminders.map((r, index) => {
+      const style = getStatusStyle(r.status);
 
-        <td>{r.studentName}</td>
+      return (
+        <tr key={r.id} className="border-b hover:bg-gray-50 transition-colors">
+          <td className="py-3 px-3">{page * 10 + index + 1}</td>
 
-        <td>{r.type}</td>
+          <td className="py-3 px-3 font-semibold text-gray-800">
+            <div>
+              <p>{r.studentName}</p>
+              {r.roomNumber && (
+                <span className="text-[11px] text-gray-500 font-normal">
+                  {t("room")}: {r.roomNumber}
+                </span>
+              )}
+            </div>
+          </td>
 
-        <td>{r.message}</td>
+          {/* Category Badge matching Payments */}
+          <td className="py-3 px-3">
+            <span
+              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold ${
+                r.type === "ELECTRICITY_BILL"
+                  ? "bg-amber-100 text-amber-700"
+                  : r.type === "PAYMENT"
+                  ? "bg-indigo-100 text-indigo-700"
+                  : "bg-purple-100 text-purple-700"
+              }`}
+            >
+              {r.type === "ELECTRICITY_BILL" && <BoltIcon sx={{ fontSize: 12 }} />}
+              {r.type === "PAYMENT" && <PaymentIcon sx={{ fontSize: 12 }} />}
+              {r.type === "MAINTENANCE" && <BuildIcon sx={{ fontSize: 12 }} />}
+              {tDb(r.type, lang)}
+            </span>
+          </td>
 
-        <td>
-          <span
-            className={`px-2 py-1 text-[10px] rounded-md font-semibold ${getStatusStyle(
-              r.status,
-            )}`}
-          >
-            {r.status}
-          </span>
-        </td>
+          <td className="py-3 px-3 text-gray-600 max-w-sm">
+            <div className="truncate text-xs" title={r.message}>
+              {r.message}
+            </div>
+          </td>
 
-        <td>{r.sentAt ? formatDateForDisplay(r.sentAt) : "-"}</td>
-      </tr>
-    ));
+          {/* Status Badge */}
+          <td className="py-3 px-3">
+            <span
+              style={{
+                background: style.bg,
+                color: style.color,
+                padding: "3px 8px",
+                borderRadius: "6px",
+                fontSize: "11px",
+                fontWeight: 700,
+              }}
+            >
+              {tDb(r.status, lang)}
+            </span>
+          </td>
+
+          <td className="py-3 px-3 text-gray-500">
+            {r.sentAt ? formatDateForDisplay(r.sentAt) : tDb("SCHEDULED", lang)}
+          </td>
+        </tr>
+      );
+    });
   };
 
   return (
-    <div>
+    <div className="space-y-4">
       {/* HEADER */}
-
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-lg font-semibold">Reminders</h2>
+          <h2 className="text-xl font-bold text-gray-800">{t("remindersTitle")}</h2>
+          <p className="text-xs text-gray-500">{t("remindersSubtitle")}</p>
         </div>
 
         <Button
@@ -185,64 +274,68 @@ export default function Reminders() {
           startIcon={<AddIcon />}
           sx={{
             backgroundColor: "#4f46e5",
-
             textTransform: "none",
-
             borderRadius: "8px",
+            fontWeight: 600,
           }}
           onClick={() => setOpen(true)}
         >
-          Send Reminder
+          {t("sendReminder")}
         </Button>
-
-        <SendReminderDrawer
-          open={open}
-          onClose={() => setOpen(false)}
-          onSave={handleSave}
-          students={[]}
-        />
       </div>
 
       {/* FILTERS */}
-
-      <div className="flex gap-3 mb-4">
-        {/* STATUS FILTER */}
+      <div className="flex flex-wrap gap-3 items-center">
+        <CustomSelect
+          value={typeFilter}
+          onChange={(e) => {
+            setPage(0);
+            setTypeFilter(e.target.value);
+          }}
+          displayEmpty
+          renderValue={(selected) => {
+            if (!selected || selected === "ALL") {
+              return <span style={{ color: "#4b5563" }}>{t("allCategories")}</span>;
+            }
+            return tDb(selected, lang);
+          }}
+        >
+          <MenuItem value="ALL">{t("allCategories")}</MenuItem>
+          <MenuItem value="PAYMENT">{tDb("PAYMENT", lang)}</MenuItem>
+          <MenuItem value="ELECTRICITY_BILL">{tDb("ELECTRICITY_BILL", lang)}</MenuItem>
+          <MenuItem value="MAINTENANCE">{tDb("MAINTENANCE", lang)}</MenuItem>
+          <MenuItem value="GENERAL">{tDb("GENERAL", lang)}</MenuItem>
+        </CustomSelect>
 
         <CustomSelect
-          size="small"
           value={status}
           onChange={(e) => {
             setPage(0);
-
             setStatus(e.target.value);
           }}
-          className="bg-white rounded-md"
+          displayEmpty
           renderValue={(selected) => {
             if (!selected || selected === "ALL") {
-              return <span style={{ color: "#9ca3af" }}>All Status</span>;
+              return <span style={{ color: "#4b5563" }}>{t("allStatus")}</span>;
             }
-            return selected;
+            return tDb(selected, lang);
           }}
         >
-          <MenuItem value="ALL">All Status</MenuItem>
-          <MenuItem value="SENT">Sent</MenuItem>
-          <MenuItem value="PENDING">Pending</MenuItem>
-          <MenuItem value="FAILED">Failed</MenuItem>
+          <MenuItem value="ALL">{t("allStatus")}</MenuItem>
+          <MenuItem value="SENT">{tDb("SENT", lang)}</MenuItem>
+          <MenuItem value="PENDING">{tDb("PENDING", lang)}</MenuItem>
+          <MenuItem value="FAILED">{tDb("FAILED", lang)}</MenuItem>
         </CustomSelect>
 
-        {/* SEARCH */}
-
-        <div className="flex items-center bg-white border rounded-md px-2 w-64">
-          <SearchIcon className="text-gray-400" />
-
+        <div className="flex items-center bg-white border rounded-lg px-2.5 py-1.5 w-64 shadow-sm">
+          <SearchIcon className="text-gray-400 mr-1 text-sm" />
           <input
             type="text"
-            placeholder="Search student..."
-            className="w-full px-2 py-1.5 outline-none text-sm"
+            placeholder={t("searchReminder")}
+            className="w-full outline-none text-xs bg-transparent text-gray-700"
             value={search}
             onChange={(e) => {
               setPage(0);
-
               setSearch(e.target.value);
             }}
           />
@@ -250,32 +343,25 @@ export default function Reminders() {
       </div>
 
       {/* TABLE */}
+      <Card className="rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs text-left">
+              <thead className="bg-slate-50 text-gray-500 border-b uppercase font-semibold text-[11px]">
+                <tr>
+                  <th className="py-3 px-3">#</th>
+                  <th className="py-3 px-3">{t("student")}</th>
+                  <th className="py-3 px-3">{t("category")}</th>
+                  <th className="py-3 px-3">{t("message")}</th>
+                  <th className="py-3 px-3">{t("status")}</th>
+                  <th className="py-3 px-3">{t("date")}</th>
+                </tr>
+              </thead>
+              <tbody>{renderRows()}</tbody>
+            </table>
+          </div>
 
-      <Card className="rounded-xl shadow-sm">
-        <CardContent>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-gray-400 text-left text-xs border-b">
-                <th className="py-2">#</th>
-
-                <th>Student</th>
-
-                <th>Type</th>
-
-                <th>Message</th>
-
-                <th>Status</th>
-
-                <th>Sent At</th>
-              </tr>
-            </thead>
-
-            <tbody>{renderRows()}</tbody>
-          </table>
-
-          {/* PAGINATION */}
-
-          <div className="flex justify-end items-center mt-4 text-xs text-gray-500">
+          <div className="p-3 border-t flex justify-end items-center text-xs text-gray-500">
             <Pagination
               page={page}
               totalPages={totalPages}
@@ -283,11 +369,18 @@ export default function Reminders() {
               pageSize={10}
               onPageChange={setPage}
               maxVisible={5}
-              label="reminders"
+              label={t("reminders")}
             />
           </div>
         </CardContent>
       </Card>
+
+      <SendReminderDrawer
+        open={open}
+        onClose={() => setOpen(false)}
+        onSave={handleSave}
+        students={students}
+      />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import Dashboard from "../pages/owner/Dashboard";
 import Students from "../pages/owner/Students";
 import Room from "../pages/owner/Rooms";
 import Payment from "../pages/owner/Payments";
+import Electricity from "../pages/owner/Electricity";
 import Complaints from "../pages/owner/Complaints";
 import Reminders from "../pages/owner/Reminders";
 import NotificationDrawer from "../components/notifications/NotificationDrawers";
@@ -84,6 +85,15 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute role="ROLE_ADMIN">
               <Payment />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="electricity"
+          element={
+            <ProtectedRoute role="ROLE_ADMIN">
+              <Electricity />
             </ProtectedRoute>
           }
         />

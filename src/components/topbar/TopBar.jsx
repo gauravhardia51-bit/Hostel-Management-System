@@ -1,5 +1,5 @@
 import "./TopBar.css";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import NotificationDrawer from "../notifications/NotificationDrawers";
 
 // MUI
@@ -7,20 +7,27 @@ import IconButton from "@mui/material/IconButton";
 import Avatar from "@mui/material/Avatar";
 import Popover from "@mui/material/Popover";
 import Button from "@mui/material/Button";
+import Tooltip from "@mui/material/Tooltip";
 import { useNavigate } from "react-router-dom";
 
 // Icons
 import MenuIcon from "@mui/icons-material/Menu";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import LanguageIcon from "@mui/icons-material/Language";
 
 // Date Picker
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { getAuthData } from "../../utils/auth";
+import { useApp } from "../../context/AppContext";
 
 export default function TopBar({ collapsed, setCollapsed }) {
   const navigate = useNavigate();
+  const { themeMode, toggleTheme, lang, setLang, t } = useApp();
+
   // ===== USER =====
   const [user, setUser] = useState(null);
   const auth = getAuthData();
@@ -32,12 +39,20 @@ export default function TopBar({ collapsed, setCollapsed }) {
         ? "Student"
         : "User";
 
-  useEffect(() => { const loadUser = () => { const currentAuth = getAuthData(); setUser(currentAuth?.user || null); }; loadUser(); window.addEventListener("userUpdated", loadUser); return () => { window.removeEventListener("userUpdated", loadUser); }; }, []);
+  useEffect(() => {
+    const loadUser = () => {
+      const currentAuth = getAuthData();
+      setUser(currentAuth?.user || null);
+    };
+    loadUser();
+    window.addEventListener("userUpdated", loadUser);
+    return () => {
+      window.removeEventListener("userUpdated", loadUser);
+    };
+  }, []);
 
   // ===== DATE =====
-
   const today = new Date();
-
   const [fromDate, setFromDate] = useState(today);
   const [toDate, setToDate] = useState(today);
 
@@ -46,7 +61,6 @@ export default function TopBar({ collapsed, setCollapsed }) {
     const savedToDate = localStorage.getItem("toDate");
 
     const today = new Date();
-
     const currentMonthStart = new Date(
       today.getFullYear(),
       today.getMonth(),
@@ -67,27 +81,20 @@ export default function TopBar({ collapsed, setCollapsed }) {
       } else {
         setFromDate(currentMonthStart);
         setToDate(today);
-
         localStorage.setItem("fromDate", currentMonthStart.getTime());
-
         localStorage.setItem("toDate", today.getTime());
-
         window.dispatchEvent(new Event("dateFilterUpdated"));
       }
     } else {
       setFromDate(currentMonthStart);
       setToDate(today);
-
       localStorage.setItem("fromDate", currentMonthStart.getTime());
-
       localStorage.setItem("toDate", today.getTime());
-
       window.dispatchEvent(new Event("dateFilterUpdated"));
     }
   }, []);
 
   // ===== DATE POPOVER =====
-
   const [anchorEl, setAnchorEl] = useState(null);
 
   const openDatePopup = (event) => {
@@ -110,11 +117,40 @@ export default function TopBar({ collapsed, setCollapsed }) {
       </div>
 
       {/* RIGHT */}
-      <div className="date-bar">
+      <div className="date-bar flex items-center gap-2">
+        {/* Quick Language Toggle */}
+        <Tooltip title={lang === "en" ? "Switch to हिंदी" : "Switch to English"}>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => setLang(lang === "en" ? "hi" : "en")}
+            startIcon={<LanguageIcon sx={{ fontSize: 14 }} />}
+            sx={{
+              textTransform: "none",
+              fontSize: "11px",
+              padding: "3px 8px",
+              borderRadius: "8px",
+              borderColor: "#e2e8f0",
+              color: themeMode === "dark" ? "#f1f5f9" : "#475569",
+              minWidth: "unset",
+            }}
+          >
+            {lang === "en" ? "हिंदी" : "EN"}
+          </Button>
+        </Tooltip>
+
+        {/* Quick Theme Toggle (Dark / Light) */}
+        <Tooltip title={themeMode === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}>
+          <IconButton size="small" onClick={toggleTheme} sx={{ color: themeMode === "dark" ? "#f59e0b" : "#64748b" }}>
+            {themeMode === "dark" ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+          </IconButton>
+        </Tooltip>
+
+        {/* Date Filter */}
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <div className="date-filter">
-            <IconButton onClick={openDatePopup} className="calendar-btn">
-              <CalendarMonthIcon />
+            <IconButton onClick={openDatePopup} className="calendar-btn" size="small">
+              <CalendarMonthIcon fontSize="small" />
             </IconButton>
 
             <Popover
@@ -155,21 +191,15 @@ export default function TopBar({ collapsed, setCollapsed }) {
 
                 <Button
                   variant="contained"
+                  size="small"
                   onClick={() => {
                     if (fromDate) {
                       localStorage.setItem("fromDate", fromDate.getTime());
                     }
-
                     if (toDate) {
                       localStorage.setItem("toDate", toDate.getTime());
                     }
-
-                    console.log("FROM:", localStorage.getItem("fromDate"));
-
-                    console.log("TO:", localStorage.getItem("toDate"));
-
                     window.dispatchEvent(new Event("dateFilterUpdated"));
-
                     closeDatePopup();
                   }}
                 >
@@ -190,9 +220,10 @@ export default function TopBar({ collapsed, setCollapsed }) {
         >
           <Avatar
             sx={{
-              width: 36,
-              height: 36,
+              width: 34,
+              height: 34,
               bgcolor: "#4f46e5",
+              fontSize: "14px",
             }}
           >
             {user?.name?.charAt(0)}
@@ -200,9 +231,8 @@ export default function TopBar({ collapsed, setCollapsed }) {
 
           {!collapsed && (
             <div>
-              <p className="owner-name">{user?.name || "User"}</p>
-
-              <p className="user">{roleLabel}</p>
+              <p className="owner-name text-xs font-semibold">{user?.name || "User"}</p>
+              <p className="user text-[10px]">{roleLabel}</p>
             </div>
           )}
         </div>
