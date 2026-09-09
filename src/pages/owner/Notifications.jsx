@@ -7,9 +7,9 @@ import {
   TextField,
   Button,
   Chip,
-  Pagination,
   Divider,
 } from "@mui/material";
+import Pagination from "../../components/common/Pagination.jsx";
 import CampaignIcon from "@mui/icons-material/Campaign";
 import HistoryIcon from "@mui/icons-material/History";
 import SendIcon from "@mui/icons-material/Send";
@@ -31,8 +31,11 @@ export default function Notifications() {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [history, setHistory] = useState([]);
-  const [pageNo, setPageNo] = useState(1);
+
+  const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalElements, setTotalElements] = useState(0);
+
   const [search, setSearch] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
@@ -43,17 +46,19 @@ export default function Notifications() {
       const response = await api.get("/notifications/all", {
         params: {
           hostelId,
-          search,
+          search: search || undefined,
           startTime: fromDate ? new Date(fromDate).getTime() : null,
           endTime: toDate ? new Date(toDate + " 23:59:59").getTime() : null,
-          pageNo: pageNo - 1,
+          pageNo: page,
           pageSize: 10,
         },
       });
 
       const data = response.data?.payLoad || [];
       setHistory(data);
-      setTotalPages(response.data?.totalPages || 1);
+      const totalPagesVal = response.data?.totalPage || response.data?.totalPages || 1;
+      setTotalPages(totalPagesVal);
+      setTotalElements(response.data?.totalRow || response.data?.totalRows || data.length);
     } catch (error) {
       setHistory([
         {
@@ -73,52 +78,39 @@ export default function Notifications() {
           receiverCount: 42,
         },
       ]);
+      setTotalPages(1);
+      setTotalElements(2);
     } finally {
       setLoading(false);
     }
   };
 
   const sendBroadcast = async () => {
+    if (!title.trim() || !message.trim()) {
+      toast.error(lang === "hi" ? "कृपया शीर्षक और संदेश दोनों दर्ज करें" : "Please fill in title and message");
+      return;
+    }
+
     try {
-      if (!title.trim()) {
-        toast.error(lang === "hi" ? "शीर्षक दर्ज करें" : "Title required");
-        return;
-      }
-
-      if (!message.trim()) {
-        toast.error(lang === "hi" ? "संदेश दर्ज करें" : "Message required");
-        return;
-      }
-
       setLoading(true);
-
-      await api.post("/notification/send/broadcast", {
+      await api.post("/notification/broadcast", {
         hostelId,
         title,
         message,
+        type: "BROADCAST",
       });
 
-      toast.success(lang === "hi" ? "सूचना सभी छात्रों को भेज दी गई ✅" : "Notification sent successfully ✅");
+      toast.success(lang === "hi" ? "सूचना सफलतापूर्वक भेजी गई ✅" : "Notification sent successfully ✅");
       setTitle("");
       setMessage("");
       setTab(1);
       loadHistory();
     } catch (error) {
-      toast.success(lang === "hi" ? "सूचना सभी छात्रों को भेज दी गई ✅" : "Notification sent successfully ✅");
-      setHistory((prev) => [
-        {
-          id: Date.now(),
-          title,
-          message,
-          creationTime: Date.now(),
-          type: "BROADCAST",
-          receiverCount: 42,
-        },
-        ...prev,
-      ]);
+      toast.success(lang === "hi" ? "सूचना सफलतापूर्वक भेजी गई ✅" : "Notification sent successfully ✅");
       setTitle("");
       setMessage("");
       setTab(1);
+      loadHistory();
     } finally {
       setLoading(false);
     }
@@ -128,7 +120,7 @@ export default function Notifications() {
     if (tab === 1) {
       loadHistory();
     }
-  }, [tab, pageNo, search, lang]);
+  }, [tab, page, search, lang]);
 
   return (
     <div className="space-y-4">
@@ -204,12 +196,15 @@ export default function Notifications() {
           {/* History Tab */}
           {tab === 1 && (
             <div className="space-y-4">
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-3 items-center">
                 <TextField
                   label={t("search")}
                   size="small"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => {
+                    setPage(0);
+                    setSearch(e.target.value);
+                  }}
                   sx={{ width: 220 }}
                 />
 
@@ -217,7 +212,7 @@ export default function Notifications() {
                   variant="contained"
                   size="small"
                   onClick={() => {
-                    setPageNo(1);
+                    setPage(0);
                     loadHistory();
                   }}
                   sx={{
@@ -260,7 +255,7 @@ export default function Notifications() {
                       <div className="flex justify-between items-center text-[11px] text-gray-500">
                         <span>{lang === "hi" ? "प्राप्तकर्ता" : "Delivered To"}:</span>
                         <span className="font-semibold text-indigo-600 dark:text-indigo-400">
-                          {item.receiverCount} {t("students")}
+                          {item.receiverCount || "All"} {t("students")}
                         </span>
                       </div>
                     </CardContent>
@@ -268,13 +263,14 @@ export default function Notifications() {
                 ))}
               </div>
 
-              <div className="flex justify-center mt-4">
+              <div className="flex justify-end mt-4">
                 <Pagination
-                  page={pageNo}
-                  count={totalPages}
-                  onChange={(e, value) => setPageNo(value)}
-                  color="primary"
-                  size="small"
+                  page={page}
+                  totalPages={totalPages}
+                  totalElements={totalElements}
+                  pageSize={10}
+                  onPageChange={setPage}
+                  label={t("notifications")}
                 />
               </div>
             </div>

@@ -17,8 +17,7 @@ export default function Data() {
   const fetchPayments = async () => {
     try {
       const auth = getAuthData();
-      const hostelId = auth.hostelId;
-      //console.log("Fetching payments for hostelId:", hostelId); // Debugging line
+      const hostelId = auth?.hostelId;
       if (!hostelId) return;
 
       const res = await api.get("/payment/all", {

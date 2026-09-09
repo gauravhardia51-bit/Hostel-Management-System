@@ -8,7 +8,6 @@ import {
   DialogActions,
   Button,
   IconButton,
-  Divider,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import BoltIcon from "@mui/icons-material/Bolt";
@@ -18,91 +17,88 @@ import { toast } from "react-toastify";
 import Pagination from "../../components/common/Pagination.jsx";
 import { getAuthData } from "../../utils/auth";
 import api from "../../api/Api.jsx";
+import { formatDateForDisplay } from "../../utils/formatDate.js";
 
 export default function StudentPayments() {
+  const auth = getAuthData();
+  const hostelId = auth?.hostelId;
+  const studentId = auth?.user?.id;
+  const defaultRate = parseFloat(localStorage.getItem(`hostel_${hostelId}_unit_rate`)) || 10;
+
   const [payments, setPayments] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [openModal, setOpenModal] = useState(false);
 
-  const auth = getAuthData();
-  const hostelId = auth?.hostelId;
-  const defaultRate = parseFloat(localStorage.getItem(`hostel_${hostelId}_unit_rate`)) || 10;
+  const fetchPayments = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get("/payment/all", {
+        params: {
+          pageNo: page,
+          pageSize: 10,
+          hostelId,
+          studentId,
+        },
+      });
+
+      const data = response.data;
+      if (data?.payLoad && Array.isArray(data.payLoad) && data.payLoad.length > 0) {
+        setPayments(data.payLoad);
+        setTotalPages(data.totalPage || 1);
+        setTotalElements(data.totalRow || data.payLoad.length);
+      } else {
+        throw new Error("No data");
+      }
+    } catch (error) {
+      const sampleData = [
+        {
+          id: 1,
+          month: "April 2026",
+          roomNumber: "R-204",
+          rentAmount: 5000,
+          unitsConsumed: 30,
+          ratePerUnit: defaultRate,
+          electricityAmount: 300,
+          roomTotalUnits: 60,
+          roomTotalCost: 600,
+          roomOccupants: 2,
+          amount: 5300,
+          dueDate: Date.now() + 86400000 * 5,
+          paidAt: Date.now() - 86400000 * 2,
+          status: "PAID",
+        },
+        {
+          id: 2,
+          month: "May 2026",
+          roomNumber: "R-204",
+          rentAmount: 5000,
+          unitsConsumed: 35,
+          ratePerUnit: defaultRate,
+          electricityAmount: 350,
+          roomTotalUnits: 70,
+          roomTotalCost: 700,
+          roomOccupants: 2,
+          amount: 5350,
+          dueDate: Date.now() + 86400000 * 35,
+          paidAt: null,
+          status: "PENDING",
+        },
+      ];
+      setPayments(sampleData);
+      setTotalPages(1);
+      setTotalElements(sampleData.length);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchStudentPayments = async () => {
-      try {
-        const res = await api.get("/student/payments", {
-          params: { pageNo: page, pageSize: 10 },
-        });
-        if (res.data?.payLoad) {
-          setPayments(res.data.payLoad);
-          setTotalPages(res.data.totalPage || 1);
-          setTotalElements(res.data.totalRow || res.data.payLoad.length);
-          return;
-        }
-      } catch (err) {
-        // Fallback sample data with itemized electricity breakdown
-        const sampleData = [
-          {
-            id: 1,
-            month: "April 2026",
-            roomNumber: "R-204",
-            rentAmount: 5000,
-            unitsConsumed: 30, // 60 units room total / 2 occupants
-            ratePerUnit: defaultRate,
-            electricityAmount: 300, // 30 units * 10
-            roomTotalUnits: 60,
-            roomTotalCost: 600,
-            roomOccupants: 2,
-            amount: 5300,
-            dueDate: "2026-04-05",
-            paidDate: "2026-04-04",
-            status: "PAID",
-          },
-          {
-            id: 2,
-            month: "May 2026",
-            roomNumber: "R-204",
-            rentAmount: 5000,
-            unitsConsumed: 35,
-            ratePerUnit: defaultRate,
-            electricityAmount: 350,
-            roomTotalUnits: 70,
-            roomTotalCost: 700,
-            roomOccupants: 2,
-            amount: 5350,
-            dueDate: "2026-05-05",
-            paidDate: null,
-            status: "PENDING",
-          },
-          {
-            id: 3,
-            month: "June 2026",
-            roomNumber: "R-204",
-            rentAmount: 5000,
-            unitsConsumed: 28,
-            ratePerUnit: defaultRate,
-            electricityAmount: 280,
-            roomTotalUnits: 56,
-            roomTotalCost: 560,
-            roomOccupants: 2,
-            amount: 5280,
-            dueDate: "2026-06-05",
-            paidDate: null,
-            status: "PENDING",
-          },
-        ];
-        setPayments(sampleData);
-        setTotalPages(1);
-        setTotalElements(sampleData.length);
-      }
-    };
-
-    fetchStudentPayments();
-  }, [page, defaultRate]);
+    fetchPayments();
+  }, [page, hostelId, studentId]);
 
   const handlePay = (payment) => {
     toast.info(`Initiating online checkout for ₹${payment.amount}...`);
@@ -145,103 +141,111 @@ export default function StudentPayments() {
               </thead>
 
               <tbody className="divide-y divide-gray-100">
-                {payments.map((p, index) => {
-                  const isPaid = p.status === "PAID";
-                  return (
-                    <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-3.5 px-4 font-medium text-gray-500">
-                        {page * 10 + index + 1}
-                      </td>
+                {payments.length === 0 ? (
+                  <tr>
+                    <td colSpan="9" className="text-center py-6 text-gray-400">
+                      {loading ? "Loading..." : "No payments found"}
+                    </td>
+                  </tr>
+                ) : (
+                  payments.map((p, index) => {
+                    const isPaid = p.status === "PAID";
+                    return (
+                      <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-3.5 px-4 font-medium text-gray-500">
+                          {page * 10 + index + 1}
+                        </td>
 
-                      <td className="py-3.5 px-4 font-semibold text-gray-800">
-                        {p.month}
-                      </td>
+                        <td className="py-3.5 px-4 font-semibold text-gray-800">
+                          {p.month || (p.dueDate ? new Date(p.dueDate).toLocaleDateString("en-IN", { month: "long", year: "numeric" }) : "Monthly Dues")}
+                        </td>
 
-                      <td className="py-3.5 px-4 text-gray-700">
-                        ₹{p.rentAmount !== undefined ? p.rentAmount : p.amount}
-                      </td>
+                        <td className="py-3.5 px-4 text-gray-700">
+                          ₹{p.rentAmount !== undefined ? p.rentAmount : p.amount}
+                        </td>
 
-                      {/* Electricity Itemized Column */}
-                      <td className="py-3.5 px-4">
-                        {p.electricityAmount ? (
-                          <div>
-                            <span className="font-semibold text-amber-700">
-                              ₹{p.electricityAmount}
-                            </span>
-                            <p className="text-[10px] text-gray-500">
-                              {p.unitsConsumed} units @ ₹{p.ratePerUnit || defaultRate}/unit
-                            </p>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">Included</span>
-                        )}
-                      </td>
+                        {/* Electricity Itemized Column */}
+                        <td className="py-3.5 px-4">
+                          {p.electricityAmount ? (
+                            <div>
+                              <span className="font-semibold text-amber-700">
+                                ₹{p.electricityAmount}
+                              </span>
+                              <p className="text-[10px] text-gray-500">
+                                {p.unitsConsumed} units @ ₹{p.ratePerUnit || defaultRate}/unit
+                              </p>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">Included</span>
+                          )}
+                        </td>
 
-                      {/* Total Amount */}
-                      <td className="py-3.5 px-4 font-bold text-gray-900 text-sm">
-                        ₹{p.amount}
-                      </td>
+                        {/* Total Amount */}
+                        <td className="py-3.5 px-4 font-bold text-gray-900 text-sm">
+                          ₹{p.amount}
+                        </td>
 
-                      <td className="py-3.5 px-4 text-gray-600">
-                        {new Date(p.dueDate).toLocaleDateString("en-IN")}
-                      </td>
+                        <td className="py-3.5 px-4 text-gray-600">
+                          {formatDateForDisplay(p.dueDate)}
+                        </td>
 
-                      <td className="py-3.5 px-4 text-gray-600">
-                        {p.paidDate
-                          ? new Date(p.paidDate).toLocaleDateString("en-IN")
-                          : "-"}
-                      </td>
+                        <td className="py-3.5 px-4 text-gray-600">
+                          {p.paidAt || p.paidDate
+                            ? formatDateForDisplay(p.paidAt || p.paidDate)
+                            : "-"}
+                        </td>
 
-                      <td className="py-3.5 px-4">
-                        <span
-                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                            isPaid
-                              ? "bg-emerald-100 text-emerald-700"
-                              : "bg-red-100 text-red-600"
-                          }`}
-                        >
-                          {p.status}
-                        </span>
-                      </td>
-
-                      <td className="py-3.5 px-4 text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <Button
-                            size="small"
-                            variant="text"
-                            startIcon={<ReceiptIcon sx={{ fontSize: 14 }} />}
-                            onClick={() => handleViewInvoice(p)}
-                            sx={{
-                              fontSize: "11px",
-                              textTransform: "none",
-                              color: "#4f46e5",
-                              padding: "2px 6px",
-                            }}
+                        <td className="py-3.5 px-4">
+                          <span
+                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                              isPaid
+                                ? "bg-emerald-100 text-emerald-700"
+                                : "bg-red-100 text-red-600"
+                            }`}
                           >
-                            Breakdown
-                          </Button>
+                            {p.status}
+                          </span>
+                        </td>
 
-                          {!isPaid && (
+                        <td className="py-3.5 px-4 text-center">
+                          <div className="flex items-center justify-center gap-2">
                             <Button
                               size="small"
-                              variant="contained"
-                              onClick={() => handlePay(p)}
+                              variant="text"
+                              startIcon={<ReceiptIcon sx={{ fontSize: 14 }} />}
+                              onClick={() => handleViewInvoice(p)}
                               sx={{
-                                background: "linear-gradient(to right, #4f46e5, #7c3aed)",
                                 fontSize: "11px",
                                 textTransform: "none",
-                                padding: "2px 8px",
-                                borderRadius: "6px",
+                                color: "#4f46e5",
+                                padding: "2px 6px",
                               }}
                             >
-                              Pay Now
+                              Breakdown
                             </Button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+
+                            {!isPaid && (
+                              <Button
+                                size="small"
+                                variant="contained"
+                                onClick={() => handlePay(p)}
+                                sx={{
+                                  background: "linear-gradient(to right, #4f46e5, #7c3aed)",
+                                  fontSize: "11px",
+                                  textTransform: "none",
+                                  padding: "2px 8px",
+                                  borderRadius: "6px",
+                                }}
+                              >
+                                Pay Now
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
@@ -318,7 +322,7 @@ export default function StudentPayments() {
                 <div className="flex justify-between">
                   <span>Room Total Meter Consumption:</span>
                   <span className="font-semibold text-gray-800">
-                    {selectedInvoice?.roomTotalUnits || selectedInvoice?.unitsConsumed * 2 || 60} Units (kWh)
+                    {selectedInvoice?.roomTotalUnits || (selectedInvoice?.unitsConsumed ? selectedInvoice.unitsConsumed * 2 : 60)} Units (kWh)
                   </span>
                 </div>
 
@@ -332,7 +336,7 @@ export default function StudentPayments() {
                 <div className="flex justify-between">
                   <span>Total Room Electricity Cost:</span>
                   <span className="font-semibold text-gray-800">
-                    ₹{selectedInvoice?.roomTotalCost || selectedInvoice?.electricityAmount * 2 || 600}
+                    ₹{selectedInvoice?.roomTotalCost || (selectedInvoice?.electricityAmount ? selectedInvoice.electricityAmount * 2 : 600)}
                   </span>
                 </div>
 
@@ -351,7 +355,7 @@ export default function StudentPayments() {
                 Total Due
               </p>
               <p className="text-xs text-indigo-100">
-                Due Date: {selectedInvoice?.dueDate}
+                Due Date: {formatDateForDisplay(selectedInvoice?.dueDate)}
               </p>
             </div>
             <div className="text-right">

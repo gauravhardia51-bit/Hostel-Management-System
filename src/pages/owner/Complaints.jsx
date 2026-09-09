@@ -31,6 +31,12 @@ export default function Complaints() {
   const hostelId = auth?.hostelId;
   const complaintId = queryParams.get("complaintId");
 
+  const STATUS_TRANSITIONS = {
+    OPEN: ["OPEN", "IN_PROGRESS", "CLOSED"],
+    IN_PROGRESS: ["IN_PROGRESS", "CLOSED"],
+    CLOSED: ["CLOSED"],
+  };
+
   const fetchComplaints = async () => {
     try {
       setLoading(true);
@@ -84,7 +90,7 @@ export default function Complaints() {
           category: "WIFI",
           complaintMessage: "WiFi speed drop on 2nd floor",
           status: "CLOSED",
-          dateOfCreation: Date.now() - 86400000 * 3,
+          dateOfCreation: Date.now() - 86400000 * 5,
         },
       ];
 
@@ -93,12 +99,14 @@ export default function Complaints() {
         filtered = filtered.filter((c) => c.status === status);
       }
       if (search) {
-        filtered = filtered.filter((c) =>
-          c.studentName.toLowerCase().includes(search.toLowerCase()) ||
-          c.complaintMessage.toLowerCase().includes(search.toLowerCase()) ||
-          c.ticketNumber.toLowerCase().includes(search.toLowerCase())
+        filtered = filtered.filter(
+          (c) =>
+            c.ticketNumber.toLowerCase().includes(search.toLowerCase()) ||
+            c.studentName.toLowerCase().includes(search.toLowerCase()) ||
+            c.complaintMessage.toLowerCase().includes(search.toLowerCase())
         );
       }
+
       setComplaints(filtered);
       setTotalPages(1);
       setTotalElements(filtered.length);
@@ -111,40 +119,49 @@ export default function Complaints() {
     const delay = setTimeout(() => {
       fetchComplaints();
     }, 300);
+
     return () => clearTimeout(delay);
-  }, [page, search, status, hostelId, lang]);
+  }, [page, search, status, complaintId, hostelId, lang]);
+
+  const getStatusStyle = (status) => {
+    if (status === "OPEN") {
+      return { bg: "#FEE2E2", color: "#DC2626" };
+    }
+    if (status === "IN_PROGRESS") {
+      return { bg: "#FEF3C7", color: "#D97706" };
+    }
+    return { bg: "#DCFCE7", color: "#16A34A" };
+  };
 
   const handleStatusChange = async (complaint, newStatus) => {
     if (complaint.status === newStatus) return;
 
     try {
       await api.put("/complaint/update", {
-        id: complaint.id,
+        ...complaint,
         status: newStatus,
         hostelId: Number(hostelId),
       });
 
-      toast.success(lang === "hi" ? "शिकायत की स्थिति अपडेट हुई ✅" : "Status updated ✅");
+      toast.success(lang === "hi" ? "शिकायत स्थिति अपडेट हुई ✅" : "Complaint status updated ✅");
       fetchComplaints();
     } catch (err) {
-      toast.success(lang === "hi" ? "शिकायत की स्थिति अपडेट हुई ✅" : "Status updated ✅");
       setComplaints((prev) =>
         prev.map((c) => (c.id === complaint.id ? { ...c, status: newStatus } : c))
       );
+      toast.success(lang === "hi" ? "शिकायत स्थिति अपडेट हुई ✅" : "Complaint status updated ✅");
     }
   };
 
-  const getStatusStyle = (status) => {
-    if (status === "OPEN") {
-      return { bg: "#FEF3C7", color: "#D97706" };
+  const getCategoryFromMsg = (msg = "") => {
+    const lower = msg.toLowerCase();
+    if (lower.includes("spark") || lower.includes("meter") || lower.includes("power") || lower.includes("electric") || lower.includes("ac")) {
+      return "ELECTRICITY";
     }
-    if (status === "IN_PROGRESS") {
-      return { bg: "#DBEAFE", color: "#2563EB" };
+    if (lower.includes("wifi") || lower.includes("internet") || lower.includes("speed")) {
+      return "WIFI";
     }
-    if (status === "CLOSED" || status === "RESOLVED") {
-      return { bg: "#DCFCE7", color: "#16A34A" };
-    }
-    return { bg: "#FEE2E2", color: "#DC2626" };
+    return "MAINTENANCE";
   };
 
   const renderRows = () => {
@@ -170,22 +187,24 @@ export default function Complaints() {
 
     return complaints.map((c, index) => {
       const style = getStatusStyle(c.status);
-      const cat = c.category || "GENERAL";
+      const cat = c.category || getCategoryFromMsg(c.complaintMessage);
 
       return (
         <tr key={c.id} className="border-b hover:bg-gray-50 transition-colors">
           <td className="py-3 px-3">{page * 10 + index + 1}</td>
 
+          {/* Ticket Chip */}
           <td className="py-3 px-3">
-            <span className="inline-flex items-center gap-1 font-bold text-xs text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">
+            <span className="inline-flex items-center gap-1 font-mono font-bold text-xs text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md">
               <ConfirmationNumberIcon sx={{ fontSize: 13 }} />
-              {c.ticketNumber}
+              {c.ticketNumber || `#CMP${c.id}`}
             </span>
           </td>
 
+          {/* Student & Room */}
           <td className="py-3 px-3 font-semibold text-gray-800">
             <div>
-              <p>{c.studentName}</p>
+              <p className="font-semibold text-gray-900">{c.studentName || "Student"}</p>
               {c.roomNumber && (
                 <span className="text-[11px] text-gray-500 font-normal">
                   {t("room")}: {c.roomNumber}
@@ -194,15 +213,18 @@ export default function Complaints() {
             </div>
           </td>
 
-          <td className="py-3 px-3 text-gray-700 max-w-sm">
-            <div className="flex items-center gap-1.5">
-              <span className={`inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
-                cat === "ELECTRICITY"
-                  ? "bg-amber-100 text-amber-700"
-                  : cat === "WIFI"
-                  ? "bg-blue-100 text-blue-700"
-                  : "bg-purple-100 text-purple-700"
-              }`}>
+          {/* Issue with Category Pill */}
+          <td className="py-3 px-3">
+            <div className="flex items-center gap-2 max-w-sm">
+              <span
+                className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[10px] font-bold ${
+                  cat === "ELECTRICITY"
+                    ? "bg-amber-100 text-amber-700"
+                    : cat === "WIFI"
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-purple-100 text-purple-700"
+                }`}
+              >
                 {cat === "ELECTRICITY" && <BoltIcon sx={{ fontSize: 11 }} />}
                 {cat === "WIFI" && <WifiIcon sx={{ fontSize: 11 }} />}
                 {tDb(cat, lang)}
@@ -234,7 +256,7 @@ export default function Complaints() {
                 </span>
               )}
               sx={{
-                minWidth: 110,
+                minWidth: 115,
                 height: "28px",
                 backgroundColor: style.bg,
                 color: style.color,
@@ -248,9 +270,11 @@ export default function Complaints() {
                 },
               }}
             >
-              <MenuItem value="OPEN">{tDb("OPEN", lang)}</MenuItem>
-              <MenuItem value="IN_PROGRESS">{tDb("IN_PROGRESS", lang)}</MenuItem>
-              <MenuItem value="CLOSED">{tDb("CLOSED", lang)}</MenuItem>
+              {(STATUS_TRANSITIONS[c.status] || ["OPEN", "IN_PROGRESS", "CLOSED"]).map((item) => (
+                <MenuItem key={item} value={item}>
+                  {tDb(item, lang)}
+                </MenuItem>
+              ))}
             </Select>
           </td>
 
@@ -322,7 +346,7 @@ export default function Complaints() {
                   <th className="py-3 px-3">{t("date")}</th>
                 </tr>
               </thead>
-              <tbody>{renderRows()}</tbody>
+              <tbody className="divide-y divide-gray-100">{renderRows()}</tbody>
             </table>
           </div>
 

@@ -43,7 +43,7 @@ export default function VerifyOtp() {
 
     const secs = seconds % 60;
 
-    return `${mins}:${secs.toString().padStart(1, "0")}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   // OTP input

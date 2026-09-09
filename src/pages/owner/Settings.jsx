@@ -10,7 +10,7 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import LanguageIcon from "@mui/icons-material/Language";
 import BoltIcon from "@mui/icons-material/Bolt";
 import Tooltip from "@mui/material/Tooltip";
-import { getAuthData } from "../../utils/auth";
+import { getAuthData, setAuthData } from "../../utils/auth";
 import { useApp } from "../../context/AppContext";
 
 import {
@@ -253,9 +253,6 @@ export default function Settings() {
         ...payload,
       };
 
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      window.dispatchEvent(new Event("userUpdated"));
-
       const updatedHostelData = {
         ...hostelData,
         ownerName: payload.name || hostelData.ownerName,
@@ -264,14 +261,21 @@ export default function Settings() {
       await api.put("/hostel/update", updatedHostelData);
       setHostelData(updatedHostelData);
 
-      const hostels = JSON.parse(auth?.hostels) || [];
+      const hostels = auth?.hostels || [];
       const updatedHostels = hostels.map((h) =>
         h.id === updatedHostelData.id
           ? { ...h, ownerName: updatedHostelData.ownerName }
           : h,
       );
 
-      localStorage.setItem("hostels", JSON.stringify(updatedHostels));
+      const updatedAuth = {
+        ...auth,
+        user: updatedUser,
+        hostels: updatedHostels,
+      };
+      setAuthData(updatedAuth);
+
+      window.dispatchEvent(new Event("userUpdated"));
       window.dispatchEvent(new Event("hostelUpdated"));
 
       setUserData({
@@ -294,12 +298,16 @@ export default function Settings() {
       setHostelLoading(true);
       await api.put("/hostel/update", hostelData);
 
-      const hostels = JSON.parse(auth?.hostels) || [];
+      const hostels = auth?.hostels || [];
       const updatedHostels = hostels.map((h) =>
         h.id === hostelData.id ? { ...h, ...hostelData } : h,
       );
 
-      localStorage.setItem("hostels", JSON.stringify(updatedHostels));
+      const updatedAuth = {
+        ...auth,
+        hostels: updatedHostels,
+      };
+      setAuthData(updatedAuth);
       window.dispatchEvent(new Event("hostelUpdated"));
       toast.success(t("save") + " ✅");
       setHostelEditMode(false);

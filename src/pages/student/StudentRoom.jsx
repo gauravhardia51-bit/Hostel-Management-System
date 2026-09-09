@@ -1,64 +1,84 @@
-import React, { useEffect, useState } from "react";
-import { Card, CardContent } from "@mui/material";
+import React, { useEffect, useState, useMemo } from "react";
+import { Card } from "@mui/material";
 import BoltIcon from "@mui/icons-material/Bolt";
 import ElectricMeterIcon from "@mui/icons-material/ElectricMeter";
 import { getAuthData } from "../../utils/auth";
 import api from "../../api/Api.jsx";
+import { formatDateForDisplay } from "../../utils/formatDate.js";
+import { toast } from "react-toastify";
 
 export default function StudentRoom() {
   const [roomData, setRoomData] = useState(null);
+  const [loading, setLoading] = useState(false);
   const auth = getAuthData();
   const hostelId = auth?.hostelId;
   const defaultRate = parseFloat(localStorage.getItem(`hostel_${hostelId}_unit_rate`)) || 10;
 
-  useEffect(() => {
-    const fetchRoom = async () => {
-      try {
-        const res = await api.get("/student/room");
-        if (res.data?.payLoad) {
-          setRoomData(res.data.payLoad);
-          return;
-        }
-      } catch (e) {
-        // Fallback demo data
-        const dummyResponse = {
-          payLoad: {
-            room: {
-              roomNumber: "R-204",
-              floor: "2nd Floor",
-              capacity: 3,
-              occupied: 2,
-              joinedAt: 1711929600000,
-              currentMeterReading: 1560,
-              previousMeterReading: 1450,
-              lastMonthUnits: 110,
-              submeterRate: defaultRate,
-              lastBillAmount: 110 * defaultRate,
-            },
-            roommates: [
-              {
-                name: "Rahul Sharma",
-                phone: "9876543210",
-                isYou: true,
-              },
-              {
-                name: "Aman Verma",
-                phone: "9123456780",
-                isYou: false,
-              },
-            ],
-          },
-        };
-        setRoomData(dummyResponse.payLoad);
+  const fetchRoom = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get("/room-data/user-id", {
+        params: {
+          userId: auth?.user?.id,
+        },
+      });
+      if (res.data?.payLoad) {
+        setRoomData(res.data.payLoad);
+        return;
       }
-    };
+    } catch (e) {
+      const dummyResponse = {
+        payLoad: {
+          room: {
+            roomNumber: "R-204",
+            floor: "2nd Floor",
+            capacity: 3,
+            occupied: 2,
+            joinedAt: Date.now() - 86400000 * 30,
+            currentMeterReading: 1560,
+            previousMeterReading: 1450,
+            lastMonthUnits: 110,
+            submeterRate: defaultRate,
+            lastBillAmount: 110 * defaultRate,
+          },
+          roommates: [
+            {
+              name: auth?.user?.name || "You",
+              phone: auth?.user?.phone || "9876543210",
+              isYou: true,
+            },
+            {
+              name: "Aman Verma",
+              phone: "9123456780",
+              isYou: false,
+            },
+          ],
+        },
+      };
+      setRoomData(dummyResponse.payLoad);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchRoom();
   }, [defaultRate]);
 
-  if (!roomData) return <p className="p-4 text-gray-500">Loading room details...</p>;
+  const { room = {}, roommates = [] } = roomData || {};
 
-  const { room, roommates } = roomData;
+  const sortedRoommates = useMemo(() => {
+    return [...roommates].sort((a, b) => Number(b.isYou) - Number(a.isYou));
+  }, [roommates]);
+
+  if (loading && !roomData) {
+    return <div className="text-center py-10 text-gray-500">Loading room details...</div>;
+  }
+
+  if (!roomData) {
+    return <div className="text-center py-10 text-gray-500">No room assigned.</div>;
+  }
+
   const units = room.lastMonthUnits || Math.max(0, (room.currentMeterReading || 0) - (room.previousMeterReading || 0)) || 60;
   const unitRate = room.submeterRate || defaultRate || 10;
   const totalRoomBill = units * unitRate;
@@ -72,10 +92,9 @@ export default function StudentRoom() {
         <p className="text-xs text-gray-500">Room details, roommates, and electricity sub-meter status</p>
       </div>
 
-      {/* ================= ROOM INFO ================= */}
+      {/* ROOM INFO */}
       <Card className="p-5 rounded-xl border border-gray-100 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-          {/* LEFT DETAILS */}
           <div>
             <h3 className="font-semibold text-gray-800 mb-4">Room Information</h3>
 
@@ -103,24 +122,15 @@ export default function StudentRoom() {
               <div>
                 <p className="text-gray-500 text-xs">Joined On</p>
                 <p className="font-medium text-gray-800">
-                  {new Date(room.joinedAt || Date.now()).toLocaleDateString("en-IN")}
+                  {formatDateForDisplay(room.joinedAt || Date.now())}
                 </p>
               </div>
             </div>
           </div>
-
-          {/* RIGHT IMAGE */}
-          <div>
-            <img
-              src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=600&q=80"
-              alt="Room"
-              className="rounded-xl w-full h-[180px] object-cover shadow-sm"
-            />
-          </div>
         </div>
       </Card>
 
-      {/* ================= ELECTRICITY SUB-METER CARD ================= */}
+      {/* ELECTRICITY SUB-METER CARD */}
       <Card className="p-5 rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50/70 via-amber-50/30 to-white shadow-sm">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
           <div className="flex items-center gap-2">
@@ -166,28 +176,32 @@ export default function StudentRoom() {
         </p>
       </Card>
 
-      {/* ================= ROOMMATES ================= */}
+      {/* ROOMMATES */}
       <Card className="p-5 rounded-xl border border-gray-100 shadow-sm">
         <h3 className="font-semibold text-gray-800 mb-3">Roommates</h3>
 
         <div className="divide-y divide-gray-100">
-          {roommates.map((mate, index) => (
-            <div
-              key={index}
-              className="flex justify-between items-center py-3"
-            >
-              <div>
-                <p className="font-medium text-gray-800 text-sm">{mate.name}</p>
-                <p className="text-gray-400 text-xs">{mate.phone}</p>
-              </div>
+          {sortedRoommates.length === 0 ? (
+            <div className="text-center py-6 text-gray-500">No roommates found.</div>
+          ) : (
+            sortedRoommates.map((mate, index) => (
+              <div
+                key={index}
+                className="flex justify-between items-center py-3"
+              >
+                <div>
+                  <p className="font-medium text-gray-800 text-sm">{mate.name}</p>
+                  <p className="text-gray-400 text-xs">{mate.phone}</p>
+                </div>
 
-              {mate.isYou && (
-                <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                  You
-                </span>
-              )}
-            </div>
-          ))}
+                {mate.isYou && (
+                  <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                    You
+                  </span>
+                )}
+              </div>
+            ))
+          )}
         </div>
       </Card>
     </div>

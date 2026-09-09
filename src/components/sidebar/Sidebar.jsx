@@ -12,7 +12,7 @@ const active = ({ isActive }) =>
 
 export default function Sidebar({ collapsed }) {
   const navigate = useNavigate();
-  const { t } = useApp();
+  const { t, lang } = useApp();
 
   // Get auth (role)
   const auth = getAuthData();
@@ -71,6 +71,7 @@ export default function Sidebar({ collapsed }) {
     { path: "electricity", label: t("electricity"), icon: "⚡" },
     { path: "reminders", label: t("reminders"), icon: "🔔" },
     { path: "complaints", label: t("complaints"), icon: "⚠" },
+    { path: "RoomInspectionList", label: lang === "hi" ? "कमरा निरीक्षण" : "Room Inspections", icon: "📝" },
     { path: "reports", label: t("reports"), icon: "📊" },
     { path: "notifications", label: t("notifications"), icon: "📢" },
     { path: "settings", label: t("settings"), icon: "⚙" },
@@ -81,6 +82,7 @@ export default function Sidebar({ collapsed }) {
     { path: "student/rooms", label: t("myRoom"), icon: "🛏" },
     { path: "student/payments", label: t("myPayments"), icon: "💳" },
     { path: "student/complaints", label: t("complaints"), icon: "⚠" },
+    { path: "student/room-inspection", label: lang === "hi" ? "कमरा निरीक्षण" : "Room Inspection", icon: "📝" },
     { path: "student/notifications", label: t("notifications"), icon: "🔔" },
     { path: "student/profile", label: t("profile") || "Profile", icon: "👤" },
     { path: "settings", label: t("settings"), icon: "⚙" },

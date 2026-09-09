@@ -12,7 +12,7 @@ import Reminders from "../pages/owner/Reminders";
 import NotificationDrawer from "../components/notifications/NotificationDrawers";
 import Settings from "../pages/owner/Settings";
 import Reports from "../pages/owner/reports";
-import Notifications from "../pages/owner/notifications";
+import Notifications from "../pages/owner/Notifications";
 // STUDENT PAGES (CREATE THESE)
 import StudentDashboard from "../pages/student/StudentDashboard";
 import StudentPayments from "../pages/student/StudentPayments";
@@ -20,7 +20,9 @@ import StudentComplaints from "../pages/student/StudentComplaints";
 import StudentRoom from "../pages/student/StudentRoom";
 import StudentNotifications from "../pages/student/StudentNotifications";
 import StudentProfile from "../pages/student/StudentProfile";
-//import StudentSettings from "../pages/student/StudentSettings";
+import StudentSettings from "../pages/student/StudentSettings";
+import StudentRoomInspection from "../pages/student/StudentRoomInspection";
+import RoomInspectionList from "../pages/owner/RoomInspectionList";
 
 // AUTH
 import Login from "../pages/auth/Login";
@@ -30,6 +32,7 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
 import { getAuthData } from "../utils/auth";
 import ProtectedRoute from "./ProtectedRoutes";
+import NotFound from "../pages/NotFound";
 
 export default function AppRoutes() {
   return (
@@ -152,6 +155,15 @@ export default function AppRoutes() {
           }
         />
 
+        <Route
+          path="RoomInspectionList"
+          element={
+            <ProtectedRoute role="ROLE_ADMIN">
+              <RoomInspectionList />
+            </ProtectedRoute>
+          }
+        />
+
         {/* ================= STUDENT ROUTES ================= */}
         <Route
           path="student/dashboard"
@@ -207,18 +219,27 @@ export default function AppRoutes() {
           }
         />
 
-        {/* <Route
+        <Route
+          path="student/room-inspection"
+          element={
+            <ProtectedRoute role="ROLE_USER">
+              <StudentRoomInspection />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="student/settings"
           element={
             <ProtectedRoute role="ROLE_USER">
               <StudentSettings />
             </ProtectedRoute>
           }
-        /> */}
+        />
       </Route>
 
       {/* FALLBACK */}
-      <Route path="*" element={<Navigate to="" />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

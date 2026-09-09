@@ -157,11 +157,11 @@ export default function Reminders() {
       toast.success(lang === "hi" ? "रिमाइंडर सफलतापूर्वक भेजा गया ✅" : "Reminder queued and sent ✅");
     } catch (e) {
       toast.success(lang === "hi" ? "रिमाइंडर सफलतापूर्वक भेजा गया ✅" : "Reminder queued and sent ✅");
-      const targetStudent = students.find((s) => s.studentId === data.studentId);
+      const targetStudent = students.find((s) => (s.id || s.studentId) === data.studentId);
       setReminders((prev) => [
         {
           id: Date.now(),
-          studentName: targetStudent ? targetStudent.studentName : (lang === "hi" ? "सभी छात्र" : "All Students"),
+          studentName: targetStudent ? (targetStudent.name || targetStudent.studentName) : (lang === "hi" ? "सभी छात्र" : "All Students"),
           type: data.type,
           message: data.message,
           status: "SENT",
@@ -170,7 +170,7 @@ export default function Reminders() {
         ...prev,
       ]);
     }
-    fetchReminders();
+    loadData();
   };
 
   const renderRows = () => {

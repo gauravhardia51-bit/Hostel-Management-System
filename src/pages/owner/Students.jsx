@@ -171,7 +171,7 @@ export default function Students() {
         hostelId: Number(hostelId),
       });
       toast.success(lang === "hi" ? "छात्र स्थिति अपडेट हुई ✅" : "Student status updated ✅");
-      fetchStudents();
+      loadData();
     } catch (e) {
       setStudents((prev) =>
         prev.map((s) => (s.id === student.id ? { ...s, status: newStatus } : s))
@@ -181,7 +181,11 @@ export default function Students() {
   };
 
   const handleDelete = async (id) => {
-    const ok = window.confirm(lang === "hi" ? "क्या आप इस छात्र को हटाना चाहते हैं?" : "Are you sure you want to remove this student?");
+    const ok = window.confirm(
+      lang === "hi"
+        ? "क्या आप इस छात्र को हटाना चाहते हैं?"
+        : "Are you sure you want to remove this student?"
+    );
     if (!ok) return;
 
     try {
@@ -189,7 +193,7 @@ export default function Students() {
         params: { id, hostelId },
       });
       toast.success(lang === "hi" ? "छात्र हट गया ✅" : "Student removed ✅");
-      fetchStudents();
+      loadData();
     } catch (err) {
       setStudents((prev) => prev.filter((s) => s.id !== id));
       toast.success(lang === "hi" ? "छात्र हट गया ✅" : "Student removed ✅");
@@ -205,12 +209,12 @@ export default function Students() {
         await api.post("/student/add", formData);
         toast.success(t("save") + " ✅");
       }
-      fetchStudents();
+      loadData();
       setOpen(false);
       setSelectedStudent(null);
     } catch (err) {
       toast.success(t("save") + " ✅");
-      fetchStudents();
+      loadData();
       setOpen(false);
       setSelectedStudent(null);
     }

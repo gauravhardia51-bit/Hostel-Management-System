@@ -154,7 +154,7 @@ export default function AddRoomDrawer({
             name="status"
             value={form.status}
             onChange={handleChange}
-            disabled={mode === "edit"}
+            disabled
             error={!!errors.status}
             helperText={errors.status}
           >

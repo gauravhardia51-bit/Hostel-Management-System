@@ -70,7 +70,7 @@ export default function AddStudentDrawer({
   const handleSubmit = () => {
     if (!validateAll()) return;
     let payload = {
-      token: auth.token,
+      token: auth?.token,
       name: form.name,
       phone: form.phone,
       roomId: Number(form.roomId),

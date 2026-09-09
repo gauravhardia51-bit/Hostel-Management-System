@@ -8,11 +8,15 @@ export const validateRoom = (values) => {
     errors.roomNumber = "Room number must be exactly 3 digits";
   }
 
-  // ✅ Capacity
-  if (!values.capacity) {
+  // ✅ Capacity (1 to 4)
+  if (
+    values.capacity === "" ||
+    values.capacity === null ||
+    values.capacity === undefined
+  ) {
     errors.capacity = "Capacity is required";
-  } else if (Number(values.capacity) <= 0) {
-    errors.capacity = "Capacity must be greater than 0";
+  } else if (Number(values.capacity) < 1 || Number(values.capacity) > 4) {
+    errors.capacity = "Capacity must be between 1 and 4";
   }
 
   // ✅ Occupied

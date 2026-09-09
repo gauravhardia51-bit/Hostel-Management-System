@@ -19,13 +19,17 @@ import Pagination from "../../components/common/Pagination.jsx";
 import { toast } from "react-toastify";
 import api from "../../api/Api.jsx";
 import { getAuthData } from "../../utils/auth";
+import { formatDateForDisplay } from "../../utils/formatDate.js";
 
 export default function StudentComplaints() {
+  const auth = getAuthData();
+  const hostelId = auth?.hostelId;
   const [complaints, setComplaints] = useState([]);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
 
   const [form, setForm] = useState({
@@ -35,74 +39,66 @@ export default function StudentComplaints() {
     priority: "MEDIUM",
   });
 
-  const auth = getAuthData();
-  const hostelId = auth?.hostelId;
-
-  // Fetch Complaints
   const fetchComplaints = async () => {
     try {
+      setLoading(true);
       const res = await api.get("/complaint/all", {
         params: {
           pageNo: page,
           pageSize: 10,
           studentId: auth?.user?.id,
+          hostelId: hostelId,
+          status: statusFilter === "ALL" ? undefined : statusFilter,
         },
       });
-      if (res.data?.payLoad) {
+      if (res.data?.payLoad && Array.isArray(res.data.payLoad) && res.data.payLoad.length > 0) {
         setComplaints(res.data.payLoad);
         setTotalPages(res.data.totalPage || 1);
         setTotalElements(res.data.totalRow || res.data.payLoad.length);
-        return;
+      } else {
+        throw new Error("No data");
       }
     } catch (e) {
-      // Fallback dummy data with utility categories
       const dummyData = [
         {
           id: 1,
-          ticket: "#CMP1012",
+          ticketNumber: "#CMP1012",
           category: "ELECTRICITY",
-          issue: "Sub-meter reading discrepancy for Room R-204",
+          complaintMessage: "Sub-meter reading discrepancy for Room R-204",
           status: "OPEN",
           priority: "HIGH",
-          date: "04 Apr 2026",
+          dateOfCreation: Date.now() - 86400000,
         },
         {
           id: 2,
-          ticket: "#CMP1011",
+          ticketNumber: "#CMP1011",
           category: "ELECTRICAL_SOCKET",
-          issue: "Main AC plug socket spark & trip",
+          complaintMessage: "Main AC plug socket spark & trip",
           status: "IN_PROGRESS",
           priority: "HIGH",
-          date: "01 Apr 2026",
+          dateOfCreation: Date.now() - 86400000 * 2,
         },
         {
           id: 3,
-          ticket: "#CMP1010",
+          ticketNumber: "#CMP1010",
           category: "WIFI",
-          issue: "WiFi connection drop in 2nd Floor corridor",
+          complaintMessage: "WiFi connection drop in 2nd Floor corridor",
           status: "CLOSED",
           priority: "LOW",
-          date: "25 Mar 2026",
-        },
-        {
-          id: 4,
-          ticket: "#CMP1009",
-          category: "PLUMBING",
-          issue: "Bathroom tap water pressure low",
-          status: "CLOSED",
-          priority: "MEDIUM",
-          date: "18 Mar 2026",
+          dateOfCreation: Date.now() - 86400000 * 5,
         },
       ];
       setComplaints(dummyData);
       setTotalPages(1);
       setTotalElements(dummyData.length);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchComplaints();
-  }, [page]);
+  }, [page, statusFilter, hostelId]);
 
   const handleFormChange = (e) => {
     setForm({
@@ -119,20 +115,21 @@ export default function StudentComplaints() {
 
     try {
       await api.post("/complaint/add", {
-        ...form,
+        complaintMessage: form.description || form.title,
         studentId: auth?.user?.id,
         hostelId: Number(hostelId),
       });
       toast.success("Complaint submitted successfully ✅");
+      fetchComplaints();
     } catch (err) {
       const newEntry = {
         id: Date.now(),
-        ticket: `#CMP${Math.floor(1000 + Math.random() * 9000)}`,
+        ticketNumber: `#CMP${Math.floor(1000 + Math.random() * 9000)}`,
         category: form.category,
-        issue: form.title || form.description,
+        complaintMessage: form.description || form.title,
         status: "OPEN",
         priority: form.priority,
-        date: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+        dateOfCreation: Date.now(),
       };
       setComplaints((prev) => [newEntry, ...prev]);
       toast.success("Complaint submitted successfully ✅");
@@ -147,11 +144,6 @@ export default function StudentComplaints() {
     setOpenDialog(false);
   };
 
-  const filteredComplaints =
-    statusFilter === "ALL"
-      ? complaints
-      : complaints.filter((c) => c.status === statusFilter);
-
   const getStatusStyle = (status) => {
     switch (status) {
       case "OPEN":
@@ -164,6 +156,11 @@ export default function StudentComplaints() {
         return "bg-gray-100 text-gray-700";
     }
   };
+
+  const filteredComplaints =
+    statusFilter === "ALL"
+      ? complaints
+      : complaints.filter((c) => c.status === statusFilter);
 
   return (
     <div className="space-y-4">
@@ -194,7 +191,10 @@ export default function StudentComplaints() {
         <Select
           size="small"
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => {
+            setPage(0);
+            setStatusFilter(e.target.value);
+          }}
           className="bg-white rounded-lg shadow-sm"
           sx={{ minWidth: 140 }}
         >
@@ -225,27 +225,27 @@ export default function StudentComplaints() {
                 {filteredComplaints.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="text-center py-6 text-gray-500">
-                      No complaints found.
+                      {loading ? "Loading..." : "No complaints found."}
                     </td>
                   </tr>
                 ) : (
                   filteredComplaints.map((c, i) => (
                     <tr key={c.id || i} className="h-12 hover:bg-slate-50 transition-colors">
                       <td className="py-3 px-4 font-semibold text-indigo-600">
-                        {c.ticket}
+                        {c.ticketNumber || c.ticket || `#CMP${c.id}`}
                       </td>
                       <td className="py-3 px-4">
                         <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded ${
-                          c.category?.includes("ELEC")
+                          (c.category || "").includes("ELEC")
                             ? "bg-amber-100 text-amber-800"
                             : "bg-slate-100 text-slate-700"
                         }`}>
-                          {c.category?.includes("ELEC") && <BoltIcon sx={{ fontSize: 12 }} />}
+                          {(c.category || "").includes("ELEC") && <BoltIcon sx={{ fontSize: 12 }} />}
                           {c.category || "GENERAL"}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-gray-700 font-medium">
-                        {c.issue || c.complaintMessage}
+                        {c.complaintMessage || c.issue}
                       </td>
                       <td className="py-3 px-4">
                         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
@@ -262,7 +262,7 @@ export default function StudentComplaints() {
                         </span>
                       </td>
                       <td className="py-3 px-4 text-gray-500">
-                        {c.date || (c.createdAt ? new Date(c.createdAt).toLocaleDateString("en-IN") : "-")}
+                        {formatDateForDisplay(c.dateOfCreation || c.date || Date.now())}
                       </td>
                     </tr>
                   ))

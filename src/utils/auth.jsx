@@ -75,3 +75,31 @@ export const updateHostelId = (newHostelId) => {
 
   window.dispatchEvent(new Event("hostelUpdated"));
 };
+
+// ===============================
+// Date Filter Helpers
+// ===============================
+
+export const setDateFilter = (fromDate, toDate) => {
+  localStorage.setItem("fromDate", fromDate.getTime());
+  localStorage.setItem("toDate", toDate.getTime());
+
+  window.dispatchEvent(new Event("dateFilterUpdated"));
+};
+
+export const getDateFilter = () => {
+  const from = localStorage.getItem("fromDate");
+  const to = localStorage.getItem("toDate");
+
+  return {
+    fromDate: from ? new Date(Number(from)) : null,
+    toDate: to ? new Date(Number(to)) : null,
+  };
+};
+
+export const clearDateFilter = () => {
+  localStorage.removeItem("fromDate");
+  localStorage.removeItem("toDate");
+
+  window.dispatchEvent(new Event("dateFilterUpdated"));
+};
