@@ -206,7 +206,7 @@ export default function TopBar({ collapsed, setCollapsed }) {
         {/* User */}
         <div
           className="user-data cursor-pointer"
-          onClick={() => navigate("/settings")}
+          onClick={() => navigate(auth?.user?.roleName === "ROLE_USER" ? "/student/settings" : "/settings")}
         >
           <Avatar
             sx={{

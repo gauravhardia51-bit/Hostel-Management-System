@@ -5,9 +5,10 @@ import ElectricMeterIcon from "@mui/icons-material/ElectricMeter";
 import { getAuthData } from "../../utils/auth";
 import api from "../../api/Api.jsx";
 import { formatDateForDisplay } from "../../utils/formatDate.js";
-import { toast } from "react-toastify";
+import { useApp } from "../../context/AppContext";
 
 export default function StudentRoom() {
+  const { t, lang } = useApp();
   const [roomData, setRoomData] = useState(null);
   const [loading, setLoading] = useState(false);
   const auth = getAuthData();
@@ -72,11 +73,11 @@ export default function StudentRoom() {
   }, [roommates]);
 
   if (loading && !roomData) {
-    return <div className="text-center py-10 text-gray-500">Loading room details...</div>;
+    return <div className="text-center py-10 text-xs text-gray-500">{t("loading")}</div>;
   }
 
   if (!roomData) {
-    return <div className="text-center py-10 text-gray-500">No room assigned.</div>;
+    return <div className="text-center py-10 text-xs text-gray-500">{t("noDataFound")}</div>;
   }
 
   const units = room.lastMonthUnits || Math.max(0, (room.currentMeterReading || 0) - (room.previousMeterReading || 0)) || 60;
@@ -85,104 +86,116 @@ export default function StudentRoom() {
   const studentShare = Math.round((totalRoomBill / (room.occupied || 1)) * 100) / 100;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {/* PAGE TITLE */}
-      <div>
-        <h2 className="text-xl font-bold text-gray-800">My Room</h2>
-        <p className="text-xs text-gray-500">Room details, roommates, and electricity sub-meter status</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-bold text-gray-800">
+            {t("myRoom") || (lang === "hi" ? "मेरा कमरा" : "My Room")}
+          </h2>
+          <p className="text-xs text-gray-500">
+            {lang === "hi" ? "कमरा विवरण, रूममेट्स और बिजली सब-मीटर स्थिति" : "Room details, roommates, and electricity sub-meter status"}
+          </p>
+        </div>
       </div>
 
       {/* ROOM INFO */}
-      <Card className="p-5 rounded-xl border border-gray-100 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+      <Card className="p-5 rounded-xl shadow-sm border border-gray-100 bg-white">
+        <h3 className="font-bold text-sm text-gray-800 mb-4 pb-2 border-b">
+          {lang === "hi" ? "कमरा विवरण" : "Room Information"}
+        </h3>
+
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 text-xs">
           <div>
-            <h3 className="font-semibold text-gray-800 mb-4">Room Information</h3>
+            <p className="text-gray-500 text-[11px] font-medium">{t("roomNo")}</p>
+            <p className="font-bold text-gray-900 text-sm mt-0.5">{room.roomNumber}</p>
+          </div>
 
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-gray-500 text-xs">Room Number</p>
-                <p className="font-bold text-gray-900 text-base">{room.roomNumber}</p>
-              </div>
+          <div>
+            <p className="text-gray-500 text-[11px] font-medium">{t("floor") || "Floor"}</p>
+            <p className="font-semibold text-gray-800 mt-0.5">{room.floor || "1st Floor"}</p>
+          </div>
 
-              <div>
-                <p className="text-gray-500 text-xs">Floor</p>
-                <p className="font-medium text-gray-800">{room.floor || "1st Floor"}</p>
-              </div>
+          <div>
+            <p className="text-gray-500 text-[11px] font-medium">{t("sharing") || "Sharing"}</p>
+            <p className="font-semibold text-gray-800 mt-0.5">{room.capacity} {lang === "hi" ? "शेयरिंग" : "Sharing"}</p>
+          </div>
 
-              <div>
-                <p className="text-gray-500 text-xs">Sharing Type</p>
-                <p className="font-medium text-gray-800">{room.capacity} Sharing</p>
-              </div>
+          <div>
+            <p className="text-gray-500 text-[11px] font-medium">{t("occupied") || "Occupied"}</p>
+            <p className="font-semibold text-gray-800 mt-0.5">{room.occupied} {lang === "hi" ? "छात्र" : "Members"}</p>
+          </div>
 
-              <div>
-                <p className="text-gray-500 text-xs">Occupied</p>
-                <p className="font-medium text-gray-800">{room.occupied} Members</p>
-              </div>
-
-              <div>
-                <p className="text-gray-500 text-xs">Joined On</p>
-                <p className="font-medium text-gray-800">
-                  {formatDateForDisplay(room.joinedAt || Date.now())}
-                </p>
-              </div>
-            </div>
+          <div>
+            <p className="text-gray-500 text-[11px] font-medium">{t("joinedDate")}</p>
+            <p className="font-semibold text-gray-800 mt-0.5">
+              {formatDateForDisplay(room.joinedAt || Date.now())}
+            </p>
           </div>
         </div>
       </Card>
 
       {/* ELECTRICITY SUB-METER CARD */}
-      <Card className="p-5 rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50/70 via-amber-50/30 to-white shadow-sm">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+      <Card className="p-5 rounded-xl shadow-sm border border-gray-100 bg-white">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 pb-2 border-b">
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-amber-500 text-white rounded-lg shadow-sm">
-              <BoltIcon />
+            <div className="p-2 bg-yellow-100 text-yellow-700 rounded-lg">
+              <BoltIcon fontSize="small" />
             </div>
             <div>
-              <h3 className="font-bold text-gray-800">Room Electricity & Sub-Meter</h3>
-              <p className="text-xs text-gray-500">Unit-based electricity billing (₹{unitRate}/unit)</p>
+              <h3 className="font-bold text-sm text-gray-800">
+                {lang === "hi" ? "कमरा बिजली सब-मीटर बिलिंग" : "Room Electricity & Sub-Meter"}
+              </h3>
+              <p className="text-xs text-gray-500">
+                {lang === "hi" ? `यूनिट-आधारित बिजली बिल (₹${unitRate}/यूनिट)` : `Unit-based electricity billing (₹${unitRate}/unit)`}
+              </p>
             </div>
           </div>
 
-          <div className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold flex items-center gap-1">
-            <ElectricMeterIcon sx={{ fontSize: 14 }} />
-            <span>Active Meter Tracking</span>
-          </div>
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-yellow-100 text-yellow-800">
+            <ElectricMeterIcon sx={{ fontSize: 13 }} />
+            <span>{lang === "hi" ? "सक्रिय मीटर ट्रैकिंग" : "Active Meter Tracking"}</span>
+          </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-white/90 rounded-xl border border-amber-100">
-          <div>
-            <p className="text-[11px] text-gray-500 font-medium">Current Meter Reading</p>
-            <p className="text-lg font-bold text-gray-800">{room.currentMeterReading || 1560} <span className="text-xs font-normal text-gray-500">kWh</span></p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+            <p className="text-[11px] text-gray-500 font-medium">{lang === "hi" ? "वर्तमान मीटर रीडिंग" : "Current Meter Reading"}</p>
+            <p className="text-base font-bold text-gray-900 mt-1">{room.currentMeterReading || 1560} <span className="text-xs font-normal text-gray-400">kWh</span></p>
           </div>
 
-          <div>
-            <p className="text-[11px] text-gray-500 font-medium">Electricity Tariff Rate</p>
-            <p className="text-lg font-bold text-amber-700">₹{unitRate} <span className="text-xs font-normal text-gray-500">/ unit</span></p>
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+            <p className="text-[11px] text-gray-500 font-medium">{lang === "hi" ? "बिजली दर (प्रति यूनिट)" : "Electricity Tariff Rate"}</p>
+            <p className="text-base font-bold text-yellow-700 mt-1">₹{unitRate} <span className="text-xs font-normal text-gray-400">/ unit</span></p>
           </div>
 
-          <div>
-            <p className="text-[11px] text-gray-500 font-medium">Room Total Consumption</p>
-            <p className="text-lg font-bold text-indigo-700">{units} <span className="text-xs font-normal text-gray-500">Units</span></p>
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+            <p className="text-[11px] text-gray-500 font-medium">{lang === "hi" ? "कमरे की कुल यूनिट खपत" : "Room Total Consumption"}</p>
+            <p className="text-base font-bold text-indigo-700 mt-1">{units} <span className="text-xs font-normal text-gray-400">Units</span></p>
           </div>
 
-          <div>
-            <p className="text-[11px] text-gray-500 font-medium">Your Monthly Share</p>
-            <p className="text-lg font-bold text-green-600">₹{studentShare}</p>
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+            <p className="text-[11px] text-gray-500 font-medium">{lang === "hi" ? "आपका मासिक हिस्सा" : "Your Monthly Share"}</p>
+            <p className="text-base font-bold text-green-700 mt-1">₹{studentShare}</p>
           </div>
         </div>
 
         <p className="text-[11px] text-gray-500 mt-3">
-          💡 <b>How it's calculated:</b> Room meter consumption ({units} units) × ₹{unitRate}/unit = ₹{totalRoomBill}, divided equally among {room.occupied} room occupants = <b>₹{studentShare} / student</b>.
+          💡 <b>{lang === "hi" ? "गणना विधि:" : "Calculation Method:"}</b> {lang === "hi"
+            ? `कमरे की कुल यूनिट खपत (${units} यूनिट) × ₹${unitRate}/यूनिट = ₹${totalRoomBill}, जो ${room.occupied} छात्रों में बराबर बांटी गई = ₹${studentShare} प्रति छात्र।`
+            : `Room meter consumption (${units} units) × ₹${unitRate}/unit = ₹${totalRoomBill}, divided equally among ${room.occupied} room occupants = ₹${studentShare} / student.`}
         </p>
       </Card>
 
       {/* ROOMMATES */}
-      <Card className="p-5 rounded-xl border border-gray-100 shadow-sm">
-        <h3 className="font-semibold text-gray-800 mb-3">Roommates</h3>
+      <Card className="p-5 rounded-xl shadow-sm border border-gray-100 bg-white">
+        <h3 className="font-bold text-sm text-gray-800 mb-3 pb-2 border-b">
+          {lang === "hi" ? "कमरे के साथी (Roommates)" : "Roommates"}
+        </h3>
 
         <div className="divide-y divide-gray-100">
           {sortedRoommates.length === 0 ? (
-            <div className="text-center py-6 text-gray-500">No roommates found.</div>
+            <div className="text-center py-6 text-xs text-gray-400">{t("noDataFound")}</div>
           ) : (
             sortedRoommates.map((mate, index) => (
               <div
@@ -190,13 +203,13 @@ export default function StudentRoom() {
                 className="flex justify-between items-center py-3"
               >
                 <div>
-                  <p className="font-medium text-gray-800 text-sm">{mate.name}</p>
-                  <p className="text-gray-400 text-xs">{mate.phone}</p>
+                  <p className="font-semibold text-gray-800 text-xs">{mate.name}</p>
+                  <p className="text-gray-400 text-[11px] mt-0.5">{mate.phone}</p>
                 </div>
 
                 {mate.isYou && (
-                  <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                    You
+                  <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2.5 py-0.5 rounded">
+                    {lang === "hi" ? "आप (You)" : "You"}
                   </span>
                 )}
               </div>

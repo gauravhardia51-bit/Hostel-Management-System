@@ -5,8 +5,11 @@ import { toast } from "react-toastify";
 import { formatDateForDisplay } from "../../utils/formatDate";
 import { getAuthData } from "../../utils/auth";
 import StEditProfileDrawer from "../../feature/profile/StEditprofiledrawer";
+import StudentDocumentsSection from "../../feature/documents/StudentDocumentsSection";
+import { useApp } from "../../context/AppContext";
 
 export default function StudentProfile() {
+  const { t, lang } = useApp();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const auth = getAuthData();
@@ -18,7 +21,7 @@ export default function StudentProfile() {
 
       const response = await api.get("/room-data/user-id", {
         params: {
-          userId: auth?.user.id,
+          userId: auth?.user?.id,
         },
       });
       setProfile(response.data.payLoad?.profile || response.data.payLoad);
@@ -35,7 +38,7 @@ export default function StudentProfile() {
   }, []);
 
   if (loading) {
-    return <div className="text-center py-10">Loading...</div>;
+    return <div className="text-center py-10 text-xs text-gray-400">{t("loading")}</div>;
   }
 
   const handleSave = async (data) => {
@@ -60,8 +63,8 @@ export default function StudentProfile() {
       }
 
       toast.success("Profile Updated");
-      setOpen(false); // ✅ close drawer
-      fetchProfile(); // ✅ refresh profile
+      setOpen(false);
+      fetchProfile();
     } catch (err) {
       console.error(err);
       toast.error(err.response?.data?.message || "Something went wrong");
@@ -69,25 +72,36 @@ export default function StudentProfile() {
   };
 
   if (!profile) {
-    return <div className="text-center py-10">No profile found.</div>;
+    return <div className="text-center py-10 text-xs text-gray-400">{t("noDataFound")}</div>;
   }
 
   return (
-    <div>
+    <div className="space-y-4">
       {/* Header */}
-      <div className="flex justify-between items-center mb-5">
-        <h2 className="text-xl font-semibold">My Profile</h2>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-bold text-gray-800">
+            {lang === "hi" ? "मेरी प्रोफाइल" : "My Profile"}
+          </h2>
+          <p className="text-xs text-gray-500">
+            {lang === "hi"
+              ? "व्यक्तिगत जानकारी, कमरा विवरण और दस्तावेज"
+              : "Personal details, room assignment, and uploaded KYC documents"}
+          </p>
+        </div>
 
         <Button
           variant="contained"
           sx={{
             backgroundColor: "#4f46e5",
+            "&:hover": { backgroundColor: "#4338ca" },
             textTransform: "none",
             borderRadius: "8px",
+            fontWeight: 600,
           }}
           onClick={() => setOpen(true)}
         >
-          Edit Profile
+          {lang === "hi" ? "प्रोफाइल बदलें" : "Edit Profile"}
         </Button>
 
         <StEditProfileDrawer
@@ -98,30 +112,31 @@ export default function StudentProfile() {
         />
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Left Card */}
-        <Card className="p-6 rounded-xl text-center">
+        <Card className="p-5 rounded-xl shadow-sm border border-gray-100 bg-white text-center flex flex-col justify-center items-center">
           <Avatar
             src={profile.profileImage}
             sx={{
-              width: 90,
-              height: 90,
+              width: 84,
+              height: 84,
               margin: "auto",
               bgcolor: "#4f46e5",
-              fontSize: 34,
+              fontSize: 32,
+              fontWeight: 700,
             }}
           >
             {profile.studentName?.charAt(0)}
           </Avatar>
 
-          <h3 className="mt-4 text-lg font-semibold">{profile.studentName}</h3>
+          <h3 className="mt-3 text-base font-bold text-gray-800">{profile.studentName}</h3>
 
-          <p className="text-gray-500 mt-2">Student</p>
+          <p className="text-xs text-gray-500 mt-1">{lang === "hi" ? "हॉस्टल छात्र" : "Hostel Student"}</p>
 
           <span
-            className={`inline-block mt-3 px-3 py-1 rounded-full text-xs font-semibold ${
+            className={`inline-block mt-3 px-2.5 py-0.5 rounded text-[10px] font-bold ${
               profile.status === "ACTIVE"
-                ? "bg-green-100 text-green-600"
+                ? "bg-green-100 text-green-700"
                 : "bg-red-100 text-red-600"
             }`}
           >
@@ -130,39 +145,49 @@ export default function StudentProfile() {
         </Card>
 
         {/* Right Card */}
-        <Card className="p-6 rounded-xl col-span-2">
-          <h3 className="font-semibold text-lg mb-5">Personal Information</h3>
+        <Card className="p-5 rounded-xl shadow-sm border border-gray-100 bg-white md:col-span-2">
+          <h3 className="font-bold text-sm text-gray-800 mb-4 pb-2 border-b">
+            {lang === "hi" ? "व्यक्तिगत जानकारी" : "Personal Information"}
+          </h3>
 
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-2 gap-4 text-xs">
             <div>
-              <p className="text-gray-500 text-sm">Student Name</p>
-              <p className="font-medium">{profile.studentName}</p>
+              <p className="text-gray-500 text-[11px] font-medium">{t("studentName")}</p>
+              <p className="font-semibold text-gray-800 mt-0.5">{profile.studentName}</p>
             </div>
 
             <div>
-              <p className="text-gray-500 text-sm">Phone Number</p>
-              <p className="font-medium">{profile.studentPhone}</p>
+              <p className="text-gray-500 text-[11px] font-medium">{t("phone")}</p>
+              <p className="font-semibold text-gray-800 mt-0.5">{profile.studentPhone}</p>
             </div>
 
             <div>
-              <p className="text-gray-500 text-sm">Room Number</p>
-              <p className="font-medium">{profile.roomNumber}</p>
+              <p className="text-gray-500 text-[11px] font-medium">{t("roomNo")}</p>
+              <p className="font-semibold text-gray-800 mt-0.5">
+                {profile.roomNumber ? `Room ${profile.roomNumber}` : (lang === "hi" ? "आवंटित नहीं" : "Not Assigned")}
+              </p>
             </div>
 
             <div>
-              <p className="text-gray-500 text-sm">Hostel</p>
-              <p className="font-medium">{profile.hostelName}</p>
+              <p className="text-gray-500 text-[11px] font-medium">{lang === "hi" ? "हॉस्टल" : "Hostel"}</p>
+              <p className="font-semibold text-gray-800 mt-0.5">{profile.hostelName}</p>
             </div>
 
             <div>
-              <p className="text-gray-500 text-sm">Joining Date</p>
-              <p className="font-medium">
+              <p className="text-gray-500 text-[11px] font-medium">{t("joinedDate")}</p>
+              <p className="font-semibold text-gray-800 mt-0.5">
                 {formatDateForDisplay(profile.joinedAt)}
               </p>
             </div>
           </div>
         </Card>
       </div>
+
+      {/* Student Documents Section */}
+      <StudentDocumentsSection
+        studentId={profile?.id || profile?.studentId}
+        userId={auth?.user?.id}
+      />
     </div>
   );
 }

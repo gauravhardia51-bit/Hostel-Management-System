@@ -18,8 +18,10 @@ import Pagination from "../../components/common/Pagination.jsx";
 import { getAuthData } from "../../utils/auth";
 import api from "../../api/Api.jsx";
 import { formatDateForDisplay } from "../../utils/formatDate.js";
+import { useApp } from "../../context/AppContext";
 
 export default function StudentPayments() {
+  const { t, tDb, lang } = useApp();
   const auth = getAuthData();
   const hostelId = auth?.hostelId;
   const studentId = auth?.user?.id;
@@ -98,10 +100,10 @@ export default function StudentPayments() {
 
   useEffect(() => {
     fetchPayments();
-  }, [page, hostelId, studentId]);
+  }, [page]);
 
   const handlePay = (payment) => {
-    toast.info(`Initiating online checkout for ₹${payment.amount}...`);
+    toast.info("Online student payment gateway redirecting...");
   };
 
   const handleViewInvoice = (payment) => {
@@ -111,32 +113,34 @@ export default function StudentPayments() {
 
   return (
     <div className="space-y-4">
-      {/* HEADER */}
+      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-xl font-bold text-gray-800">My Payments & Bills</h2>
+          <h2 className="text-xl font-bold text-gray-800">
+            {t("paymentsTitle") || (lang === "hi" ? "किराया व बिजली भुगतान" : "My Payments & Dues")}
+          </h2>
           <p className="text-xs text-gray-500">
-            View monthly room rent and itemized electricity sub-meter calculations
+            {lang === "hi" ? "कमरा किराया, बिजली सब-मीटर बिल और भुगतान इतिहास" : "Room rent, electricity sub-meter breakdown, and payment history"}
           </p>
         </div>
       </div>
 
-      {/* PAYMENTS TABLE */}
-      <Card className="rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      {/* Table */}
+      <Card className="rounded-xl shadow-sm border border-gray-100 bg-white overflow-hidden">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead className="bg-slate-50 text-gray-500 border-b uppercase font-semibold text-[11px]">
                 <tr>
                   <th className="py-3 px-4">#</th>
-                  <th className="py-3 px-4">Billing Period</th>
-                  <th className="py-3 px-4">Room Rent</th>
-                  <th className="py-3 px-4">Electricity Charges</th>
-                  <th className="py-3 px-4">Total Payable</th>
-                  <th className="py-3 px-4">Due Date</th>
-                  <th className="py-3 px-4">Paid Date</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-center">Action</th>
+                  <th className="py-3 px-4">{lang === "hi" ? "बिलिंग अवधि" : "Billing Period"}</th>
+                  <th className="py-3 px-4">{lang === "hi" ? "कमरा किराया" : "Room Rent"}</th>
+                  <th className="py-3 px-4">{lang === "hi" ? "बिजली बिल" : "Electricity Charges"}</th>
+                  <th className="py-3 px-4">{lang === "hi" ? "कुल देय राशि" : "Total Payable"}</th>
+                  <th className="py-3 px-4">{lang === "hi" ? "अंतिम तिथि" : "Due Date"}</th>
+                  <th className="py-3 px-4">{lang === "hi" ? "भुगतान तिथि" : "Paid Date"}</th>
+                  <th className="py-3 px-4">{t("status")}</th>
+                  <th className="py-3 px-4 text-center">{t("actions")}</th>
                 </tr>
               </thead>
 
@@ -144,31 +148,32 @@ export default function StudentPayments() {
                 {payments.length === 0 ? (
                   <tr>
                     <td colSpan="9" className="text-center py-6 text-gray-400">
-                      {loading ? "Loading..." : "No payments found"}
+                      {loading ? t("loading") : t("noDataFound")}
                     </td>
                   </tr>
                 ) : (
                   payments.map((p, index) => {
                     const isPaid = p.status === "PAID";
+
                     return (
-                      <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-3.5 px-4 font-medium text-gray-500">
+                      <tr key={p.id} className="h-12 hover:bg-slate-50/70 transition-colors">
+                        <td className="py-3 px-4 text-gray-500">
                           {page * 10 + index + 1}
                         </td>
 
-                        <td className="py-3.5 px-4 font-semibold text-gray-800">
+                        <td className="py-3 px-4 font-semibold text-gray-800">
                           {p.month || (p.dueDate ? new Date(p.dueDate).toLocaleDateString("en-IN", { month: "long", year: "numeric" }) : "Monthly Dues")}
                         </td>
 
-                        <td className="py-3.5 px-4 text-gray-700">
+                        <td className="py-3 px-4 text-gray-700">
                           ₹{p.rentAmount !== undefined ? p.rentAmount : p.amount}
                         </td>
 
                         {/* Electricity Itemized Column */}
-                        <td className="py-3.5 px-4">
+                        <td className="py-3 px-4">
                           {p.electricityAmount ? (
                             <div>
-                              <span className="font-semibold text-amber-700">
+                              <span className="font-semibold text-yellow-700">
                                 ₹{p.electricityAmount}
                               </span>
                               <p className="text-[10px] text-gray-500">
@@ -176,52 +181,56 @@ export default function StudentPayments() {
                               </p>
                             </div>
                           ) : (
-                            <span className="text-gray-400">Included</span>
+                            <span className="text-gray-400">-</span>
                           )}
                         </td>
 
                         {/* Total Amount */}
-                        <td className="py-3.5 px-4 font-bold text-gray-900 text-sm">
+                        <td className="py-3 px-4 font-bold text-gray-900 text-sm">
                           ₹{p.amount}
                         </td>
 
-                        <td className="py-3.5 px-4 text-gray-600">
+                        <td className="py-3 px-4 text-gray-600">
                           {formatDateForDisplay(p.dueDate)}
                         </td>
 
-                        <td className="py-3.5 px-4 text-gray-600">
+                        <td className="py-3 px-4 text-gray-600">
                           {p.paidAt || p.paidDate
                             ? formatDateForDisplay(p.paidAt || p.paidDate)
                             : "-"}
                         </td>
 
-                        <td className="py-3.5 px-4">
+                        <td className="py-3 px-4">
                           <span
-                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                            className={`px-2.5 py-0.5 rounded text-[10px] font-bold ${
                               isPaid
-                                ? "bg-emerald-100 text-emerald-700"
+                                ? "bg-green-100 text-green-700"
                                 : "bg-red-100 text-red-600"
                             }`}
                           >
-                            {p.status}
+                            {tDb(p.status, lang)}
                           </span>
                         </td>
 
-                        <td className="py-3.5 px-4 text-center">
+                        <td className="py-3 px-4 text-center">
                           <div className="flex items-center justify-center gap-2">
                             <Button
                               size="small"
-                              variant="text"
-                              startIcon={<ReceiptIcon sx={{ fontSize: 14 }} />}
+                              variant="outlined"
+                              startIcon={<ReceiptIcon sx={{ fontSize: 13 }} />}
                               onClick={() => handleViewInvoice(p)}
                               sx={{
                                 fontSize: "11px",
                                 textTransform: "none",
-                                color: "#4f46e5",
-                                padding: "2px 6px",
+                                borderRadius: "8px",
+                                fontWeight: 500,
+                                py: 0.3,
+                                px: 1.2,
+                                borderColor: "#e2e8f0",
+                                color: "#475569",
                               }}
                             >
-                              Breakdown
+                              {lang === "hi" ? "विवरण" : "Breakdown"}
                             </Button>
 
                             {!isPaid && (
@@ -230,14 +239,17 @@ export default function StudentPayments() {
                                 variant="contained"
                                 onClick={() => handlePay(p)}
                                 sx={{
-                                  background: "linear-gradient(to right, #4f46e5, #7c3aed)",
+                                  backgroundColor: "#4f46e5",
+                                  "&:hover": { backgroundColor: "#4338ca" },
                                   fontSize: "11px",
                                   textTransform: "none",
-                                  padding: "2px 8px",
-                                  borderRadius: "6px",
+                                  fontWeight: 600,
+                                  py: 0.3,
+                                  px: 1.5,
+                                  borderRadius: "8px",
                                 }}
                               >
-                                Pay Now
+                                {lang === "hi" ? "भुगतान करें" : "Pay Now"}
                               </Button>
                             )}
                           </div>
@@ -251,7 +263,7 @@ export default function StudentPayments() {
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t flex justify-end items-center text-xs text-gray-500">
+          <div className="p-3 border-t flex justify-end items-center text-xs text-gray-500">
             <Pagination
               page={page}
               totalPages={totalPages}
@@ -259,7 +271,7 @@ export default function StudentPayments() {
               pageSize={10}
               onPageChange={setPage}
               maxVisible={5}
-              label="payments"
+              label={t("payments")}
             />
           </div>
         </CardContent>
@@ -271,7 +283,7 @@ export default function StudentPayments() {
         onClose={() => setOpenModal(false)}
         maxWidth="xs"
         fullWidth
-        PaperProps={{ sx: { borderRadius: "16px" } }}
+        PaperProps={{ sx: { borderRadius: "12px" } }}
       >
         <DialogTitle className="flex justify-between items-center border-b pb-3">
           <div className="flex items-center gap-2">
@@ -279,7 +291,9 @@ export default function StudentPayments() {
               <ReceiptIcon fontSize="small" />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-800">Itemized Invoice Breakdown</p>
+              <p className="text-sm font-bold text-gray-800">
+                {lang === "hi" ? "बिल विवरण" : "Itemized Invoice Breakdown"}
+              </p>
               <p className="text-xs text-gray-500">{selectedInvoice?.month}</p>
             </div>
           </div>
@@ -294,54 +308,49 @@ export default function StudentPayments() {
             <div className="flex justify-between items-center text-xs font-semibold text-gray-700">
               <span className="flex items-center gap-1.5">
                 <HomeIcon fontSize="small" className="text-indigo-600" />
-                Base Room Rent
+                {lang === "hi" ? "कमरा किराया" : "Base Room Rent"}
               </span>
               <span className="text-sm font-bold text-gray-900">
                 ₹{selectedInvoice?.rentAmount || selectedInvoice?.amount}
               </span>
             </div>
             <p className="text-[11px] text-gray-500">
-              Monthly accommodation charge for Room {selectedInvoice?.roomNumber || "R-204"}
+              {lang === "hi"
+                ? `कमरा ${selectedInvoice?.roomNumber || "R-204"} का मासिक किराया`
+                : `Monthly accommodation charge for Room ${selectedInvoice?.roomNumber || "R-204"}`}
             </p>
           </div>
 
           {/* Electricity Breakdown */}
           {selectedInvoice?.electricityAmount ? (
-            <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2">
-              <div className="flex justify-between items-center text-xs font-bold text-amber-900">
+            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-xl space-y-2">
+              <div className="flex justify-between items-center text-xs font-bold text-yellow-900">
                 <span className="flex items-center gap-1.5">
-                  <BoltIcon fontSize="small" className="text-amber-600" />
-                  Electricity Sub-Meter Bill
+                  <BoltIcon fontSize="small" className="text-yellow-600" />
+                  {lang === "hi" ? "बिजली सब-मीटर बिल" : "Electricity Sub-Meter Bill"}
                 </span>
-                <span className="text-sm font-bold text-amber-800">
+                <span className="text-sm font-bold text-yellow-800">
                   ₹{selectedInvoice?.electricityAmount}
                 </span>
               </div>
 
-              <div className="text-[11px] text-gray-600 space-y-1 pt-1 border-t border-amber-200/60">
+              <div className="text-[11px] text-gray-600 space-y-1 pt-1 border-t border-yellow-200/60">
                 <div className="flex justify-between">
-                  <span>Room Total Meter Consumption:</span>
+                  <span>{lang === "hi" ? "कमरे की कुल यूनिट:" : "Room Total Meter Consumption:"}</span>
                   <span className="font-semibold text-gray-800">
-                    {selectedInvoice?.roomTotalUnits || (selectedInvoice?.unitsConsumed ? selectedInvoice.unitsConsumed * 2 : 60)} Units (kWh)
+                    {selectedInvoice?.roomTotalUnits || (selectedInvoice?.unitsConsumed ? selectedInvoice.unitsConsumed * 2 : 60)} Units
                   </span>
                 </div>
 
                 <div className="flex justify-between">
-                  <span>Hostel Tariff Rate:</span>
+                  <span>{lang === "hi" ? "बिजली दर:" : "Hostel Tariff Rate:"}</span>
                   <span className="font-semibold text-gray-800">
                     ₹{selectedInvoice?.ratePerUnit || defaultRate} / Unit
                   </span>
                 </div>
 
-                <div className="flex justify-between">
-                  <span>Total Room Electricity Cost:</span>
-                  <span className="font-semibold text-gray-800">
-                    ₹{selectedInvoice?.roomTotalCost || (selectedInvoice?.electricityAmount ? selectedInvoice.electricityAmount * 2 : 600)}
-                  </span>
-                </div>
-
-                <div className="flex justify-between text-indigo-700 font-semibold pt-1 border-t border-amber-200/60">
-                  <span>Your Share ({selectedInvoice?.unitsConsumed} Units):</span>
+                <div className="flex justify-between text-indigo-700 font-semibold pt-1 border-t border-yellow-200/60">
+                  <span>{lang === "hi" ? "आपका हिस्सा:" : "Your Share:"} ({selectedInvoice?.unitsConsumed} Units):</span>
                   <span>₹{selectedInvoice?.electricityAmount}</span>
                 </div>
               </div>
@@ -352,14 +361,14 @@ export default function StudentPayments() {
           <div className="p-3 bg-indigo-600 text-white rounded-xl flex justify-between items-center">
             <div>
               <p className="text-xs text-indigo-200 uppercase font-medium tracking-wide">
-                Total Due
+                {lang === "hi" ? "कुल देय राशि" : "Total Due"}
               </p>
               <p className="text-xs text-indigo-100">
-                Due Date: {formatDateForDisplay(selectedInvoice?.dueDate)}
+                {lang === "hi" ? "अंतिम तिथि" : "Due Date"}: {formatDateForDisplay(selectedInvoice?.dueDate)}
               </p>
             </div>
             <div className="text-right">
-              <span className="text-xl font-black">
+              <span className="text-xl font-bold">
                 ₹{selectedInvoice?.amount}
               </span>
             </div>
@@ -372,11 +381,14 @@ export default function StudentPayments() {
             variant="contained"
             onClick={() => setOpenModal(false)}
             sx={{
-              background: "linear-gradient(to right, #4f46e5, #7c3aed)",
+              backgroundColor: "#4f46e5",
+              "&:hover": { backgroundColor: "#4338ca" },
               textTransform: "none",
+              borderRadius: "8px",
+              fontWeight: 600,
             }}
           >
-            Close Breakdown
+            {lang === "hi" ? "बंद करें" : "Close"}
           </Button>
         </DialogActions>
       </Dialog>

@@ -85,7 +85,7 @@ export default function Sidebar({ collapsed }) {
     { path: "student/room-inspection", label: lang === "hi" ? "कमरा निरीक्षण" : "Room Inspection", icon: "📝" },
     { path: "student/notifications", label: t("notifications"), icon: "🔔" },
     { path: "student/profile", label: t("profile") || "Profile", icon: "👤" },
-    { path: "settings", label: t("settings"), icon: "⚙" },
+    { path: "/student/settings", label: t("settings"), icon: "⚙" },
   ];
 
   const menu = role === "ROLE_USER" ? studentMenu : adminMenu;

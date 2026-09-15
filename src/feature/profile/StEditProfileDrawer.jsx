@@ -8,12 +8,11 @@ import {
   Avatar,
   IconButton,
 } from "@mui/material";
-
 import CloseIcon from "@mui/icons-material/Close";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
-
 import useFormValidation from "../../hooks/FormValidation";
 import { ValidateStudentProfile } from "../../validations/ValidateStudentProfile";
+import { useApp } from "../../context/AppContext";
 
 export default function StEditProfileDrawer({
   open,
@@ -21,6 +20,7 @@ export default function StEditProfileDrawer({
   onSave,
   editData,
 }) {
+  const { t, lang } = useApp();
   const [selectedImage, setSelectedImage] = useState(null);
 
   const {
@@ -48,8 +48,8 @@ export default function StEditProfileDrawer({
     if (editData) {
       setValues({
         id: editData.id || "",
-        name: editData.studentName || "",
-        phone: editData.studentPhone || "",
+        name: editData.studentName || editData.name || "",
+        phone: editData.studentPhone || editData.phone || "",
         email: editData.email || "",
         profileImage: editData.profileImage || "",
       });
@@ -79,11 +79,11 @@ export default function StEditProfileDrawer({
 
   return (
     <Drawer anchor="right" open={open} onClose={onClose}>
-      <Box sx={{ width: 420 }} className="h-full flex flex-col">
+      <Box sx={{ width: 440 }} className="h-full flex flex-col bg-white dark:bg-slate-900">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b">
-          <Typography variant="h6" fontWeight={700}>
-            Edit Profile
+        <div className="flex items-center justify-between p-5 border-b dark:border-gray-800">
+          <Typography variant="h6" fontWeight={700} className="text-gray-800 dark:text-gray-100 text-base">
+            {lang === "hi" ? "प्रोफाइल अपडेट करें" : "Edit Student Profile"}
           </Typography>
 
           <IconButton onClick={onClose}>
@@ -101,10 +101,11 @@ export default function StEditProfileDrawer({
                   : form.profileImage
               }
               sx={{
-                width: 100,
-                height: 100,
-                fontSize: 36,
+                width: 90,
+                height: 90,
+                fontSize: 32,
                 bgcolor: "#4f46e5",
+                fontWeight: 700,
               }}
             >
               {!selectedImage && !form.profileImage && form.name?.charAt(0)}
@@ -112,13 +113,17 @@ export default function StEditProfileDrawer({
 
             <Button
               component="label"
-              startIcon={<PhotoCameraIcon />}
+              size="small"
+              variant="outlined"
+              startIcon={<PhotoCameraIcon sx={{ fontSize: 13 }} />}
               sx={{
                 mt: 2,
                 textTransform: "none",
+                borderRadius: "8px",
+                fontSize: "11px",
               }}
             >
-              Upload Photo
+              {lang === "hi" ? "फोटो बदलें" : "Change Photo"}
               <input
                 hidden
                 type="file"
@@ -130,7 +135,8 @@ export default function StEditProfileDrawer({
 
           <TextField
             fullWidth
-            label="Full Name"
+            size="small"
+            label={t("studentName")}
             name="name"
             value={form.name}
             onChange={handleChange}
@@ -140,7 +146,8 @@ export default function StEditProfileDrawer({
 
           <TextField
             fullWidth
-            label="Phone Number"
+            size="small"
+            label={t("phone")}
             name="phone"
             value={form.phone}
             onChange={handleChange}
@@ -151,13 +158,24 @@ export default function StEditProfileDrawer({
             }}
           />
 
-          <TextField fullWidth disabled label="Email" value={form.email} />
+          <TextField
+            fullWidth
+            size="small"
+            disabled
+            label={t("email")}
+            value={form.email}
+          />
         </div>
 
         {/* Footer */}
-        <div className="p-5 border-t flex gap-3">
-          <Button variant="outlined" fullWidth onClick={onClose}>
-            Cancel
+        <div className="p-5 border-t dark:border-gray-800 flex gap-3 bg-white dark:bg-slate-900">
+          <Button
+            variant="outlined"
+            fullWidth
+            onClick={onClose}
+            sx={{ textTransform: "none", borderRadius: "8px" }}
+          >
+            {t("cancel")}
           </Button>
 
           <Button
@@ -165,10 +183,14 @@ export default function StEditProfileDrawer({
             fullWidth
             onClick={handleSubmit}
             sx={{
-              background: "linear-gradient(to right,#4f46e5,#7c3aed)",
+              backgroundColor: "#4f46e5",
+              "&:hover": { backgroundColor: "#4338ca" },
+              textTransform: "none",
+              borderRadius: "8px",
+              fontWeight: 600,
             }}
           >
-            Save Changes
+            {t("save")}
           </Button>
         </div>
       </Box>

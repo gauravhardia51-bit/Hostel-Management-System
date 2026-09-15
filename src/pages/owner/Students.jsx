@@ -6,8 +6,10 @@ import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import PhoneIcon from "@mui/icons-material/Phone";
+import BadgeIcon from "@mui/icons-material/Badge";
 import api from "../../api/Api.jsx";
 import AddStudentDrawer from "../../feature/students/AddStudentDrawer.jsx";
+import StudentDocumentsModal from "../../feature/students/StudentDocumentsModal.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
 import { toast } from "react-toastify";
 import { formatDateForDisplay } from "../../utils/formatDate.js";
@@ -25,6 +27,8 @@ export default function Students() {
   const [totalElements, setTotalElements] = useState(0);
   const [open, setOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [docsModalOpen, setDocsModalOpen] = useState(false);
+  const [docsStudent, setDocsStudent] = useState(null);
   const [mode, setMode] = useState("add");
   const [search, setSearch] = useState("");
   const [roomFilter, setRoomFilter] = useState("ALL");
@@ -317,6 +321,19 @@ export default function Students() {
 
           <td className="py-3 px-3 text-center">
             <div className="flex justify-center items-center gap-1">
+              <Tooltip title={lang === "hi" ? "दस्तावेज एवं केवाईसी" : "Documents & KYC"}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setDocsStudent(s);
+                    setDocsModalOpen(true);
+                  }}
+                  className="hover:bg-indigo-50"
+                >
+                  <BadgeIcon fontSize="small" className="text-gray-400 hover:text-indigo-600" />
+                </IconButton>
+              </Tooltip>
+
               <Tooltip title={t("edit")}>
                 <IconButton
                   size="small"
@@ -472,6 +489,16 @@ export default function Students() {
         rooms={rooms}
         editData={selectedStudent}
         mode={mode}
+      />
+
+      <StudentDocumentsModal
+        open={docsModalOpen}
+        onClose={() => {
+          setDocsModalOpen(false);
+          setDocsStudent(null);
+        }}
+        student={docsStudent}
+        hostelId={hostelId}
       />
     </div>
   );
